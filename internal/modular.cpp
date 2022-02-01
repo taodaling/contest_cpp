@@ -1,0 +1,32 @@
+#pragma once
+#include "../common.cpp"
+namespace dalt {
+inline i32 MulMod(i32 a, i32 b, i32 modulus) {
+  i64 res = i64(a) * i64(b) % modulus;
+  return i32(res);
+}
+inline i64 MulMod(i64 a, i64 b, i64 modulus) {
+  i64 k = roundl((f80)a / modulus * b);
+  i64 res = (a * b - k * modulus) % modulus;
+  if (res < 0) {
+    res += modulus;
+  }
+  return res;
+}
+template <class T>
+inline enable_if_t<is_integral_v<T>, T> AddMod(T a, T b, T modulus) {
+  T res = a + b;
+  if (res >= modulus) {
+    res -= modulus;
+  }
+  return res;
+}
+template <class T>
+inline enable_if_t<is_integral_v<T>, T> SubMod(T a, T b, T modulus) {
+  T res = a - b;
+  if (res < T(0)) {
+    res += modulus;
+  }
+  return res;
+}
+} // namespace dalt

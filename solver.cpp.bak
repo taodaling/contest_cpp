@@ -1,0 +1,36 @@
+#pragma once
+#include "common.cpp"
+using namespace dalt;
+#include "matrix.cpp"
+using Modular = MOD998244353;
+using Mi = ModInt<Modular>;
+void SolveOne(IStream &in, OStream &out) {
+  int n;
+  in >> n;
+  using Mat = Matrix<Mi>;
+  Mat a(n, n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      in >> a[i][j];
+    }
+  }
+  auto d = a.possible_inv();
+  if (d.is_none()) {
+    out << -1 << '\n';
+    return;
+  }
+  auto &inv_mat = *d;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      out << inv_mat[i][j] << ' ';
+    }
+    out << '\n'; 
+  }
+}
+
+void SolveMulti(IStream &in, OStream &out) {
+  int num_of_input = 1;
+  for (int i = 0; i < num_of_input; i++) {
+    SolveOne(in, out);
+  }
+}
