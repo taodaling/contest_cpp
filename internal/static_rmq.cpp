@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "function.cpp"
 #include "sparse_table.cpp"
 
@@ -29,7 +29,7 @@ public:
         min_indices[to] = i;
       }
     }
-    st = new SparseTable<i32>(consider_part, MakeIndexer(min_indices),
+    st = new SparseTable<i32>(consider_part, MakeIndexer<i32>(min_indices),
                               comparator);
     int mask = 0;
     for (int i = 0; i < n; i++) {
@@ -51,7 +51,7 @@ public:
   }
 
   i32 query(int l, int r) {
-    assert(l <= r);
+    Assert(l <= r);
     int bl = l >> SHIFT;
     int br = r >> SHIFT;
     int tl = l & AND_MASK;

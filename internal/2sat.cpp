@@ -1,4 +1,5 @@
-#include "F:\sourcecode\cppcp\internal\strongly_connected_component.cpp"
+#pragma once
+#include "strongly_connected_component.cpp"
 #include "optional.cpp"
 namespace dalt {
 struct TwoSat {
@@ -13,7 +14,7 @@ private:
 
 public:
   TwoSat(int n) : g(2 * n) {}
-  int id(int x) const { return x * 2; }
+  i64 ID(int x) const { return x * 2; }
   int negate_id(int x) const { return x * 2 + 1; }
   int negate(int x) const { return x ^ 1; }
   void deduce(int a, int b) {

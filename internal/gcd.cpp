@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "optional.cpp"
 namespace dalt {
 template <class T, class = typename std::enable_if_t<is_integral_v<T>>>
@@ -10,6 +10,7 @@ inline T Gcd(T a, T b) {
   }
   return a;
 }
+//ret_value = [x, y, gcd(a,b)] that x * a + y * b = gcd(a, b)
 template <class T, class = typename std::enable_if_t<is_integral_v<T>>>
 inline Array<T, 3> ExtGcd(T a, T b) {
   if (b == 0) {

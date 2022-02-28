@@ -1,9 +1,10 @@
 #pragma once
-#include "iter.cpp"
-#include "math.cpp"
-#include "polynomial.cpp"
 #include "function.cpp"
+#include "iter.cpp"
+#include "polynomial.cpp"
+#include "mod_inverse.cpp"
 namespace dalt {
+namespace poly {
 // reference: https://arxiv.org/pdf/1807.11597.pdf
 // given |s| polynomial, F_i = c_i x^{s_i}+1
 // Find F = F_1 * F_2 * ... * F_|S| % x^{n}
@@ -20,7 +21,7 @@ Vec<T> CountSetsetSum(const Vec<i32> &s, const Indexer<T> &c, i32 n) {
   }
   Vec<T> log(n);
   Vec<T> inv_buf(n);
-  auto inv = InverseBatch(
+  auto inv = math::InverseBatch(
       Range<i32>(0, n - 1).iter().map(ConstructorMapper<i32, T>()).to_vec());
   for (i32 i = 1; i < n; i++) {
     T prod = T(1);
@@ -41,4 +42,5 @@ Vec<T> CountSetsetSum(const Vec<i32> &s, const Indexer<T> &c, i32 n) {
   ans.resize(n);
   return ans;
 }
-} // namespace dalt
+}  // namespace conv
+}  // namespace dalt

@@ -1,4 +1,4 @@
-#include "dsu_compress_path.cpp"
+#include "dsu.cpp"
 #include "root_tree.cpp"
 namespace dalt {
 namespace graph {
@@ -25,7 +25,7 @@ template <class E>
 enable_if_t<is_base_of_v<BiBaseEdge, E>, Tuple<i32, i32, i32>>
 ForestDiameter(const Graph<E> &g) {
   int n = Size(g);
-  DSUCompressPath dsu(n);
+  DSU dsu(n);
   for (int i = 0; i < n; i++) {
     for (auto &e : g[i]) {
       dsu.merge(i, e.to);

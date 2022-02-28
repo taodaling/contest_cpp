@@ -1,31 +1,29 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "matrix.cpp"
-using Modular = MOD998244353;
-using Mi = ModInt<Modular>;
+#include "prefix_sum2.cpp"
+#include "math.cpp"
+#include "input.cpp"
 void SolveOne(IStream &in, OStream &out) {
-  int n;
-  in >> n;
-  using Mat = Matrix<Mi>;
-  Mat a(n, n);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      in >> a[i][j];
-    }
+  int n, m;
+  in >> n >> m;
+  int L = 5e3 + 10;
+  Vec<Vec<u16>> data(L, Vec<u16>(L));
+  for(int i = 0; i < n; i++) {
+    int x, y, v;
+    in >> x >> y >> v;
+    data[x][y] += v;
   }
-  auto d = a.possible_inv();
-  if (d.is_none()) {
-    out << -1 << '\n';
-    return;
+  Debug(data);
+  PrefixSum2<u16> ps(L, L, [&](int i, int j) { return data[i][j]; });
+  Debug(ps.to_vec());
+  u16 best = 0;
+  for(int i = 0; i + m - 1 < L; i++) {
+    for(int j = 0; j + m - 1 < L; j++) {
+      Chmax(best, ps.query(i, i + m - 1, j, j + m - 1));
+    } 
   }
-  auto &inv_mat = *d;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      out << inv_mat[i][j] << ' ';
-    }
-    out << '\n'; 
-  }
+  out << best << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {

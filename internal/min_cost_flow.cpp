@@ -17,7 +17,7 @@ AugmentPathSpfa(Graph<E> &g, int s, T inf) {
   while (!dq.empty()) {
     int root = dq.front();
     dq.pop_front();
-    assert(threshold-- >= 0);
+    Assert(threshold-- >= 0);
     for (auto &e : g[root]) {
       if (g[e.to][e.rev].flow == 0 || dist[e.to] <= dist[root] + e.cost) {
         continue;
@@ -127,7 +127,7 @@ MinCostFlowDijkstra(
     for (int trace = t; trace != s; trace = prev[trace]->to) {
       PushFlow(g, *prev[trace], -max);
     }
-    assert(max > 0);
+    Assert(max > 0);
     cost += sum * max;
     remain -= max;
   }

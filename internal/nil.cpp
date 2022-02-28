@@ -1,4 +1,5 @@
 #pragma once
+#include "common.cpp"
 namespace dalt {
 struct Nil {};
 Nil operator+(const Nil &a, const Nil &b) { return Nil(); }

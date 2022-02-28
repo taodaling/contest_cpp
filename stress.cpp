@@ -1,7 +1,7 @@
 #pragma once
 #include "solver.cpp"
 #include "stress_external_member.cpp"
-
+namespace stress {
 String StressFormatInput(const String &s) {
   if (s.size() <= 100) {
     return s;
@@ -36,4 +36,5 @@ void Stress() {
 
   Stderr << "PASS!" << std::endl;
   exit(0);
+}
 }

@@ -1,4 +1,4 @@
-#include "../common.cpp"
+#include "common.cpp"
 
 namespace dalt {
 String ReadAll(IStream &in, int cap = 10 << 20) {

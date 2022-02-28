@@ -14,3 +14,4 @@
 #include <chrono>
 #include <random>
 #include <complex>
+#include <bitset>

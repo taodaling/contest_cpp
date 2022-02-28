@@ -245,7 +245,7 @@ public:
         G[v][w].v = v;
         G[v][w].w = w;
         floFrom[v][w] = (v == w ? v : 0);
-        assert(G[v][w].weight >= T());
+        Assert(G[v][w].weight >= T());
         mx = Max(mx, G[v][w].weight = matrix[v - 1][w - 1]);
       }
     Fill(lab.begin() + 1, lab.begin() + V + 1, mx);

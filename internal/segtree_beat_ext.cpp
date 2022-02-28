@@ -1,14 +1,14 @@
 //verify by: https://judge.yosupo.jp/problem/range_chmin_chmax_add_range_sum
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "segtree_common.cpp"
 
 namespace dalt {
 namespace segtree_beat_ext {
 
 #define ASSERTION_STUB                                                         \
-  assert(first_largest >= second_largest);                                     \
-  assert(first_smallest <= second_smallest);
+  Assert(first_largest >= second_largest);                                     \
+  Assert(first_smallest <= second_smallest);
 template <class T, class = enable_if_t<is_arithmetic<T>::value>>
 struct SegTreeBeatExtNode {
   static const T INF = numeric_limits<T>::max() / 2;

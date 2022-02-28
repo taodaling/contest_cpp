@@ -1,6 +1,14 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 namespace dalt {
+template <class T, class E>
+T Modular(E val, T mod) {
+  val = val % mod;
+  if (val < 0) {
+    val = val + mod;
+  }
+  return T(val);
+}
 inline i32 MulMod(i32 a, i32 b, i32 modulus) {
   i64 res = i64(a) * i64(b) % modulus;
   return i32(res);
@@ -21,6 +29,20 @@ inline enable_if_t<is_integral_v<T>, T> AddMod(T a, T b, T modulus) {
   }
   return res;
 }
+template <class T, class E>
+inline enable_if_t<is_integral_v<T> && is_integral_v<E>, T> PowMod(T x, E exp,
+                                                                   T modulus) {
+   Assert(exp >= E(0));                                                          
+  if (exp == E(0)) {
+    return modulus == T(1) ? T(0) : T(1);
+  }
+  T ans = PowMod(x, exp >> 1, modulus);
+  ans = MulMod(ans, ans, modulus);
+  if (exp & T(1)) {
+    ans = MulMod(ans, x, modulus);
+  }
+  return ans;
+}
 template <class T>
 inline enable_if_t<is_integral_v<T>, T> SubMod(T a, T b, T modulus) {
   T res = a - b;
@@ -29,4 +51,4 @@ inline enable_if_t<is_integral_v<T>, T> SubMod(T a, T b, T modulus) {
   }
   return res;
 }
-} // namespace dalt
+}  // namespace dalt

@@ -1,16 +1,19 @@
-#include "../common.cpp"
+#pragma once
+#include "common.cpp"
 
 namespace dalt {
-template <class T> struct Optional {
-private:
+template <class T>
+struct Optional {
+  using Self = Optional<T>;
+
+ private:
   T val;
   bool show_up;
 
-public:
+ public:
   Optional(const T &arg_val) : val(arg_val), show_up(true) {}
   Optional(const T &&arg_val) : val(arg_val), show_up(true) {}
   Optional() : show_up(false) {}
-  using Self = Optional<T>;
   const T &value() const {
     Assert(show_up);
     return val;
@@ -31,9 +34,10 @@ public:
       return def;
     }
   }
-  template <class E> Optional<E> map(const Mapper<T, E> &TreeMapper) const {
+  template <class E>
+  Optional<E> map(const Mapper<T, E> &mapper) const {
     if (is_some()) {
-      return TreeMapper(value());
+      return mapper(value());
     } else {
       return Optional<E>();
     }
@@ -41,13 +45,16 @@ public:
   template <class E>
   friend bool operator==(const Optional<E> &a, const Optional<E> &b);
 };
-template <class E> bool operator==(const Optional<E> &a, const Optional<E> &b) {
+template <class E>
+bool operator==(const Optional<E> &a, const Optional<E> &b) {
   return a.show_up == b.show_up && (!a.show_up || a.val == b.val);
 }
-template <class E> bool operator!=(const Optional<E> &a, const Optional<E> &b) {
+template <class E>
+bool operator!=(const Optional<E> &a, const Optional<E> &b) {
   return !(a == b);
 }
-template <class E> OStream &operator<<(OStream &os, const Optional<E> &v) {
+template <class E>
+OStream &operator<<(OStream &os, const Optional<E> &v) {
   if (v.is_none()) {
     os << "{}";
   } else {
@@ -55,4 +62,4 @@ template <class E> OStream &operator<<(OStream &os, const Optional<E> &v) {
   }
   return os;
 }
-} // namespace dalt
+}  // namespace dalt

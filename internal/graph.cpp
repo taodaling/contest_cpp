@@ -1,8 +1,10 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 
 namespace dalt {
 namespace graph {
+template <class E>
+using Graph = Vec<Vec<E>>;
 MakeAttribute(WithId, i32, id);
 MakeAttribute(WithTo, i32, to);
 MakeAttribute(WithRev, i32, rev);

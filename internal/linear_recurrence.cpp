@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "iter.cpp"
 #include "polynomial.cpp"
 namespace dalt {

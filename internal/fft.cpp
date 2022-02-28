@@ -31,7 +31,7 @@ enable_if_t<is_floating_point_v<F>> fft(Vec<Complex<F>> &p, bool inv) {
       level.resize(1 << d);
       for (int j = 0, s = 1 << d; j < s; j++) {
         level[j] =
-            cpx(Cos(F(constant::PI) / s * j), Sin(F(constant::PI) / s * j));
+            cpx(Cos(F(M_PI) / s * j), Sin(F(M_PI) / s * j));
       }
     }
     for (int i = 0; i < n; i += s2) {
@@ -60,14 +60,18 @@ enable_if_t<is_floating_point_v<F>> fft(Vec<Complex<F>> &p, bool inv) {
     }
   }
 }
-template <class M, class F = f80> struct FFTConv {
+template <class M, class F = f80>
+struct FFTConv {
+  static_assert(is_modint_v<M>);
   using cpx = Complex<F>;
-  using mi = ModInt<M>;
+  using mi = M;
   using Type = mi;
-  static_assert(is_modular_v<M>);
   static_assert(is_same_v<i32, typename M::Type>);
 
   static Vec<mi> conv(const Vec<mi> &a, const Vec<mi> &b) {
+    if (&a == &b) {
+      return conv2(a);
+    }
     return conv(a, Size(a), b, Size(b));
   }
   static Vec<mi> conv(const Vec<mi> &a, int na, const Vec<mi> &b, int nb) {
@@ -249,8 +253,9 @@ template <class M, class F = f80> struct FFTConv {
     return ans;
   }
 };
-template <class F, class M> struct is_convolution<FFTConv<F, M>> {
+template <class F, class M>
+struct is_convolution<FFTConv<F, M>> {
   static const bool value = true;
 };
-} // namespace poly
-} // namespace dalt
+}  // namespace poly
+}  // namespace dalt

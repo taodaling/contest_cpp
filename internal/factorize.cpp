@@ -1,8 +1,10 @@
+#pragma once
 #include "miller_rabin.cpp"
 namespace dalt {
 // find any factor, if nothing find, return n, don't invoke it directly, turn to
 // FindFactor instead
-template <class T> enable_if_t<is_integral_v<T>, T> PollardRho(T n) {
+template <class T>
+enable_if_t<is_integral_v<T>, T> PollardRho(T n) {
   if (n <= 1) {
     return n;
   }
@@ -30,8 +32,9 @@ template <class T> enable_if_t<is_integral_v<T>, T> PollardRho(T n) {
   }
 }
 // find any factor, if nothing find, return n
-template <class T> enable_if_t<is_integral_v<T>, T> FindFactor(T n) {
-  Debug(n);
+template <class T>
+enable_if_t<is_integral_v<T>, T> FindFactor(T n) {
+  //Debug(n);
   if (n == 1) {
     return 1;
   }
@@ -46,8 +49,17 @@ template <class T> enable_if_t<is_integral_v<T>, T> FindFactor(T n) {
   }
   Debug("over");
 }
+template <class T>
+enable_if_t<is_integral_v<T>, T> FindPrimeFactor(T n) {
+  T res;
+  while ((res = FindFactor(n)) != n) {
+    n = res;
+  }
+  return n;
+}
 // Find all factors of n
-template <class T> enable_if_t<is_integral_v<T>, Vec<T>> Factorize(T n) {
+template <class T>
+enable_if_t<is_integral_v<T>, Vec<T>> Factorize(T n) {
   const static T SMALL_PRIMES[]{2, 3, 5, 7, 11, 13, 17, 19};
   Assert(n != 0);
   Vec<T> set;
@@ -78,4 +90,4 @@ template <class T> enable_if_t<is_integral_v<T>, Vec<T>> Factorize(T n) {
   MakeUnique(set);
   return set;
 }
-} // namespace dalt
+}  // namespace dalt

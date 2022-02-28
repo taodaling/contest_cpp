@@ -1,4 +1,4 @@
-#include "../common.cpp"
+#include "common.cpp"
 #include "prefer_div.cpp"
 #include "segtree_common.cpp"
 namespace dalt {
@@ -44,7 +44,7 @@ private:
     return root;
   }
   T intersect(const Ln &a, const Ln &b) {
-    assert(a.a < b.a);
+    Assert(a.a < b.a);
     return DivFloor(a.b - b.b, b.a - a.a);
   }
 
@@ -121,7 +121,7 @@ public:
 
   T query(T x) const {
     auto iter = LowerBound(All(sorted), x);
-    assert(iter != sorted.end() && *iter == x);
+    Assert(iter != sorted.end() && *iter == x);
     return query(tree, 0, Size(sorted) - 1, iter - sorted.begin());
   }
 

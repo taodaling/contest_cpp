@@ -3,306 +3,301 @@
 #include "segtree_common.cpp"
 #include "tag.cpp"
 namespace dalt {
-namespace segtree {
+namespace sbt {
+#define CID -202202131500
+template <class S, class U, bool P = false, i64 ID = 0>
+struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
+  struct Node {
+    using Self = Node;
+    Self *left;
+    Self *right;
+    S sum;
+    U upd;
 
-
-template <class S, class U> struct SegTreeNode {
-  using Self = SegTreeNode<S, U>;
-  Self *left;
-  Self *right;
-  S sum;
-  U upd;
-
-  static void Destroy(Self *self) {
-    if (self == NULL) {
-      return;
+#ifdef DROP
+    ~Node() {
+      delete left;
+      delete right;
     }
-    Destroy(self->left);
-    Destroy(self->right);
-    delete self;
-  }
-};
+#endif
+    IsBool(P,Node *) clone() { return new Node(*this); }
+    IsBool(!P,Node *) clone() { return this; }
 
-template <
-    class S, class U, class P = TransientTag,
-    class = std::enable_if_t<is_same_v<P, TransientTag> || is_same_v<P, TransientTag>>>
-struct SegTree {
-  using Node = SegTreeNode<S, U>;
+    void push_up() { sum = SegTree::s_s(left->sum, right->sum); }
+    void push_down() {
+      left = left->clone();
+      right = right->clone();
+      if (upd != SegTree::u_nil) {
+        left->modify(upd);
+        right->modify(upd);
+        upd = SegTree::u_nil;
+      }
+    }
+    void modify(const U &u) {
+      sum = SegTree::s_u(sum, u);
+      upd = SegTree::SegTree::u_u(upd, u);
+    }
+  };
+  using Self = SegTree<S, U, P, ID>;
 
-private:
-  S s_nil;
-  U u_nil;
-  Adder<S, S> s_s;
-  Adder<S, U> s_u;
-  Adder<U, U> u_u;
   Node *tree;
   int n;
 
-  Node* make_node() {
-    Node *ans = new Node();
-    ans->left = ans->right = NULL;
-    ans->sum = s_nil;
-    ans->upd = u_nil;
+ private:
+  Node *make_node() {
+    Node *ans = new Node{
+        .left = NULL,
+        .right = NULL,
+        .sum = SegTree::s_nil,
+        .upd = SegTree::u_nil,
+    };
     return ans;
   }
-  void modify(Node *root, const U &u) {
-    root->sum = s_u(root->sum, u);
-    root->upd = u_u(root->upd, u);
-  }
-  void push_up(Node *root) {
-    root->sum = s_s(root->left->sum, root->right->sum);
-  }
-  IsType(TransientTag, P, void) push_down(Node *root) {
-    if (root->upd != u_nil) {
-      modify(root->left, root->upd);
-      modify(root->right, root->upd);
-      root->upd = u_nil;
-    }
-  }
-  IsType(PermTag, P, void) push_down(Node *root) {
-    root->left = new Node(*(root->left));
-    root->right = new Node(*(root->right));
-    modify(root->left, root->upd);
-    modify(root->right, root->upd);
-    root->upd = u_nil;
-  }
-  Node *make_tree(const Indexer<S> &indexer, int l, int r) {
-    Node *root = make_node();
-    root->upd = u_nil;
-    if (l == r) {
-      root->sum = indexer(l);
-    } else {
-      int m = (l + r) / 2;
-      root->left = make_tree(indexer, l, m);
-      root->right = make_tree(indexer, m + 1, r);
-      push_up(root);
-    }
-    return root;
-  }
-  IsType(PermTag, P, Node *) make_tree() {
+
+  IsBool(P,Node *) make_tree() {
     Node *root = make_node();
     root->left = root->right = root;
     return root;
   }
-  IsType(TransientTag, P, Node *) make_tree() {
-    assert(false);
-    return NULL;
-  }
-  S query_const_rec(Node *root, int L, int R, int l, int r,
-                    const U &upd) const {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return s_nil;
-    }
-    if (SegmentCover(L, R, l, r)) {
-      return s_u(root->sum, upd);
-    }
-    U new_upd = u_u(root->upd, upd);
-    int m = (l + r) / 2;
-    auto lsum = query_const_rec(root->left, L, R, l, m, new_upd);
-    auto rsum = query_const_rec(root->right, L, R, m + 1, r, new_upd);
-    return s_s(lsum, rsum);
-  }
-  S query_rec(Node *root, int L, int R, int l, int r) {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return s_nil;
-    }
-    if (SegmentCover(L, R, l, r)) {
-      return root->sum;
-    }
-    push_down(root);
-    int m = (l + r) / 2;
-    auto lsum = query_rec(root->left, L, R, l, m);
-    auto rsum = query_rec(root->right, L, R, m + 1, r);
-    return s_s(lsum, rsum);
+  IsBool(!P,Node *) make_tree() {
+    Node *root = make_node();
+    return root;
   }
 
-  void update_rec(Node *root, int L, int R, int l, int r, const U &upd) {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return;
-    }
-    if (SegmentCover(L, R, l, r)) {
-      modify(root, upd);
-      return;
-    }
-    push_down(root);
-    int m = (l + r) / 2;
-    update_rec(root->left, L, R, l, m, upd);
-    update_rec(root->right, L, R, m + 1, r, upd);
-    push_up(root);
+ public:
+  Self clone() const {
+    Self ans = *this;
+    ans.tree = ans.tree->clone();
+    return ans;
   }
 
-  void travel_rec(Node *root, const U &upd, Consumer<S> &consumer, int l,
-                  int r) const {
-    // is leaf
-    if (l == r) {
-      consumer(s_u(root->sum, upd));
-      return;
-    }
-    int m = (l + r) / 2;
-    U new_upd = u_u(root->upd, upd);
-    travel_rec(root->left, new_upd, consumer, l, m);
-    travel_rec(root->right, new_upd, consumer, m + 1, r);
-  }
-  Optional<int> first_true_rec(Node *root, S &sum, int L, int R, int l, int r,
-                               const Checker<S> &checker) {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return {};
-    }
-    if (SegmentCover(L, R, l, r)) {
-      S new_sum = s_s(sum, root->sum);
-      if (!checker(new_sum)) {
-        sum = new_sum;
-        return {};
-      }
+  SegTree(
+      int _n = 0,
+      const Indexer<S> &indexer = [](int index) { return SegTree::s_nil; })
+      : n(_n) {
+    auto dfs = [&](auto &dfs, int l, int r) -> Node * {
+      Node *root = make_tree();
+      root->upd = SegTree::u_nil;
       if (l == r) {
-        // leaf
-        sum = new_sum;
-        return l;
+        root->sum = indexer(l);
+      } else {
+        int m = (l + r) / 2;
+        root->left = dfs(dfs, l, m);
+        root->right = dfs(dfs, m + 1, r);
+        root->push_up();
       }
-    }
-    push_down(root);
-    int m = (l + r) / 2;
-    auto lres = first_true_rec(root->left, sum, L, R, l, m, checker);
-    if (lres.is_none()) {
-      return first_true_rec(root->right, sum, L, R, m + 1, r, checker);
-    }
-    return lres;
+      return root;
+    };
+    tree = dfs(dfs, 0, n - 1);
   }
-  Optional<int> first_true_const_rec(Node *root, S &sum, const U &upd, int L,
-                                     int R, int l, int r,
-                                     const Checker<S> &checker) const {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return {};
-    }
-    if (SegmentCover(L, R, l, r)) {
-      S new_sum = s_s(sum, s_u(root->sum, upd));
-      if (!checker(new_sum)) {
-        sum = new_sum;
-        return {};
-      }
-      if (l == r) {
-        // leaf
-        sum = new_sum;
-        return l;
-      }
-    }
-    U new_upd = u_u(root->upd, upd);
-    push_down(root);
-    int m = (l + r) / 2;
-    auto lres =
-        first_true_const_rec(root->left, sum, new_upd, L, R, l, m, checker);
-    if (lres.is_none()) {
-      return first_true_const_rec(root->right, sum, new_upd, L, R, m + 1, r,
-                                  checker);
-    }
-    return lres;
-  }
-  Optional<int> last_true_const_rec(Node *root, S &sum, const U &upd, int L,
-                                    int R, int l, int r,
-                                    const Checker<S> &checker) const {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return {};
-    }
-    if (SegmentCover(L, R, l, r)) {
-      S new_sum = s_s(sum, s_u(root->sum, upd));
-      if (checker(new_sum)) {
-        sum = new_sum;
-        return r;
-      }
-      // false
-      if (l == r) {
-        return {};
-      }
-    }
-    U new_upd = u_u(root->upd, upd);
-    push_down(root);
-    int m = (l + r) / 2;
-    auto lres =
-        last_true_const_rec(root->left, sum, new_upd, L, R, l, m, checker);
-    if (m < L || lres.is_some() && lres.value() == m) {
-      auto rres = last_true_const_rec(root->right, sum, new_upd, L, R, m + 1, r,
-                                      checker);
-      if (rres.is_some()) {
-        return rres;
-      }
-    }
-    return lres;
+  
+  IsBoolStatic(P, Self)
+  MakePersistentTree(int n) {
+    Self res(1);
+    res.n = n;
+    return res;
   }
 
-public:
-  using Self = SegTree<S, U, P>;
-  SegTree(int _n, S _s_nil, U _u_nil, Adder<S, S> _s_s, Adder<U, U> _u_u,
-          Adder<S, U> _s_u, const Indexer<S> &indexer)
-      : n(_n), s_nil(_s_nil), u_nil(_u_nil), s_s(_s_s), u_u(_u_u), s_u(_s_u) {
-    tree = make_tree(indexer, 0, n - 1);
+  S query(int L, int R) {
+    auto dfs = [&](auto &dfs, Node *root, int l, int r) {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return SegTree::s_nil;
+      }
+      if (SegmentCover(L, R, l, r)) {
+        return root->sum;
+      }
+      root->push_down();
+      int m = (l + r) / 2;
+      auto lsum = dfs(dfs, root->left, l, m);
+      auto rsum = dfs(dfs, root->right, m + 1, r);
+      return SegTree::s_s(lsum, rsum);
+    };
+    return dfs(dfs, tree, 0, n - 1);
   }
-  SegTree(int _n, S _s_nil, U _u_nil, Adder<S, S> _s_s, Adder<U, U> _u_u,
-          Adder<S, U> _s_u)
-      : n(_n), s_nil(_s_nil), u_nil(_u_nil), s_s(_s_s), u_u(_u_u), s_u(_s_u) {
-    tree = make_tree();
-  }
-
-  S query(int L, int R) { return query_rec(tree, L, R, 0, n - 1); }
   S query_const(int L, int R) const {
-    return query_const_rec(tree, L, R, 0, n - 1, u_nil);
+    auto dfs = [&](auto &dfs, Node *root, int l, int r, const U &upd) {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return SegTree::s_nil;
+      }
+      if (SegmentCover(L, R, l, r)) {
+        return SegTree::s_u(root->sum, upd);
+      }
+      U new_upd = SegTree::SegTree::u_u(root->upd, upd);
+      int m = (l + r) / 2;
+      auto lsum = dfs(dfs, root->left, l, m, new_upd);
+      auto rsum = dfs(dfs, root->right, m + 1, r, new_upd);
+      return SegTree::s_s(lsum, rsum);
+    };
+    return dfs(dfs, tree, 0, n - 1, SegTree::u_nil);
   }
   void update(int L, int R, const U &upd) {
-    update_rec(tree, L, R, 0, n - 1, upd);
+    auto dfs = [&](auto &dfs, Node *root, int l, int r) {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return;
+      }
+      if (SegmentCover(L, R, l, r)) {
+        root->modify(upd);
+        return;
+      }
+      root->push_down();
+      int m = (l + r) / 2;
+      dfs(dfs, root->left, l, m);
+      dfs(dfs, root->right, m + 1, r);
+      root->push_up();
+    };
+    dfs(dfs, tree, 0, n - 1);
   }
-  void travel(Consumer<S> &consumer) const {
-    travel_rec(tree, u_nil, consumer, 0, n - 1);
+  void travel(const Consumer<S> &consumer) const {
+    auto dfs = [&](auto &dfs, Node *root, const U &upd, int l, int r) {
+      // is leaf
+      if (l == r) {
+        consumer(SegTree::s_u(root->sum, upd));
+        return;
+      }
+      int m = (l + r) / 2;
+      U new_upd = SegTree::SegTree::u_u(root->upd, upd);
+      dfs(dfs, root->left, new_upd, l, m);
+      dfs(dfs, root->right, new_upd, m + 1, r);
+    };
+    dfs(dfs, tree, SegTree::u_nil, 0, n - 1);
   }
   Vec<S> to_vec() const {
     Vec<S> res;
     res.reserve(n);
-    Consumer<S> consumer = [&](auto x) { res.push_back(x); };
-    travel(consumer);
+    travel([&](auto x) { res.push_back(x); });
     return res;
   }
   Optional<Tuple<int, S>> first_true(int L, int R, Checker<S> &checker) {
-    S sum = s_nil;
-    auto res = first_true_rec(tree, sum, L, R, 0, n - 1, checker);
-    TreeMapper<int, Tuple<int, S>> TreeMapper = [&](auto x) {
-      return Tuple<int, S>(x, sum);
+    S sum = SegTree::s_nil;
+    auto dfs = [&](auto &dfs, Node *root, int l, int r) -> Optional<int> {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return {};
+      }
+      if (SegmentCover(L, R, l, r)) {
+        S new_sum = SegTree::s_s(sum, root->sum);
+        if (!checker(new_sum)) {
+          sum = new_sum;
+          return {};
+        }
+        if (l == r) {
+          // leaf
+          sum = new_sum;
+          return l;
+        }
+      }
+      root->push_down();
+      int m = (l + r) / 2;
+      auto lres = dfs(dfs, root->left, l, m);
+      if (lres.is_none()) {
+        return dfs(dfs, root->right, m + 1, r);
+      }
+      return lres;
     };
-    return res.TreeMap(TreeMapper);
+    auto res = dfs(dfs, tree, 0, n - 1);
+    return res.map(
+        [&](int x) -> Tuple<int, S> { return Tuple<int, S>(x, sum); });
   }
   Optional<Tuple<int, S>> last_true(int L, int R, const Checker<S> &checker) {
-    S sum = s_nil;
-    auto res = last_true_rec(tree, sum, L, R, 0, n - 1, checker);
-    TreeMapper<int, Tuple<int, S>> TreeMapper = [&](auto x) {
-      return Tuple<int, S>(x, sum);
+    S sum = SegTree::s_nil;
+    auto dfs = [&](auto &dfs, Node *root, int l, int r) -> Optional<int> {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return {};
+      }
+      if (SegmentCover(L, R, l, r)) {
+        S new_sum = SegTree::s_s(sum, root->sum);
+        if (checker(new_sum)) {
+          sum = new_sum;
+          return r;
+        }
+        if (l == r) {
+          return {};
+        }
+      }
+      root->push_down();
+      int m = (l + r) / 2;
+      auto lres = dfs(dfs, root->left, l, m);
+      if (lres.s_some() || r < L) {
+        auto rres = dfs(dfs, root->right, m + 1, r);
+        if (rres.s_some()) {
+          return rres;
+        }
+      }
+      return lres;
     };
-    return res.TreeMap(TreeMapper);
+    auto res = dfs(dfs, tree, 0, n - 1);
+    return res.map(
+        [&](int x) -> Tuple<int, S> { return Tuple<int, S>(x, sum); });
   }
   Optional<Tuple<int, S>> first_true_const(int L, int R,
                                            Checker<S> &checker) const {
-    S sum = s_nil;
-    auto res = first_true_rec(tree, sum, u_nil, L, R, 0, n - 1, checker);
-    TreeMapper<int, Tuple<int, S>> TreeMapper = [&](auto x) {
-      return Tuple<int, S>(x, sum);
+    S sum = SegTree::s_nil;
+    auto dfs = [&](Node *root, const U &upd, int l, int r) -> Optional<int> {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return {};
+      }
+      if (SegmentCover(L, R, l, r)) {
+        S new_sum = SegTree::s_s(sum, SegTree::s_u(root->sum, upd));
+        if (!checker(new_sum)) {
+          sum = new_sum;
+          return {};
+        }
+        if (l == r) {
+          // leaf
+          sum = new_sum;
+          return l;
+        }
+      }
+      U new_upd = SegTree::SegTree::u_u(root->upd, upd);
+      int m = (l + r) / 2;
+      auto lres = dfs(dfs, root->left, new_upd, l, m);
+      if (lres.is_none()) {
+        return dfs(dfs, root->right, new_upd, m + 1, r);
+      }
+      return lres;
     };
-    return res.TreeMap(TreeMapper);
+    auto res = dfs(dfs, tree, SegTree::u_nil, 0, n - 1);
+    return res.map([&](auto x) { return Tuple<int, S>(x, sum); });
   }
   Optional<Tuple<int, S>> last_true_const(int L, int R,
                                           const Checker<S> &checker) const {
-    S sum = s_nil;
-    auto res = last_true_rec(tree, sum, u_nil, L, R, 0, n - 1, checker);
-    TreeMapper<int, Tuple<int, S>> TreeMapper = [&](auto x) {
-      return Tuple<int, S>(x, sum);
+    S sum = SegTree::s_nil;
+    auto dfs = [&](Node *root, const U &upd, int l, int r) -> Optional<int> {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return {};
+      }
+      if (SegmentCover(L, R, l, r)) {
+        S new_sum = SegTree::s_s(sum, SegTree::s_u(root->sum, upd));
+        if (checker(new_sum)) {
+          sum = new_sum;
+          return r;
+        }
+        if (l == r) {
+          // leaf
+          return {};
+        }
+      }
+      U new_upd = SegTree::SegTree::u_u(root->upd, upd);
+      int m = (l + r) / 2;
+      auto lres = dfs(dfs, root->left, new_upd, l, m);
+      if (lres.is_some() || r < L) {
+        auto rres = dfs(dfs, root->right, new_upd, m + 1, r);
+        if (rres.is_some()) {
+          return rres;
+        }
+      }
+      return lres;
     };
-    return res.TreeMap(TreeMapper);
+    auto res = dfs(dfs, tree, SegTree::u_nil, 0, n - 1);
+    return res.map([&](auto x) { return Tuple<int, S>(x, sum); });
   }
 
-  IsType(PermTag, P, void) set_root(Node *root) { tree = root; }
-  IsType(PermTag, P, Node *) get_root() { return tree; }
-  IsType(TransientTag, P, void) destroy() { Node::Destroy(tree); }
-  IsType(PermTag, P, void) destroy() {}
+  IsBool(!P,void) destroy() { delete tree; }
+  IsBool(P,void) destroy() {}
 
 #ifdef DROP
   ~SegTree() { destroy(); }
 #endif
 };
-} // namespace segtree
-using segtree::SegTree;
-} // namespace dalt
+#undef CID
+}  // namespace sbt
+}  // namespace dalt

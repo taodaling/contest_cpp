@@ -29,7 +29,7 @@ CycleDetect(const Graph<E> &g) {
       }
     }
     instk[root] = false;
-    assert(dq.back() == root);
+    Assert(dq.back() == root);
     dq.pop_back();
     return false;
   };
@@ -37,7 +37,7 @@ CycleDetect(const Graph<E> &g) {
     if (dfs(dfs, i)) {
       return dq;
     }
-    assert(dq.empty());
+    Assert(dq.empty());
   }
   return {};
 }

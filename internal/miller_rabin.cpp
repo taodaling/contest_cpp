@@ -1,4 +1,4 @@
-#include "../common.cpp"
+#include "common.cpp"
 #include "math.cpp"
 #include "modint.cpp"
 namespace dalt {
@@ -6,7 +6,7 @@ namespace dalt {
 template <class T> enable_if_t<is_integral_v<T>, bool> MillerRabin(T n, int s = 10) {
   using Modular = DynamicModular<T, -2>;
   using mi = ModInt<Modular>;
-  Modular::cinit(n);
+  Modular::Register(n);
   auto test = [&](auto &test, mi y, T exp, T n) -> bool {
     auto y2 = y * y;
     if (!(exp == n - 1 || test(test, y2, exp * 2, n))) {

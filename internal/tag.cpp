@@ -4,5 +4,7 @@ namespace dalt {
 struct PermTag {};
 struct TransientTag {};
 struct DiTag {};
-struct BidTag{};
-} // namespace dalt
+struct BidTag {};
+struct YesTag {};
+struct NoTag {};
+}  // namespace dalt

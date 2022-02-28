@@ -1,11 +1,11 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "nil.cpp"
 #include "prefer_div.cpp"
 namespace dalt {
-namespace convex_hull_trick {
-template <class T, class I = Nil> struct Line {
-  using Self = Line<T, I>;
+template <class T, class I = Nil>
+struct CHTLine {
+  using Self = CHTLine;
   Nil id;
   T a;
   T b;
@@ -13,44 +13,37 @@ template <class T, class I = Nil> struct Line {
   mutable T r;
   T apply(T x) const { return a * x + b; }
   bool empty() const { return l >= r; }
+  bool operator==(const Self &rhs) const { return l == rhs.l && r == rhs.r; }
+  bool operator!=(const Self &rhs) const { return !(*this == rhs); }
 };
 template <class T, class I>
-bool operator==(const Line<T, I> &a, const Line<T, I> &b) {
-  return memcmp(&a, &b, sizeof(Line<T, I>)) == 0;
-}
-template <class T, class I>
-bool operator!=(const Line<T, I> &a, const Line<T, I> &b) {
-  return !(a == b);
-}
-template <class T, class I>
-OStream &operator<<(OStream &os, const Line<T, I> &line) {
+OStream &operator<<(OStream &os, const CHTLine<T, I> &line) {
   os << line.a << "x + " << line.b;
   return os;
 }
-template <class T, class I> struct SortLineByA {
-  bool operator()(const Line<T, I> &a, const Line<T, I> &b) const {
-    return a.a < b.a;
-  }
-};
-template <class T, class I> struct SortLineByLeft {
-  bool operator()(const Line<T, I> &a, const Line<T, I> &b) const {
-    return a.l < b.l;
-  }
-};
-template <class T, class I = Nil> struct ConvexHullTrick {
+template <class T, class I = Nil>
+struct ConvexHullTrick {
   static_assert(is_floating_point_v<T> || is_integral_v<T>,
                 "only integer and float are supported");
-  using L = Line<T, I>;
+
+  using L = CHTLine<T, I>;
+  struct SortLineByA {
+    bool operator()(const L &a, const L &b) const { return a.a < b.a; }
+  };
+  struct SortLineByLeft {
+    bool operator()(const L &a, const L &b) const { return a.l < b.l; }
+  };
   using Self = ConvexHullTrick<T, I>;
-  using SA = set<L, SortLineByA<T, I>>;
-  using SL = set<L, SortLineByLeft<T, I>>;
+  using SA = TreeSet<L, SortLineByA>;
+  using SL = TreeSet<L, SortLineByLeft>;
   SA sort_by_a;
   SL sort_by_l;
+  T constant;
 
-private:
-  const static T INF = numeric_limits<T>::max() / 2;
+ private:
+  const static T INF = std::numeric_limits<T>::max() / 2;
   T intersect(const L &x, const L &y) {
-    assert(y.a > x.a);
+    Assert(y.a > x.a);
     return DivCeil(x.b - y.b, y.a - x.a);
   }
   void add(L line) {
@@ -59,29 +52,31 @@ private:
   }
   Vec<L> to_vec_l() { return Vec<L>(sort_by_l.begin(), sort_by_l.end()); }
 
-public:
+ public:
+  // call this method for id only
   const L &best_line(T x) const {
     L q;
     q.l = x;
-    auto iter = sort_by_l.LowerBound(q);
-    if(iter == sort_by_l.end() || iter->l > x) {
-        iter--;
+    auto iter = sort_by_l.lower_bound(q);
+    if (iter == sort_by_l.end() || iter->l > x) {
+      iter--;
     }
     return *iter;
   }
   // max_i Line[i](x)
-  T query(T x) const { return best_line(x).apply(x); }
-
+  T query(T x) const { return best_line(x).apply(x) + constant; }
+  void global_add(T x) { constant = constant + x; }
   void insert(T a, T b, I id = I()) {
+    b = b - constant;
     L line{
         .id = id,
         .a = a,
         .b = b,
     };
 
-    auto ceil_a = sort_by_a.LowerBound(line);
-    auto ceil_l = ceil_a == sort_by_a.end()
-        ? sort_by_l.end() : sort_by_l.LowerBound(*ceil_a);
+    auto ceil_a = sort_by_a.lower_bound(line);
+    auto ceil_l = ceil_a == sort_by_a.end() ? sort_by_l.end()
+                                            : sort_by_l.lower_bound(*ceil_a);
     if (ceil_a != sort_by_a.end() && ceil_a->a == line.a) {
       if (ceil_a->b >= line.b) {
         return;
@@ -100,7 +95,7 @@ public:
         ceil_l = sort_by_l.erase(ceil_l);
         continue;
       }
-      ceil_l->l = ceil_a->l = max(ceil_a->l, r);
+      ceil_l->l = ceil_a->l = Max(ceil_a->l, r);
       line.r = r;
       break;
     }
@@ -117,7 +112,7 @@ public:
         ceil_l = sort_by_l.erase(ceil_l);
         continue;
       }
-      ceil_a->r = ceil_l->r = min(ceil_a->r, r);
+      ceil_a->r = ceil_l->r = Min(ceil_a->r, r);
       line.l = r;
       break;
     }
@@ -128,9 +123,13 @@ public:
 
     Assert(to_vec() == to_vec_l());
   }
-  Vec<L> to_vec() const { return Vec<L>(sort_by_a.begin(), sort_by_a.end()); }
+  Vec<L> to_vec() const {
+    auto ans = Vec<L>(sort_by_a.begin(), sort_by_a.end());
+    for (auto& l : ans) {
+      l.b = l.b + constant;
+    }
+    return ans;
+  }
 };
-} // namespace convex_hull_trick
-using convex_hull_trick::ConvexHullTrick;
-using convex_hull_trick::Line;
-} // namespace dalt
+
+}  // namespace dalt

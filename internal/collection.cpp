@@ -1,6 +1,7 @@
-#include "../common.cpp"
+#include "common.cpp"
 namespace dalt {
-template <class F, class T> Vec<T> Cast(const Vec<F> &data) {
+template <class T, class F>
+Vec<T> Cast(const Vec<F>& data) {
   int n = Size(data);
   Vec<T> ans;
   ans.reserve(n);
@@ -9,4 +10,24 @@ template <class F, class T> Vec<T> Cast(const Vec<F> &data) {
   }
   return ans;
 }
-} // namespace dalt
+template <class V, class C, class K>
+V GetOrDefault(const C& data, const K& key, const V& def = V()) {
+  auto res = data.find(key);
+  if (res == data.end()) {
+    return def;
+  }
+  return res->second;
+}
+template <class V, class C>
+V PopFront(C& data) {
+  V res = V(data.front());
+  data.pop_front();
+  return res;
+}
+template <class V, class C>
+V PopBack(C& data) {
+  V res = V(data.back());
+  data.pop_back();
+  return res;
+}
+}  // namespace dalt

@@ -7,7 +7,7 @@ int main() {
   Stdout << std::setiosflags(std::ios::fixed);
   Stdout << std::setprecision(15);
 #ifdef STRESS
-  Stress();
+  stress::Stress();
 #else
   SolveMulti(Stdin, Stdout);
 #endif

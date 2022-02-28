@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 
 namespace dalt {
 template <class T> struct PrefixSum {
@@ -33,12 +33,7 @@ public:
     return prefix(r) - prefix(l - 1);
   }
   Vec<T> to_vec() const {
-    Vec<T> res;
-    res.reserve(n);
-    for (int i = 0; i < n; i++) {
-      res.push_back(query(i, i));
-    }
-    return res;
+    return sum;
   }
 };
 } // namespace dalt

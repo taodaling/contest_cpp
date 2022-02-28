@@ -1,22 +1,23 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 namespace dalt {
-template <class T> struct FenwickTree {
-private:
+template <class T>
+struct FenwickTree {
+ private:
   // data[i] = \sum_{j \in (i-lowbit(i), i]} A[i]
   Vec<T> data;
   int n;
 
-public:
-  FenwickTree(int arg_n) {
-    n = arg_n;
+ public:
+  FenwickTree(int _n = 0) {
+    n = _n;
     data = Vec<T>(n + 1);
   }
 
   // A[0] + ... + A[i]
   T query(int i) {
     i += 1;
-    i = min(i, n);
+    i = Min(i, n);
     T sum = 0;
     for (; i > 0; i -= i & -i) {
       sum = sum + data[i];
@@ -44,7 +45,10 @@ public:
   }
 
   void update(int l, int r, T mod) {
-    l = max(l, 0);
+    if (l > r) {
+      return;
+    }
+    l = Max(l, 0);
     update(l, mod);
     update(r + 1, -mod);
   }
@@ -54,9 +58,9 @@ public:
   // A[i] = x
   void set(int i, T x) { update(i, x - query(i, i)); }
 
-  FenwickTree(const Vec<T> &initial_value, i32 arg_n) : FenwickTree(arg_n) {
+  FenwickTree(const Indexer<T> &initial_value, i32 _n) : FenwickTree(_n) {
     for (int i = 1; i <= n; i++) {
-      data[i] = initial_value[i - 1];
+      data[i] = initial_value(i - 1);
     }
     for (int i = 1; i <= n; i++) {
       int to = i + (i & -i);
@@ -74,4 +78,4 @@ public:
     return ans;
   }
 };
-} // namespace dalt
+}  // namespace dalt

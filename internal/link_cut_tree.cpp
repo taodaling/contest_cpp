@@ -1,9 +1,15 @@
-#include "../common.cpp"
-
+#pragma once
+#include "sbt_common.cpp"
+#include "sbt_reverse.cpp"
 namespace dalt {
-namespace link_cut_tree {
-template <class S, class U> struct LCTNode {
-  using Self = LCTNode<S, U>;
+namespace sbt {
+#define CID -202202140000
+template <class S, class U, bool DIR = false, i64 ID = 0>
+struct LCTNode
+    : public SelfBalanceTreeBase<S, U, ID, CID>,
+      protected SbtReverse<S, U, DIR, SelfBalanceTreeBase<S, U, ID, CID>> {
+  using Self = LCTNode<S, U, DIR, ID>;
+  static Self *NIL;
   Self *left;
   Self *right;
   Self *father;
@@ -12,22 +18,40 @@ template <class S, class U> struct LCTNode {
   S weight;
   U upd;
   bool rev;
-
-  int id;
+  i64 ID;
   int tree_size;
   int vtree_size;
-  char tree_weight;
-
-  void init(Self *NIL, const S &_weight, const U &_upd, char _tree_weight) {
+  i8 tree_weight;
+  LCTNode(int _id = 0, const S &_weight = Self::s_nil,
+          const U &_upd = Self::u_nil, i8 _tree_weight = 1) {
+    init(_id, _weight, _upd, _tree_weight);
+  }
+  void init(int _id = 0, const S &_weight = Self::s_nil,
+            const U &_upd = Self::u_nil, i8 _tree_weight = 1) {
+    id = _id;
     left = right = father = tree_father = NIL;
     rev = false;
     tree_size = vtree_size = 0;
     sum = weight = _weight;
     upd = _upd;
     tree_weight = _tree_weight;
+    this->init_sum_rev(_weight);
+  }
+  static void Register(S _s_nil, U _u_nil, const Adder<S, S> &_s_s,
+                       const Adder<S, U> &_s_u, const Adder<U, U> &_u_u) {
+    if (NIL != NULL) {
+      delete NIL;
+    }
+    NIL = new LCTNode(-1, _s_nil, _u_nil, 0);
+    NIL->left = NIL->right = NIL->father = NIL->tree_father = NIL;
+    SelfBalanceTreeBase<S, U, ID, CID>::Register(_s_nil, _u_nil, _s_s, _s_u,
+                                                 _u_u);
   }
 
-  void reverse() { rev = !rev; }
+  void reverse() {
+    rev = !rev;
+    this->swap_sum_rev(sum);
+  }
 
   void set_left(Self *x) {
     left = x;
@@ -46,51 +70,43 @@ template <class S, class U> struct LCTNode {
       set_right(x);
     }
   }
-};
-template <class S, class U> struct LinkCutTree {
-  using Node = LCTNode<S, U>;
-  using Self = LinkCutTree<S, U>;
-  Node *NIL;
 
-private:
-  Adder<S, S> s_s;
-  Adder<S, U> s_u;
-  Adder<U, U> u_u;
-  Vec<Node> nodes;
-  void zig(Node *x) {
-    Node *y = x->father;
-    Node *z = y->father;
-    Node *b = x->right;
+  static void zig(Self *x) {
+    Self *y = x->father;
+    Self *z = y->father;
+    Self *b = x->right;
 
     y->set_left(b);
     x->set_right(y);
     z->change_child(y, x);
 
-    push_up(y);
+    y->push_up();
   }
 
-  void zag(Node *x) {
-    Node *y = x->father;
-    Node *z = y->father;
-    Node *b = x->left;
+  static void zag(Self *x) {
+    Self *y = x->father;
+    Self *z = y->father;
+    Self *b = x->left;
 
     y->set_right(b);
     x->set_left(y);
     z->change_child(y, x);
 
-    push_up(y);
+    y->push_up();
   }
 
-  void modify(Node *x, const U &upd) {
+  void modify(const U &upd) {
+    Self *x = this;
     if (x == NIL) {
       return;
     }
-    x->sum = s_u(x->sum, upd);
-    x->weight = s_u(x->weight, upd);
-    x->upd = u_u(x->upd, upd);
+    x->sum = Self::s_u(x->sum, upd);
+    x->weight = Self::s_u(x->weight, upd);
+    x->upd = Self::u_u(x->upd, upd);
+    this->apply_sum_rev(upd);
   }
-  void access(Node *x) {
-    Node *last = NIL;
+  static void access(Self *x) {
+    Self *last = NIL;
     while (x != NIL) {
       splay(x);
       x->right->father = NIL;
@@ -98,60 +114,60 @@ private:
       x->vtree_size += x->right->tree_size;
       x->set_right(last);
       x->vtree_size -= last->tree_size;
-      push_up(x);
+      x->push_up();
 
       last = x;
       x = x->tree_father;
     }
   }
 
-  void make_root(Node *x) {
+  static void make_root(Self *x) {
     access(x);
     splay(x);
     x->reverse();
   }
 
-  void cut(Node *y, Node *x) {
+  static void cut(Self *y, Self *x) {
     make_root(y);
     access(x);
     splay(y);
     y->right->tree_father = NIL;
     y->right->father = NIL;
     y->set_right(NIL);
-    push_up(y);
+    y->push_up();
   }
 
-  void join(Node *y, Node *x) {
+  static void join(Self *y, Self *x) {
     make_root(x);
     make_root(y);
     x->tree_father = y;
     y->vtree_size += x->tree_size;
-    push_up(y);
+    y->push_up();
   }
 
-  void find_path(Node *x, Node *y) {
-    make_root(y);
-    access(x);
+  static void find_path(Self *x, Self *y) {
+    make_root(x);
+    access(y);
   }
 
-  void splay(Node *x) {
+  static void splay(Self *x) {
     if (x == NIL) {
       return;
     }
-    Node *y, *z;
+    Self *y, *z;
     while ((y = x->father) != NIL) {
       if ((z = y->father) == NIL) {
-        push_down(y);
-        push_down(x);
+        y->push_down();
+        x->push_down();
         if (x == y->left) {
           zig(x);
         } else {
           zag(x);
         }
       } else {
-        push_down(z);
-        push_down(y);
-        push_down(x);
+        z->push_down();
+        y->push_down();
+        x->push_down();
         if (x == y->left) {
           if (y == z->left) {
             zig(y);
@@ -172,48 +188,61 @@ private:
       }
     }
 
-    push_down(x);
-    push_up(x);
+    x->push_down();
+    x->push_up();
   }
-
-  Node *find_root(Node *x) {
+  Vec<Pair<int, S>> to_vec_sub_tree() const {
+    Vec<Pair<int, S>> data;
+    travel([&](auto a, auto b) { data.push_back({a, b}); });
+    return data;
+  }
+  Vec<Pair<int, S>> to_vec_tree() const {
+    const Self *root = this;
+    while (root->father != NIL) {
+      root = root->father;
+    }
+    return root->to_vec_sub_tree();
+  }
+  static Self *find_root(Self *x) {
     splay(x);
-    push_down(x);
+    x->push_down();
     while (x->left != NIL) {
       x = x->left;
-      push_down(x);
+      x->push_down();
     }
     splay(x);
     return x;
   }
-  const Node *find_root_slow(const Node *x) const {
+  static const Self *find_root_slow(const Self *x) {
     while (x->father != NIL) {
       x = x->father;
     }
     return x;
   }
-  void travel(const Node *root, bool rev, const U &upd,
-              Consumer<S> &consumer) const {
+  void travel(const BiConsumer<int, S> &consumer, bool rev = false,
+              const U &upd = Self::u_nil) const {
+    const Self *root = this;
     if (root == NIL) {
       return;
     }
     if (root->rev) {
       rev = !rev;
     }
-    U new_upd = u_u(root->upd, upd);
-    travel(rev ? root->right : root->left, rev, new_upd, consumer);
-    consumer(s_u(root->weight, upd));
-    travel(rev ? root->left : root->right, rev, new_upd, consumer);
+    U new_upd = Self::u_u(root->upd, upd);
+    (rev ? root->right : root->left)->travel(consumer, rev, new_upd);
+    consumer(root->id, Self::s_u(root->weight, upd));
+    (rev ? root->left : root->right)->travel(consumer, rev, new_upd);
   }
 
-  void push_down(Node *root) {
+  void push_down() {
+    Self *root = this;
     if (root == NIL) {
       return;
     }
     if (root->rev) {
       root->rev = false;
 
-      Node *tmpNode = root->left;
+      Self *tmpNode = root->left;
       root->left = root->right;
       root->right = tmpNode;
 
@@ -225,22 +254,25 @@ private:
     root->right->tree_father = root->tree_father;
 
     if (root->upd != NIL->upd) {
-      modify(root->left, root->upd);
-      modify(root->right, root->upd);
+      root->left->modify(root->upd);
+      root->right->modify(root->upd);
       root->upd = NIL->upd;
     }
   }
 
-  void push_up(Node *root) {
+  void push_up() {
+    Self *root = this;
     if (root == NIL) {
       return;
     }
-    root->sum = s_s(s_s(root->left->sum, root->weight), root->right->sum);
+    root->sum =
+        Self::s_s(Self::s_s(root->left->sum, root->weight), root->right->sum);
+    this->push_up_sum_rev(*(root->left), *(root->right));
     root->tree_size = root->left->tree_size + root->right->tree_size +
                       root->vtree_size + root->tree_weight;
   }
 
-  Node *lca(Node *a, Node *b) {
+  static Self *lca(Self *a, Self *b) {
     if (a == b) {
       return a;
     }
@@ -258,83 +290,16 @@ private:
     return NIL;
   }
 
-  bool connected(Node *a, Node *b) {
+  static bool connected(Self *a, Self *b) {
     return lca(a, b) != NIL;
     //        makeRoot(a);
     //        access(b);
     //        splay(b);
     //        return findRoot(b) == a;
   }
-  Node *get_node(int i) {
-    Node *node = &nodes[i];
-    if (node->father != NIL) {
-      splay(node);
-    }
-    return node;
-  }
-
-public:
-  LinkCutTree(int n, S s_nil, U u_nil, Adder<S, S> _s_s, Adder<U, U> _u_u,
-              Adder<S, U> _s_u, const Indexer<S> &indexer,
-              const Indexer<char> &weight_indexer)
-      : nodes(n + 1), s_s(_s_s), u_u(_u_u), s_u(_s_u) {
-    NIL = &nodes[n];
-    NIL->id = -1;
-    NIL->init(NIL, s_nil, u_nil, char(0));
-    push_up(NIL);
-    for (int i = 0; i < n; i++) {
-      nodes[i].id = i;
-      nodes[i].init(NIL, indexer(i), u_nil, weight_indexer(i));
-      push_up(&nodes[i]);
-    }
-  }
-  void splay(int root) { splay(&nodes[root]); }
-  void access(int root) { access(&nodes[root]); }
-  void modify_subtree(int root, const U &upd) { modify(&nodes[root], upd); }
-  void make_root(int root) { make_root(&nodes[root]); }
-  void cut(int y, int x) { cut(&nodes[y], &nodes[x]); }
-  void join(int y, int x) { join(&nodes[y], &nodes[x]); }
-  void find_path(int x, int y) { find_path(&nodes[x], &nodes[y]); }
-  int find_root(int x) { return find_root(&nodes[x])->id; }
-  int lca(int a, int b) { return lca(&nodes[a], &nodes[b])->id; }
-  void travel(int root, Consumer<S> &consumer) const {
-    const Node *tree = find_root_slow(&nodes[root]);
-    travel(tree, false, NIL->upd, consumer);
-  }
-  Vec<S> to_vec_tree(int id) const {
-    Vec<S> res;
-    res.reserve(Size(nodes) - 1);
-    Consumer<S> consumer = [&](auto s) { res.push_back(s); };
-    travel(id, consumer);
-    return res;
-  }
-  Vec<Vec<S>> to_vec_tree() const {
-    Vec<Vec<S>> res;
-    for (int i = 0; i < Size(nodes) - 1; i++) {
-      const Node *node = &nodes[i];
-      if (node->father == NIL) {
-        res.push_back(to_vec_tree(i));
-      }
-    }
-    return res;
-  }
-  Vec<S> to_vec() {
-    Vec<S> res;
-    int n = Size(nodes) - 1;
-    res.reserve(n);
-    for (int i = 0; i < n; i++) {
-      res.push_back(get_weight(i));
-    }
-    return res;
-  }
-
-  S &get_sum(int root) { return get_node(root)->sum; }
-
-  S &get_weight(int root) { return get_node(root)->weight; }
-
-  int get_tree_size(int root) { return get_node(root)->tree_size; }
 };
-} // namespace link_cut_tree
-
-using link_cut_tree::LinkCutTree;
-} // namespace dalt
+template <class S, class U, bool DIR, i64 ID>
+LCTNode<S, U, DIR, ID> *LCTNode<S, U, DIR, ID>::NIL = NULL;
+#undef CID
+}  // namespace sbt
+}  // namespace dalt

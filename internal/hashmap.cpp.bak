@@ -1,0 +1,28 @@
+#pragma once
+/**
+ * Description: Hash Map with the same API as unordered\_map, but \tilde 3x
+ * faster. Initial capacity must be a power of 2 if provided. Source: KACTL
+ * Usage: ht<int,int> h({},{},{},{},{1<<16});
+ */
+#include "common.cpp"
+#include "hash.cpp"
+namespace dalt {
+namespace hash {
+struct chash {  /// use most bits rather than just the lowest ones
+  i64 operator()(i64 x) const { return hash::Shuffle(x); }
+};
+template <class K, class V>
+using HashMap_um = std::unordered_map<K, V, chash>;
+template <class K, class V>
+using HashMap_ht = __gnu_pbds::gp_hash_table<K, V, chash>;
+template <class K, class V>
+OStream &operator<<(OStream &os, const HashMap_ht<K, V> &hv) {
+  HashMap_um<K, V> hm;
+  for (auto iter = hv.begin(); iter != hv.end(); iter++) {
+    hm[iter->first] = iter->second;
+  }
+  os << hm;
+  return os;
+}
+}  // namespace hash
+}  // namespace dalt

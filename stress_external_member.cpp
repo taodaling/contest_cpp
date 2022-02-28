@@ -1,5 +1,5 @@
-#include "common.cpp"
-
+#include "solver.cpp"
+namespace stress {
 void StressSolve(IStream &in, OStream &out) {}
 
 void StressGenerate(int test_id, std::mt19937 &mt, OStream &out) {}
@@ -23,4 +23,5 @@ String StressMatch(const String &a, const String &b) {
       return "mismatch: " + x + " | " + y;
     }
   }
+}
 }

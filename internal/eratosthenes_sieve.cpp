@@ -1,4 +1,4 @@
-#include "../common.cpp"
+#include "common.cpp"
 #include "math.cpp"
 namespace dalt {
 // Find all primes in [2, n] and consume them.
@@ -7,7 +7,7 @@ void EratosthenesSieve(int n, const Consumer<int> &consumer) {
   if (n <= 1) {
     return;
   }
-  int block = Round(std::sqrt(n));
+  int block = std::round(std::sqrt(n));
   Vec<bool> is_comp(block + 1);
   Vec<int> primes(block + 1);
   int prime_cnt = 0;

@@ -1,4 +1,4 @@
-#include "../common.cpp"
+#include "common.cpp"
 
 namespace dalt {
 namespace graph {

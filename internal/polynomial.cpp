@@ -1,25 +1,35 @@
 #pragma once
-#include "convolution.cpp"
-#include "poly.cpp"
 #include "binary.cpp"
+#include "brute_force_conv.cpp"
+#include "convolution.cpp"
+#include "math.cpp"
+#include "modint.cpp"
+#include "poly.cpp"
+#include "mod_inverse.cpp"
 namespace dalt {
 namespace poly {
-template <class Conv> struct Polynomial {
+const static int POLY_FAST_MAGIC_THRESHOLD = 64;
+MakeAnnotation(polynomial);
+template <class Conv>
+struct Polynomial {
   static_assert(is_convolution_v<Conv>);
   using T = typename Conv::Type;
+  using Type = T;
   using Seq = Vec<T>;
   using Self = Polynomial<Conv>;
   Seq data;
-  Polynomial() : Seq({0}) {}
+  Polynomial() : Polynomial(Vec<T>{T(0)}) {}
   Polynomial(Vec<T> &&_data) : data(_data) { Normalize(data); }
   Polynomial(const Vec<T> &_data) : data(_data) { Normalize(data); }
+  T operator()(T x) const { return Apply(data, x); }
+  T apply(T x) const { return (*this)(x); }
   Self integral() const {
     let rank = this->rank();
     Vec<T> range(rank + 1);
     for (int i = 0; i <= rank; i++) {
       range[i] = i + 1;
     }
-    let inv = InverseBatch(move(range));
+    let inv = math::InverseBatch(move(range));
     Vec<T> ans(rank + 2);
     for (int i = 0; i <= rank; i++) {
       ans[i + 1] = inv[i] * data[i];
@@ -34,14 +44,7 @@ template <class Conv> struct Polynomial {
     return Self(ans);
   }
   Self modular(i32 n) const {
-    if (Size(data) < n) {
-      return Self(*this);
-    } else {
-      Vec<T> ans;
-      ans.reserve(n);
-      ans.insert(ans.begin(), data.begin(), data.begin() + n);
-      return Self(ans);
-    }
+    return Self(CopyAndExtend(data, n));
   }
   static Self of(T val) { return Self(Vec<T>{val}); }
   Self ln(i32 n) const {
@@ -68,13 +71,79 @@ template <class Conv> struct Polynomial {
   int rank() const { return Size(data) - 1; }
   Self operator*(const Self &rhs) const {
     const Self &lhs = *this;
+    if (Min(lhs.rank(), rhs.rank()) < POLY_FAST_MAGIC_THRESHOLD) {
+      return Self(BruteForceConv<T>::conv(lhs.data, rhs.data));
+    }
     return Self(Conv::conv(lhs.data, rhs.data));
+  }
+  Self operator*(const T &rhs) const {
+    Vec<T> res = data;
+    for (int i = 0; i < Size(res); i++) {
+      res[i] = res[i] * rhs;
+    }
+    return Self(res);
+  }
+  Self &operator*=(const T &rhs) {
+    for (int i = 0; i < Size(data); i++) {
+      data[i] = data[i] * rhs;
+    }
+    Normalize(data);
+    return *this;
+  }
+  Self operator+(const T &rhs) const {
+    Vec<T> res = data;
+    res[0] = res[0] + rhs;
+    return Self(res);
+  }
+  Self operator+=(const T &rhs) const {
+    data[0] = data[0] + rhs;
+    Normalize(data);
+    return data;
+  }
+  Self operator-(const T &rhs) const {
+    Vec<T> res = data;
+    res[0] = res[0] - rhs;
+    return Self(res);
+  }
+  Self operator-=(const T &rhs) const {
+    data[0] = data[0] - rhs;
+    Normalize(data);
+    return data;
+  }
+  Self operator>>(i32 n) const {
+    if (n < 0) {
+      return *this << -n;
+    }
+    if (*this == Self::of(T(0))) {
+      return Self::of(T(0));
+    }
+    Vec<T> res(Size(data) + n);
+    for (int i = 0; i < Size(data); i++) {
+      res[i + n] = data[i];
+    }
+    return Self(res);
+  }
+  Self operator<<(i32 n) const {
+    if (n < 0) {
+      return *this >> -n;
+    }
+    if (Size(data) < n) {
+      return Self::of(T(0));
+    }
+    Vec<T> res(Size(data) - n);
+    for (int i = 0; i < Size(res); i++) {
+      res[i] = data[i + n];
+    }
+    return Self(res);
   }
   Self operator/(const Self &rhs) const {
     auto a = data;
     auto b = rhs.data;
     if (a.size() < b.size()) {
       return Self::of(T(0));
+    }
+    if (b.size() <= POLY_FAST_MAGIC_THRESHOLD) {
+      return BruteForceConv<T>::div_and_rem(Move(a), Move(b))[0];
     }
     Reverse(All(a));
     Reverse(All(b));
@@ -88,7 +157,12 @@ template <class Conv> struct Polynomial {
     Reverse(All(prod));
     return Self(prod);
   }
-  Self operator%(const Self &rhs) const { return *this - (*this / rhs) * rhs; }
+  Self operator%(const Self &rhs) const {
+    if (Min(rank(), rhs.rank()) < POLY_FAST_MAGIC_THRESHOLD) {
+      return BruteForceConv<T>::div_and_rem(data, rhs.data)[1];
+    }
+    return *this - (*this / rhs) * rhs;
+  }
   Self operator+(const Self &rhs) const {
     const Self &lhs = *this;
     int n = Size(lhs.data);
@@ -127,7 +201,56 @@ template <class Conv> struct Polynomial {
   bool operator!=(const_ref(Self) rhs) const { return !(*this == rhs); }
   Vec<T> to_vec() const { return data; }
   Self inverse(int n) const { return Self(Conv::inverse(data, n)); }
-};
+  static Self mulmod(const Self &a, const Self &b, int mod) {
+    return (a * b).modular(mod);
+  }
+  Self powmod_binary_lift(i64 n, i32 mod) const {
+    if (n == 0) {
+      return Self::of(T(1)).modular(mod);
+    }
+    Self res = powmod_binary_lift(n / 2, mod);
+    res = (res * res).modular(mod);
+    if (n % 2 == 1) {
+      res = (res * *this).modular(mod);
+    }
+    return res;
+  }
 
-} // namespace poly
-} // namespace dalt
+  enable_if_t<is_modint_v<T> && is_same_v<i32, typename T::Type>, Self>
+  powmod_fast(i32 n_mod_modulus, i32 n_mod_phi, i64 estimate, i32 mod) const {
+    if (estimate == 0) {
+      return Self::of(T(1)).modular(mod);
+    }
+    if (*this == Self::of(T(0))) {
+      return *this;
+    }
+    i32 k = 0;
+    while (data[k] == T(0)) {
+      k++;
+    }
+    if (MulLimit<i64>(k, estimate, mod) >= mod) {
+      return Self::of(T(0));
+    }
+    auto expln = [&](const Self &p, i32 n_mod_modulus, i32 mod) -> Self {
+      return (p.ln(mod) *= T(n_mod_modulus)).exp(mod);
+    };
+    auto expln_ext = [&](Self p, i32 n_mod_modulus, i32 n_mod_phi,
+                         i32 mod) -> Self {
+      T val = p[0];
+      T inv = T(1) / p[0];
+      p *= inv;
+      Self res = expln(p, n_mod_modulus, mod);
+      res *= PowBinaryLift(val, n_mod_phi);
+      return res;
+    };
+    if (k == 0) {
+      return expln_ext(*this, n_mod_modulus, n_mod_phi, mod);
+    }
+    Self trim = (*this) << k;
+    Self res = expln_ext(Move(trim), n_mod_modulus, n_mod_phi, mod);
+    return (res >> k * estimate).modular(mod);
+  }
+};
+AssignAnnotationTemplate(Polynomial, polynomial, class);
+}  // namespace poly
+}  // namespace dalt

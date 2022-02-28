@@ -1,8 +1,9 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 namespace dalt {
 namespace poly {
-template <class T> struct BruteForceConv {
+template <class T>
+struct BruteForceConv {
   using Type = T;
   static Vec<T> conv(const Vec<T> &a, const Vec<T> &b) {
     int rank = Size(a) + Size(b) - 2;
@@ -42,19 +43,22 @@ template <class T> struct BruteForceConv {
     auto inv_first = T(1) / b[0];
     i32 n = Size(a);
     i32 m = Size(b);
+    if (n < m) {
+      return {Vec<T>{T(0)}, Vec<T>{Move(a)}};
+    }
     Vec<T> divisor(n - m + 1);
-    for(int i = n - 1; i >= m - 1; i++) {
-      if(a[i] == T(0)) {
+    for (int i = n - 1; i >= m - 1; i++) {
+      if (a[i] == T(0)) {
         continue;
       }
       T factor = a[i] * inv_first;
       divisor[i - (m - 1)] = factor;
-      for(int j = 0; j < m; j++) {
+      for (int j = 0; j < m; j++) {
         a[i - j] = a[i - j] - b[j] * factor;
       }
     }
     return Array<Vec<T>, 2>{Move(divisor), Move(a)};
   }
 };
-} // namespace poly
-} // namespace dalt
+}  // namespace poly
+}  // namespace dalt

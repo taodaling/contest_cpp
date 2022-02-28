@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "binary.cpp"
 #include "poly.cpp"
 namespace dalt {

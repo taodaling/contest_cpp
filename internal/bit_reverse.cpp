@@ -1,4 +1,4 @@
-#include "../common.cpp"
+#include "common.cpp"
 namespace dalt {
 static const u8 BitReverseTable[]{
     0,  128, 64, 192, 32, 160, 96,  224, 16, 144, 80, 208, 48, 176, 112, 240,

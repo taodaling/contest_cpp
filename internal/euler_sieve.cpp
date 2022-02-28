@@ -1,113 +1,37 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "math.cpp"
 #include "modint.cpp"
 namespace dalt {
+namespace math {
 struct EulerSieve {
-private:
-  Vec<int> primes;
-  Vec<bool> is_comp;
-  Vec<int> smallest_prime_factor;
-  Vec<int> exp_of_smallest_prime_factor;
-  int n;
-
-public:
-  Vec<int> &get_primes() { return primes; }
-  Vec<bool> &get_is_comp() { return is_comp; }
-
-  Vec<int> powmod(int k, int mod) const {
-    static const int ID = -1;
-    using Modular = DynamicModular<i32, ID>;
-    using InternalMi = ModInt<Modular>;
-    Modular::cinit(mod);
-    Vec<int> ans(n + 1);
-    if (k == 0) {
-      ans[0] = 1;
-    }
-    if (n >= 1) {
-      ans[1] = 1;
-    }
-    for (int i = 2; i <= n; i++) {
-      if (!is_comp[i]) {
-        ans[i] = PowBinaryLift(InternalMi(i), k).value;
-      } else {
-        ans[i] = (int)((i64)ans[i / smallest_prime_factor[i]] *
-                       ans[smallest_prime_factor[i]] % mod);
-      }
-    }
-    return ans;
+ public:
+  static Vec<int> primes;
+  static Vec<bool> is_comp;
+  static Vec<int> smallest_prime_factor;
+  static Vec<int> exp_of_smallest_prime_factor;
+  static CONSTRUCT(_init) {
+    is_comp.resize(2);
+    smallest_prime_factor.resize(2);
+    exp_of_smallest_prime_factor.resize(2);
+    ensure(1e6);
   }
-
-  Vec<int> get_mobius() const {
-    Vec<int> mobius(n + 1);
-    mobius[1] = 1;
-    for (int i = 2; i <= n; i++) {
-      if (!is_comp[i]) {
-        mobius[i] = -1;
-      } else {
-        if (exp_of_smallest_prime_factor[i] != smallest_prime_factor[i]) {
-          mobius[i] = 0;
-        } else {
-          mobius[i] = mobius[exp_of_smallest_prime_factor[i]] *
-                      mobius[i / exp_of_smallest_prime_factor[i]];
-        }
-      }
+  static void ensure(int n) {
+    int cur_size = is_comp.size();
+    if (cur_size >= n) {
+      return;
     }
-    return mobius;
-  }
-
-  Vec<int> get_euler() const {
-    Vec<int> euler(n + 1);
-    euler[1] = 1;
-    for (int i = 2; i <= n; i++) {
-      if (!is_comp[i]) {
-        euler[i] = i - 1;
-      } else {
-        if (exp_of_smallest_prime_factor[i] == i) {
-          euler[i] = i - i / smallest_prime_factor[i];
-        } else {
-          euler[i] = euler[exp_of_smallest_prime_factor[i]] *
-                     euler[i / exp_of_smallest_prime_factor[i]];
-        }
-      }
-    }
-    return euler;
-  }
-
-  Vec<int> &get_smallest_prime_factor() { return smallest_prime_factor; }
-
-  Vec<int> get_factor() const {
-    Vec<int> factors(n + 1);
-    factors[1] = 1;
-    for (int i = 2; i <= n; i++) {
-      if (!is_comp[i]) {
-        factors[i] = 2;
-      } else {
-        if (exp_of_smallest_prime_factor[i] == i) {
-          factors[i] = 1 + factors[i / smallest_prime_factor[i]];
-        } else {
-          factors[i] = factors[exp_of_smallest_prime_factor[i]] *
-                       factors[i / exp_of_smallest_prime_factor[i]];
-        }
-      }
-    }
-    return factors;
-  }
-
-  EulerSieve(int _n) : n(_n) {
-    is_comp = Vec<bool>(n + 1);
-    primes.reserve(n + 1);
-    exp_of_smallest_prime_factor = Vec<int>(n + 1);
-    smallest_prime_factor = Vec<int>(n + 1);
-    for (int i = 2; i <= n; i++) {
+    primes.reserve(n);
+    is_comp.resize(n);
+    smallest_prime_factor.resize(n);
+    exp_of_smallest_prime_factor.resize(n);
+    for (int i = cur_size; i < n; i++) {
       if (!is_comp[i]) {
         primes.push_back(i);
         exp_of_smallest_prime_factor[i] = smallest_prime_factor[i] = i;
       }
-      int until = n / i;
-      for (int j = 0, until = n / i; j < Size(primes) && primes[j] <= until;
-           j++) {
-        int pi = primes[j] * i;
+      int pi;
+      for (int j = 0; j < Size(primes) && (pi = primes[j] * i) < n; j++) {
         smallest_prime_factor[pi] = primes[j];
         exp_of_smallest_prime_factor[pi] =
             smallest_prime_factor[i] == primes[j]
@@ -121,5 +45,106 @@ public:
       }
     }
   }
+
+  //(factor, exp_factor)
+  // O(n + n / ln(n) * O(per f) )
+  template <class T>
+  static Vec<T> calc_multiplicative_function(int n,
+                                             const Function<T(int, int)>& f) {
+    ensure(n);
+    Vec<T> ans(n);
+    if (n > 0) {
+      ans[0] = T(0);
+    }
+    if (n > 1) {
+      ans[1] = T(1);
+    }
+    for (int i = 2; i < n; i++) {
+      if (exp_of_smallest_prime_factor[i] != i) {
+        ans[i] = ans[exp_of_smallest_prime_factor[i]] *
+                 ans[i / exp_of_smallest_prime_factor[i]];
+      } else {
+        ans[i] = f(smallest_prime_factor[i], i);
+      }
+    }
+    return ans;
+  }
+  template <class T>
+  static Vec<T> calc_totally_multiplicative_function(
+      int n, const Function<T(int)>& f) {
+    ensure(n);
+    Vec<T> ans(n);
+    if (n > 0) {
+      ans[0] = T(0);
+    }
+    if (n > 1) {
+      ans[1] = T(1);
+    }
+    for (int i = 2; i < n; i++) {
+      if (smallest_prime_factor[i] != i) {
+        ans[i] =
+            ans[smallest_prime_factor[i]] * ans[i / smallest_prime_factor[i]];
+      } else {
+        ans[i] = f(i);
+      }
+    }
+    return ans;
+  }
+  template <class T>
+  static Vec<int> powmod(int n, int k, int mod) {
+    static const i64 ID = -1;
+    using Modular = DynamicModular<i32, ID>;
+    using InternalMi = ModInt<Modular>;
+    Modular::Register(mod);
+    return calc_totally_multiplicative_function<int>(n, [&](auto x) -> int {
+      return PowBinaryLift(InternalMi(x), k).value;
+    });
+  }
+
+  static Vec<int> get_mobius(int n) {
+    return calc_multiplicative_function<int>(
+        n, [&](auto factor, auto exp_factor) -> int {
+          if (factor == exp_factor) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+  }
+
+  static Vec<int> get_euler(int n) {
+    return calc_multiplicative_function<int>(
+        n, [&](auto factor, auto exp_factor) -> int {
+          return exp_factor - exp_factor / factor;
+        });
+  }
+
+  static Vec<int> get_factor(int n) {
+    ensure(n);
+    Vec<int> ans(n);
+    if (n > 0) {
+      ans[0] = 0;
+    }
+    if (n > 1) {
+      ans[1] = 1;
+    }
+    for (int i = 2; i < n; i++) {
+      if (!is_comp[i]) {
+        ans[i] = 2;
+      } else if (i == exp_of_smallest_prime_factor[i]) {
+        ans[i] = 1 + ans[i / smallest_prime_factor[i]];
+      } else {
+        ans[i] = ans[exp_of_smallest_prime_factor[i]] *
+                 ans[i / exp_of_smallest_prime_factor[i]];
+      }
+    }
+    return ans;
+  }
 };
-} // namespace dalt
+Vec<int> EulerSieve::primes;
+Vec<bool> EulerSieve::is_comp;
+Vec<int> EulerSieve::smallest_prime_factor;
+Vec<int> EulerSieve::exp_of_smallest_prime_factor;
+//void CONSTRUCT _InitEulerSieve() { EulerSieve::ensure(1e6); }
+}  // namespace math
+}  // namespace dalt

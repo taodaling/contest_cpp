@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "binary.cpp"
 #include "bit_reverse.cpp"
 #include "convolution.cpp"
@@ -64,30 +64,34 @@ enable_if_t<is_modular_v<M>> NumberTheoryTransform(Vec<ModInt<M>> &p,
     }
   }
 }
-template <class M> struct NTTConv {
+template <class M>
+struct NTTConv {
   static_assert(is_modular_v<M>);
   using mi = ModInt<M>;
   using Type = mi;
   using P = Vec<mi>;
-  static P conv(P a, P b) {
+  static P conv(const P &a, const P &b) {
+    if (&a == &b) {
+      return conv2(a);
+    }
     int n = Size(a) + Size(b);
     int conv_len = 1 << Log2Ceil(n);
-    a.resize(conv_len);
-    b.resize(conv_len);
-    NumberTheoryTransform(a, false);
-    NumberTheoryTransform(b, false);
-    DotMulInplace(a, b);
-    NumberTheoryTransform(a, true);
-    return a;
+    auto pa = CopyAndExtend(a, conv_len);
+    auto pb = CopyAndExtend(b, conv_len);
+    NumberTheoryTransform(pa, false);
+    NumberTheoryTransform(pb, false);
+    DotMulInplace(pa, pb);
+    NumberTheoryTransform(pa, true);
+    return pa;
   }
-  static P conv2(P a) {
-    int n = Size(a) + Size(a);
+  static P conv2(const P &a) {
+    int n = Size(a) + Size(a) - 1;
     int conv_len = 1 << Log2Ceil(n);
-    a.resize(conv_len);
-    NumberTheoryTransform(a, false);
-    DotMulInplace(a, a);
-    NumberTheoryTransform(a, true);
-    return a;
+    auto pa = CopyAndExtend(a, conv_len);
+    NumberTheoryTransform(pa, false);
+    DotMulInplace(pa, pa);
+    NumberTheoryTransform(pa, true);
+    return pa;
   }
   static P inverse(P p, i32 n) {
     Extend(p, n);
@@ -116,8 +120,9 @@ template <class M> struct NTTConv {
     return dfs(dfs, n);
   }
 };
-template <class M> struct is_convolution<NTTConv<M>> {
+template <class M>
+struct is_convolution<NTTConv<M>> {
   static const bool value = true;
 };
-} // namespace poly
-} // namespace dalt
+}  // namespace poly
+}  // namespace dalt

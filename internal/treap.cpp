@@ -1,17 +1,18 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "function.cpp"
+#include "optional_field.cpp"
+#include "sbt_common.cpp"
+#include "sbt_reverse.cpp"
 #include "tag.cpp"
 namespace dalt {
-namespace treap {
-#define TEMPLATE_ARG_LIST                                                      \
-  template <class S, class U, int ID = 0, class P = TransientTag,              \
-            class DIR = BidTag>
-TEMPLATE_ARG_LIST struct Treap {
-  static_assert(is_same_v<P, TransientTag> || is_same_v<P, PermTag>);
-  static_assert(is_same_v<DIR, BidTag> || is_same_v<DIR, DiTag>);
-
-private:
+namespace sbt {
+#define CID -202202131700
+template <class S, class U, i64 ID = 0, bool P = false, bool DIR = false>
+struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
+               protected SbtReverse<S, U, DIR,
+                                    SelfBalanceTreeBase<S, U, ID, CID>> {
+ private:
   using Self = Treap<S, U, ID, P, DIR>;
   using AT2 = Array<Self *, 2>;
   AT2 split_by_weight_first_true(const Checker<S> &checker, bool &find) {
@@ -40,7 +41,7 @@ private:
     push_up();
     return res;
   }
-  IsType(TransientTag, P, void) do_perm() {}
+  IsBool(!P,void) do_perm() {}
   IsType(PermTag, P, void) do_perm() {
     left = left->clone();
     right = right->clone();
@@ -51,20 +52,17 @@ private:
     if (this == NIL) {
       return;
     }
-    U new_upd = u_u(upd, u);
+    U new_upd = Self::u_u(upd, u);
     bool new_rev_upd = rev_upd != rev;
     (new_rev_upd ? right : left)->travel(new_upd, new_rev_upd, consumer);
-    consumer(s_u(weight, u));
+    consumer(Self::s_u(weight, u));
     (new_rev_upd ? left : right)->travel(new_upd, new_rev_upd, consumer);
   }
 
-public:
-  static Adder<S, S> s_s;
-  static Adder<S, U> s_u;
-  static Adder<U, U> u_u;
+ public:
   static Self *NIL;
-  static void cinit(S s_nil, U u_nil, const Adder<S, S> &_s_s,
-                    const Adder<U, U> &_u_u, const Adder<S, U> &_s_u) {
+  static void Register(S s_nil, U u_nil, const Adder<S, S> &_s_s,
+                       const Adder<S, U> &_s_u, const Adder<U, U> &_u_u) {
     if (NIL != NULL) {
       delete NIL;
     }
@@ -76,27 +74,34 @@ public:
     NIL->id = -1;
     NIL->rev = false;
     NIL->left = NIL->right = NIL;
-    s_s = _s_s;
-    u_u = _u_u;
-    s_u = _s_u;
+
+    SelfBalanceTreeBase<S, U, ID, CID>::Register(s_nil, u_nil, _s_s, _s_u,
+                                                 _u_u);
   }
   Treap(int _id = 0, S _sum = S())
-      : sum(_sum), weight(_sum), id(_id), size(1), upd(NIL->upd), left(NIL),
-        right(NIL), rev(false) {}
+      : sum(_sum),
+        weight(_sum),
+        id(_id),
+        size(1),
+        upd(NIL->upd),
+        left(NIL),
+        right(NIL),
+        rev(false) {
+    this->init_sum_rev(Self::s_nil);
+  }
   S sum;
   U upd;
   S weight;
   int size;
-  int id;
+  i64 ID;
   Self *left;
   Self *right;
   bool rev;
-  IsType(DiTag, DIR, void) reverse() {
+  void reverse() {
     rev = !rev;
-    sum.reverse();
+    this->swap_sum_rev(sum);
   }
 
-  IsType(BidTag, DIR, void) reverse() { rev = !rev; }
   Self *clone() {
     if (this == NIL) {
       return this;
@@ -107,16 +112,18 @@ public:
     if (this == NIL) {
       return;
     }
-    sum = s_s(s_s(left->sum, weight), right->sum);
+    sum = Self::s_s(Self::s_s(left->sum, weight), right->sum);
+    this->push_up_sum_rev(*left, *right);
     size = left->size + 1 + right->size;
   }
   void modify(const U &u) {
     if (this == NIL) {
       return;
     }
-    sum = s_u(sum, u);
-    upd = u_u(upd, u);
-    weight = s_u(weight, u);
+    sum = Self::s_u(sum, u);
+    upd = Self::u_u(upd, u);
+    weight = Self::s_u(weight, u);
+    this->apply_sum_rev(u);
   }
 
   void push_down() {
@@ -125,7 +132,7 @@ public:
     }
     do_perm();
     if (rev) {
-      swap(left, right);
+      Swap(left, right);
       left->reverse();
       right->reverse();
       rev = false;
@@ -256,14 +263,8 @@ public:
     return res;
   }
 };
-template <class S, class U, int ID, class P, class DIR>
-Adder<S, S> Treap<S, U, ID, P, DIR>::s_s;
-template <class S, class U, int ID, class P, class DIR>
-Adder<U, U> Treap<S, U, ID, P, DIR>::u_u;
-template <class S, class U, int ID, class P, class DIR>
-Adder<S, U> Treap<S, U, ID, P, DIR>::s_u;
-template <class S, class U, int ID, class P, class DIR>
+template <class S, class U, i64 ID, bool P, bool DIR>
 Treap<S, U, ID, P, DIR> *Treap<S, U, ID, P, DIR>::NIL = NULL;
-} // namespace treap
-using treap::Treap;
-} // namespace dalt
+#undef CID
+}  // namespace sbt
+}  // namespace dalt

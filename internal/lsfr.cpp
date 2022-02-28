@@ -1,5 +1,5 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 namespace dalt {
 template <class T> struct LinearFeedbackShiftRegister {
   Vec<T> cm;

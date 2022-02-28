@@ -5,9 +5,11 @@ namespace dalt {
 namespace graph {
 // credited to:
 // https://github.com/indy256/codelibrary/blob/master/java/graphs/lca/LcaSchieberVishkin.java
-template <class E, class = IsBiGraph(E, void)>
+template <class E>
 struct LowestCommonAncestorBySchieberVishkin {
-private:
+  static_assert(IsBiGraph(E, void));
+
+ private:
   Vec<int> parent;
   Vec<int> pre_order;
   Vec<int> i;
@@ -21,8 +23,7 @@ private:
     i[u] = pre_order[u] = time++;
     for (auto &e : tree[u]) {
       int v = e.to;
-      if (v == p)
-        continue;
+      if (v == p) continue;
       dfs1(v, u);
       if (LowestOneBit(i[u]) < LowestOneBit(i[v])) {
         i[u] = i[v];
@@ -35,20 +36,19 @@ private:
     a[u] = up | LowestOneBit(i[u]);
     for (auto &e : tree[u]) {
       int v = e.to;
-      if (v == p)
-        continue;
+      if (v == p) continue;
       dfs2(v, u, a[u]);
     }
   }
   int enter_into_strip(int x, int hz) {
-    if (LowestOneBit(i[x]) == hz)
-      return x;
+    if (LowestOneBit(i[x]) == hz) return x;
     int hw = 1 << Log2Floor(u32(a[x] & (hz - 1)));
     return parent[head[i[x] & -hw | hw]];
   }
 
-public:
-  LowestCommonAncestorBySchieberVishkin(const Graph<E> &_tree, const Checker<int> &is_root)
+ public:
+  LowestCommonAncestorBySchieberVishkin(const Graph<E> &_tree,
+                                        const Checker<int> &is_root)
       : tree(_tree) {
     int n = Size(tree);
     pre_order = Vec<int>(n);
@@ -66,12 +66,13 @@ public:
   }
 
   int lca(int x, int y) {
-    int hb = i[x] == i[y] ? LowestOneBit(i[x]) : (1 << Log2Floor(u32(i[x] ^ i[y])));
+    int hb =
+        i[x] == i[y] ? LowestOneBit(i[x]) : (1 << Log2Floor(u32(i[x] ^ i[y])));
     int hz = LowestOneBit(a[x] & a[y] & -hb);
     int ex = enter_into_strip(x, hz);
     int ey = enter_into_strip(y, hz);
     return pre_order[ex] < pre_order[ey] ? ex : ey;
   }
 };
-} // namespace graph
-} // namespace dalt
+}  // namespace graph
+}  // namespace dalt

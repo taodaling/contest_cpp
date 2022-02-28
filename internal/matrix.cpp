@@ -1,13 +1,16 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "modint.cpp"
 #include "modint_sum.cpp"
 namespace dalt {
-template <class T> struct Matrix {
+namespace math {
+template <class T>
+struct Matrix {
   using Self = Matrix<T>;
   Vec<T> data;
   int m;
-  Matrix(int _n = 0, int _m = 0) : data(_n * _m), m(_m) {}
+  Matrix(int _n, int _m) : data(_n * _m), m(_m) {}
+  Matrix() : Matrix(0, 0) {}
   static Self mul_identity(int n) {
     Self res(n, n);
     for (int i = 0; i < n; i++) {
@@ -169,7 +172,7 @@ template <class T> struct Matrix {
     return {r};
   }
 
-private:
+ private:
   void row_swap(int i, int j) {
     T *offset_i = (*this)[i];
     T *offset_j = (*this)[j];
@@ -206,4 +209,5 @@ private:
     return res;
   }
 };
-} // namespace dalt
+}  // namespace math
+}  // namespace dalt

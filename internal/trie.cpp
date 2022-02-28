@@ -1,12 +1,12 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "optional.cpp"
 namespace dalt {
 namespace trie {
-template <class S, int C = 26, int ID = 0> struct Trie {
+template <class S, int C = 26, i64 ID = 0> struct Trie {
   using Self = Trie<S, C, ID>;
   static S s_nil;
-  static void cinit(S _s_nil) { s_nil = _s_nil; }
+  static void Register(S _s_nil) { s_nil = _s_nil; }
   S sum;
   Self *next[C];
   Trie() : sum(s_nil) { memset(next, 0, sizeof(Self *) * C); }
@@ -26,7 +26,7 @@ template <class S, int C = 26, int ID = 0> struct Trie {
   bool exist(int index) { return next[index] != NULL; }
   Self *operator[](int index) { return get_or_create(index); }
 };
-template <class S, int C, int ID> S Trie<S, C, ID>::s_nil = S();
+template <class S, int C, i64 ID> S Trie<S, C, ID>::s_nil = S();
 } // namespace trie
 using trie::Trie;
 } // namespace dalt

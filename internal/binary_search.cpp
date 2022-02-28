@@ -1,16 +1,15 @@
 #pragma once
-#include "../common.cpp"
+#include "common.cpp"
 #include "optional.cpp"
 #include "prefer_div.cpp"
 namespace dalt {
-template <class T,
-          class = typename std::enable_if<std::is_integral<T>::value>::Type>
-Optional<T> FirstTrue(T l, T r, const Checker<T> &checker) {
+template <class T>
+enable_if_t<is_integral_v<T>, Optional<T>> FirstTrue(T l, T r, const Checker<T> &checker) {
   if (!checker(r)) {
     return {};
   }
   while (l < r) {
-    T m = DivFloor(l, r);
+    T m = DivFloor(l + r, 2);
     if (checker(m)) {
       r = m;
     } else {
@@ -19,14 +18,14 @@ Optional<T> FirstTrue(T l, T r, const Checker<T> &checker) {
   }
   return l;
 }
-template <class T,
-          class = typename std::enable_if<std::is_integral<T>::value>::Type>
-Optional<T> LastTrue(T l, T r, const Checker<T> &checker) {
+template <class T>
+enable_if_t<is_integral_v<T>, Optional<T>> LastTrue(T l, T r,
+                                                    const Checker<T> &checker) {
   if (!checker(l)) {
     return {};
   }
   while (l < r) {
-    T m = DivCeil(l, r);
+    T m = DivCeil(l + r, 2);
     if (checker(m)) {
       l = m;
     } else {
@@ -35,9 +34,10 @@ Optional<T> LastTrue(T l, T r, const Checker<T> &checker) {
   }
   return l;
 }
-template <class T, class = typename std::enable_if<
-                       std::is_floating_point<T>::value>::Type>
-Optional<T> FirstTrue(T l, T r, const Checker<T> &checker, i32 max_round) {
+template <class T>
+enable_if_t<is_floating_point_v<T>, Optional<T>> FirstTrue(T l, T r,
+                                                     const Checker<T> &checker,
+                                                     i32 max_round) {
   if (!checker(r)) {
     return {};
   }

@@ -1,8 +1,7 @@
 #pragma once
-
-namespace dalt {
-namespace constant {
-const long double PI = std::asin((long double)1) * 2;
-const long double E = std::exp((long double)1);
-} // namespace constant
-} // namespace dalt
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+#ifndef M_E
+#define M_E 2.7182818284590452354
+#endif
