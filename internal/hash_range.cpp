@@ -7,7 +7,7 @@ struct HashRange {
   using Self = HashRange;
   using Mi = HashBase::Mi;
   Vec<Mi> data;
-  HashRange(const Indexer<T>& s, int n) {
+  HashRange(int n, const Indexer<T>& s) {
     static_assert(is_integral_v<T>);
     HashBase::ensure(n + 2);
     data.resize(n + 1);

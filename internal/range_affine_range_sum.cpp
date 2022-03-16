@@ -10,9 +10,14 @@ struct RangeAffineRangeSum {
   using A = Array<T, 2>;
   using ST = SegTree<A, A, NoTag, CID>;
   ST st;
+  static bool initialized;
 
  public:
   static CONSTRUCT(_init) {
+    init();
+  }
+  static void init() {
+    initialized = true;
     ST::Register(
         A{0, 0}, A{1, 0},
         [&](auto a, auto b) {
@@ -42,6 +47,8 @@ struct RangeAffineRangeSum {
     return res;
   }
 };
+template <class T>
+bool RangeAffineRangeSum<T>::initialized = false;
 #undef CID
 }  // namespace sbt
 }  // namespace dalt

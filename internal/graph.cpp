@@ -16,6 +16,12 @@ struct BiBaseEdge: public DiBaseEdge, public WithRev {};
 #define IsDiGraph(E, ret) enable_if_t<is_base_of_v<DiBaseEdge, E>, ret>
 #define IsBiGraph(E, ret) enable_if_t<is_base_of_v<BiBaseEdge, E>, ret>
 
+template <class E>
+IsDiGraph(E, void) AddDiEdge(Graph<E> &g, int s, int t) {
+  E pos;
+  pos.to = t;
+  g[s].push_back(pos);
+}
 template <class E> IsBiGraph(E, void) AddBiEdge(Graph<E> &g, int s, int t) {
   E pos, neg;
   pos.to = t;

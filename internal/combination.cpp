@@ -3,12 +3,12 @@
 namespace dalt {
 namespace math {
 template <class T>
-struct ModCombinationFactory {
+struct Combination {
   static_assert(is_modint_v<T>);
   using Modular = typename T::Modular;
   Vec<T> fact;
   Vec<T> inv_fact;
-  ModCombinationFactory(int cap) {
+  Combination(int cap) {
     cap += 10;
     cap = Min(cap, Modular::modulus);
     fact.resize(cap);

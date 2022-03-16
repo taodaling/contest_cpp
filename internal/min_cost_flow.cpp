@@ -42,7 +42,7 @@ MinCostFlowDijkstra(
     }) {
   int n = Size(g);
   T inf = std::numeric_limits<T>::max() / 2;
-  auto last_dist = Get((AugmentPathSpfa(g, s, inf)), 0);
+  auto last_dist = std::get<0>(AugmentPathSpfa(g, s, inf));
   Vec<E *> prev(n, NULL);
   Vec<T> cur_dist(n, inf);
   auto fix_dist = [&]() {

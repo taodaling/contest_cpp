@@ -5,7 +5,7 @@
 namespace dalt {
 namespace math {
 template <class T>
-struct ModFactorialFactory : public Factory<T> {
+struct ModFactorialFactory {
   ModFactorialFactory(int cap, const Indexer<T> &indexer)
       : Factory<T>(0,
                    [&, = indexer](int i) { return data.back() * indexer(i); }) {

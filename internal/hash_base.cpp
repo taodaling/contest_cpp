@@ -9,8 +9,10 @@ struct HashBase {
   static Mi inv_x;
   static Vec<Mi> xp;
   static Vec<Mi> inv_xp;
-  static void Register(i32 cap = 1e6) {
-    cap += 10;
+
+  static CONSTRUCT(_init) { HashBase::init(); }
+  static void init() {
+    int cap = 1e6 + 10;
     x = Mi(random_choice<i64>(1, Modular::modulus - 1));
     inv_x = Mi(1) / x;
     xp.clear();
@@ -21,6 +23,9 @@ struct HashBase {
     inv_xp.push_back(Mi(1));
   }
   static void ensure(i32 n) {
+    if(xp.empty()) {
+      init();
+    }
     Assert(x != Mi(0));
     while (Size(xp) < n) {
       xp.push_back(xp.back() * x);

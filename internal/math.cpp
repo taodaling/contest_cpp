@@ -2,20 +2,39 @@
 #include "common.cpp"
 namespace dalt {
 template <class T>
-T& Chmin(T& a, const T& b) {
+inline T& Chmin(T& a, const T& b) {
   if (a > b) {
     a = b;
   }
   return a;
 }
 template <class T>
-T& Chmax(T& a, const T& b) {
+inline T& Chmax(T& a, const T& b) {
   if (a < b) {
     a = b;
   }
   return a;
 }
-
+template <class T>
+inline T& AddTo(T& a, const T& b) {
+  a = a + b;
+  return a;
+}
+template <class T>
+inline T& MulTo(T& a, const T& b) {
+  a = a * b;
+  return a;
+}
+template <class T>
+inline T& SubFrom(T& a, const T& b) {
+  a = a - b;
+  return a;
+}
+template <class T>
+inline T& DivFrom(T& a, const T& b) {
+  a = a / b;
+  return a;
+}
 template <class T, class E>
 constexpr enable_if_t<is_integral_v<E>, T> PowBinaryLift(T x, E n) {
   if (n == E(0)) {
@@ -59,4 +78,7 @@ template <class T>
 inline T AddLimit(T a, T b, T max) {
   return AddLimit(a, b, max, max);
 }
+i64 Round(f32 x) { return roundf(x); }
+i64 Round(f64 x) { return round(x); }
+i64 Round(f80 x) { return roundl(x); }
 }  // namespace dalt

@@ -21,13 +21,13 @@ Tuple<Vec<T>, Vec<int>> ShortestPathWeightElogE(const Graph<E> &g,
   while (!heap.empty()) {
     auto state = heap.top();
     heap.pop();
-    int root = Get(state, 1);
-    T d = Get(state, 0);
+    int root = std::get<1>(state);
+    T d = std::get<0>(state);
     if (dist[root] <= d) {
       continue;
     }
     dist[root] = d;
-    prev[root] = Get(state, 2);
+    prev[root] = std::get<2>(state);
     for (auto &e : g[root]) {
       heap.push(State(d + e.weight, e.to, root));
     }

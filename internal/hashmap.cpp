@@ -220,25 +220,25 @@ struct HashMap {
 
   CIter end() const {
     return CIter{
-        .hm = *this,
+        .hm = this,
         .index = Size(hash_val),
     };
   }
   CIter rbegin() const {
     return --CIter{
-        .hm = *this,
+        .hm = this,
         .index = Size(hash_val),
     };
   }
   CIter rend() const {
     return CIter{
-        .hm = *this,
+        .hm = this,
         .index = -1,
     };
   }
   CIter begin() const {
     return ++CIter{
-        .hm = *this,
+        .hm = this,
         .index = -1,
     };
   }

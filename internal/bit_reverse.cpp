@@ -1,3 +1,4 @@
+#pragma once
 #include "common.cpp"
 namespace dalt {
 static const u8 BitReverseTable[]{

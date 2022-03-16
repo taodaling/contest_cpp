@@ -25,7 +25,7 @@ struct Point {
   Self operator*(const T& rhs) const { return {x * rhs, y * rhs}; }
   Self operator/(const T& rhs) const { return {x / rhs, y / rhs}; }
   bool operator<(const Self& rhs) const {
-    return MakeTuple(x, y) < MakeTuple(rhs.x, rhs.y);
+    return MakePair(x, y) < MakePair(rhs.x, rhs.y);
   }
   ImplDefaultComparision(Self);
   bool operator==(const Self& rhs) const { return x == rhs.x && y == rhs.y; }

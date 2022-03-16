@@ -9,7 +9,7 @@ private:
 
 public:
   using Self = PrefixSum<T>;
-  PrefixSum(Vec<T> data) : sum(move(data)) {
+  PrefixSum(Vec<T> data = Vec<T>()) : sum(move(data)) {
     if (sum.empty()) {
       sum.push_back(T());
     }

@@ -3,9 +3,9 @@
 #include "brute_force_conv.cpp"
 #include "convolution.cpp"
 #include "math.cpp"
+#include "mod_inverse.cpp"
 #include "modint.cpp"
 #include "poly.cpp"
-#include "mod_inverse.cpp"
 namespace dalt {
 namespace poly {
 const static int POLY_FAST_MAGIC_THRESHOLD = 64;
@@ -18,7 +18,7 @@ struct Polynomial {
   using Seq = Vec<T>;
   using Self = Polynomial<Conv>;
   Seq data;
-  Polynomial() : Polynomial(Vec<T>{T(0)}) {}
+  Polynomial(T v = T(0)): Polynomial(Vec<T>{v}) {}
   Polynomial(Vec<T> &&_data) : data(_data) { Normalize(data); }
   Polynomial(const Vec<T> &_data) : data(_data) { Normalize(data); }
   T operator()(T x) const { return Apply(data, x); }
@@ -43,9 +43,13 @@ struct Polynomial {
     }
     return Self(ans);
   }
-  Self modular(i32 n) const {
-    return Self(CopyAndExtend(data, n));
+  void self_modular(i32 n) {
+    if(data.size() >= n) {
+      data.resize(n);
+      Normalize(data);
+    }
   }
+  Self modular(i32 n) const { return Self(CopyAndExtend(data, n)); }
   static Self of(T val) { return Self(Vec<T>{val}); }
   Self ln(i32 n) const {
     Assert(data[0] == T(1));
@@ -71,9 +75,9 @@ struct Polynomial {
   int rank() const { return Size(data) - 1; }
   Self operator*(const Self &rhs) const {
     const Self &lhs = *this;
-    if (Min(lhs.rank(), rhs.rank()) < POLY_FAST_MAGIC_THRESHOLD) {
-      return Self(BruteForceConv<T>::conv(lhs.data, rhs.data));
-    }
+    // if (Min(lhs.rank(), rhs.rank()) < POLY_FAST_MAGIC_THRESHOLD) {
+    //   return Self(BruteForceConv<T>::conv(lhs.data, rhs.data));
+    // }
     return Self(Conv::conv(lhs.data, rhs.data));
   }
   Self operator*(const T &rhs) const {
@@ -189,8 +193,10 @@ struct Polynomial {
     }
     return Self(move(res));
   }
-  T &operator[](int index) { return data[index]; }
-  const T &operator[](int index) const { return data[index]; }
+
+  T operator[](int index) const {
+    return index < Size(data) ? data[index] : T(0);
+  }
   T get(int index) const {
     if (index < Size(data)) {
       return data[index];
@@ -249,6 +255,19 @@ struct Polynomial {
     Self trim = (*this) << k;
     Self res = expln_ext(Move(trim), n_mod_modulus, n_mod_phi, mod);
     return (res >> k * estimate).modular(mod);
+  }
+  static Self product(const Vec<Self> &data) {
+    if (data.empty()) {
+      return Self(Vec<T>{Type(1)});
+    }
+    auto dfs = [&](auto &dfs, int l, int r) {
+      if (l == r) {
+        return data[l];
+      }
+      int m = (l + r) / 2;
+      return dfs(dfs, l, m) * dfs(dfs, m + 1, r);
+    };
+    return dfs(dfs, 0, Size(data) - 1);
   }
 };
 AssignAnnotationTemplate(Polynomial, polynomial, class);

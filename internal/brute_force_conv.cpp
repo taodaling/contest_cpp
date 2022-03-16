@@ -1,20 +1,48 @@
 #pragma once
 #include "common.cpp"
+#include "convolution.cpp"
+#include "uint128.cpp"
+#include "modint.cpp"
 namespace dalt {
 namespace poly {
 template <class T>
 struct BruteForceConv {
   using Type = T;
-  static Vec<T> conv(const Vec<T> &a, const Vec<T> &b) {
-    int rank = Size(a) + Size(b) - 2;
+
+  template <class Arg = T>
+  static enable_if_t<is_same_v<Arg, T> &&
+                         !(is_modint_v<T> && is_same_v<typename T::Type, i32>),
+                     Vec<T>>
+  conv(const Vec<T> &a, const Vec<T> &b) {
+    int rank = Size(a) + Size(b) - 2; 
     Vec<T> c(rank + 1);
     for (int i = 0; i < Size(a); i++) {
       for (int j = 0; j < Size(b); j++) {
-        c[i + j] = c[i + j] + a[i] * b[j];
+        c[i + j] += a[i] * b[j];
       }
     }
     return c;
   }
+  template <class Arg = T>
+  static enable_if_t<is_same_v<Arg, T> && is_modint_v<T> &&
+                         is_same_v<typename T::Type, i32>,
+                     Vec<T>>
+  conv(const Vec<T> &a, const Vec<T> &b) {
+    int rank = Size(a) + Size(b) - 2;
+    Vec<u128> data(rank + 1);
+    for(int i = 0; i < Size(a); i++) {
+      for(int j = 0; j < Size(b); j++) {
+        data[i + j] += u64(a[i].value) * b[j].value;
+      }
+    }
+    Vec<T> ans(rank + 1);
+    i32 modulus = T::modulus();
+    for(int i = 0; i <= rank; i++) {
+      ans[i] = data[i].modular(modulus);
+    } 
+    return ans;
+  }
+
   static Vec<T> conv2(const Vec<T> &a) { return conv(a, a); }
   static Vec<T> inverse(Vec<T> p, i32 n) {
     Extend(p, n);
@@ -59,6 +87,10 @@ struct BruteForceConv {
     }
     return Array<Vec<T>, 2>{Move(divisor), Move(a)};
   }
+};
+template<class T>
+struct is_convolution<BruteForceConv<T>> {
+  static const bool value = true;
 };
 }  // namespace poly
 }  // namespace dalt

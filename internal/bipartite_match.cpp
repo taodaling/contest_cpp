@@ -2,7 +2,7 @@
 namespace dalt {
 namespace graph {
 // super fast, worst O(nm)
-template <class E> IsDiGraph(E, Vec<int>) BipartiteMatch(const Graph<E> &g) {
+template <class E> IsBiGraph(E, Vec<int>) BipartiteMatch(const Graph<E> &g) {
   int n = Size(g);
   Vec<int> mate(n, -1);
   Vec<int> visit(n, 0);

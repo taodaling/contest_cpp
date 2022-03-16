@@ -2,6 +2,7 @@
 #include "common.cpp"
 #include "modint.cpp"
 #include "modint_sum.cpp"
+#include "uint128.cpp"
 namespace dalt {
 namespace math {
 template <class T>
@@ -9,6 +10,7 @@ struct Matrix {
   using Self = Matrix<T>;
   Vec<T> data;
   int m;
+  Matrix(int _m, Vec<T> _data) : m(_m), data(Move(_data)) {}
   Matrix(int _n, int _m) : data(_n * _m), m(_m) {}
   Matrix() : Matrix(0, 0) {}
   static Self mul_identity(int n) {
@@ -80,7 +82,8 @@ struct Matrix {
     int n = lhs.row_num();
     int mid = lhs.col_num();
     int m = rhs.col_num();
-    Vec<u64> accummulate(n * m);
+    Vec<u128> accummulate(n * m);
+    
     u64 threshold = std::numeric_limits<u64>::max() -
                     u64(Modular::modulus - 1) * u64(Modular::modulus - 1);
     Self res(n, m);
@@ -88,16 +91,14 @@ struct Matrix {
       for (int k = 0; k < mid; k++) {
         for (int j = 0; j < m; j++) {
           i32 ij = i * m + j;
-          if (accummulate[ij] > threshold) {
-            accummulate[ij] %= Modular::modulus;
-          }
-          accummulate[ij] += u64(lhs[i][k].value) * rhs[k][j].value;
+          accummulate[ij] += u64(lhs[i][k].value) *
+                         rhs[k][j].value;
         }
       }
     }
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        res[i][j] = ModInt<Modular>(accummulate[i * m + j] % Modular::modulus);
+        res[i][j] = accummulate[i * m + j].modular(Modular::modulus);
       }
     }
     return res;
@@ -208,6 +209,7 @@ struct Matrix {
     }
     return res;
   }
+  ImplArithmeticAssignOperation(Self);
 };
 }  // namespace math
 }  // namespace dalt

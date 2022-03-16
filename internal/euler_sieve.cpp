@@ -10,13 +10,19 @@ struct EulerSieve {
   static Vec<bool> is_comp;
   static Vec<int> smallest_prime_factor;
   static Vec<int> exp_of_smallest_prime_factor;
-  static CONSTRUCT(_init) {
+  static CONSTRUCT(_init) {init();} 
+  static void init(){
     is_comp.resize(2);
     smallest_prime_factor.resize(2);
     exp_of_smallest_prime_factor.resize(2);
-    ensure(1e6);
+    ensure(1e6 + 10);
   }
+  //trigger recompute if necessary
   static void ensure(int n) {
+    if(is_comp.empty()) {
+      //in case 
+      _init();
+    }
     int cur_size = is_comp.size();
     if (cur_size >= n) {
       return;
@@ -25,7 +31,8 @@ struct EulerSieve {
     is_comp.resize(n);
     smallest_prime_factor.resize(n);
     exp_of_smallest_prime_factor.resize(n);
-    for (int i = cur_size; i < n; i++) {
+    primes.clear();
+    for (int i = 2; i < n; i++) {
       if (!is_comp[i]) {
         primes.push_back(i);
         exp_of_smallest_prime_factor[i] = smallest_prime_factor[i] = i;

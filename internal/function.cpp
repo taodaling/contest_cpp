@@ -4,7 +4,11 @@
 namespace dalt {
 template <class T, class C>
 Indexer<T> MakeIndexer(const C &data) {
-  return [&](auto i) { return data[i]; };
+  return [&](auto i) -> T { return data[i]; };
+}
+template <class T, class C>
+Indexer<T> MakeReverseIndexer(const C &data) {
+  return [&](auto i) -> T { return data[Size(data) - 1 - i]; };
 }
 template <class T>
 Vec<T> ExpandIndexer(int n, const Indexer<T> &indexer) {
@@ -37,5 +41,17 @@ constexpr Adder<A, B, C> EmptyAdder() {
 template <class A, class B = A>
 constexpr Adder<A, B, A> ReturnLeftAdder() {
   return [](auto a, auto b) { return a; };
+}
+template <class A, class B = A>
+constexpr Adder<A, B, B> ReturnRightAdder() {
+  return [](auto a, auto b) { return b; };
+}
+template <class T>
+Indexer<int> BinaryIndexer(const T& val) {
+  return [=](int i) {return int((val >> i) & 1);};
+}
+template <class T>
+Indexer<int> ReverseIndexer(int n, Indexer<T> indexer) {
+  return [=](int i) {return indexer(n - 1 - i);};
 }
 }  // namespace dalt

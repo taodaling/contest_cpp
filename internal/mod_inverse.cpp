@@ -26,16 +26,6 @@ Vec<T> InverseBatch(Vec<T> batch) {
   }
   return batch;
 }
-template <class T>
-struct ModInverseFactory : public Factory<T> {
-  static_assert(is_modint_v<T>);
-  ModInverseFactory(int cap)
-      : Factory<T>(cap, [&](int index) {
-          auto p = T::modulus();
-          auto k = p / i.value;
-          auto r = p - k * i;
-          return T(-k) * data[r];
-        }) {}
-};
+
 }  // namespace math
 }  // namespace dalt

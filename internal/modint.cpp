@@ -2,6 +2,7 @@
 #include "common.cpp"
 #include "gcd.cpp"
 #include "modular.cpp"
+#include "math.cpp"
 #pragma once
 namespace dalt {
 namespace modint {
@@ -72,6 +73,14 @@ TEMPLATE_ARGS struct ModInt {
     }
     value = v;
   }
+  static Self nil() {
+    Self res;
+    res.value = -1;
+    return res;
+  }
+  bool is_nil() {
+    return value == -1;
+  }
   explicit operator Type() const { return value; }
   static Type modulus() { return MOD; }
   static Type primitive_root() { return Modular::primitive_root; }
@@ -94,7 +103,7 @@ TEMPLATE_ARGS struct ModInt {
   }
   Self operator+(const Self &rhs) const {
     auto res = value + rhs.value;
-    if(res >= MOD) {
+    if (res >= MOD) {
       res -= MOD;
     }
     return res;
@@ -115,7 +124,10 @@ TEMPLATE_ARGS struct ModInt {
   bool operator<(const Self &b) const { return value < b.value; }
   ImplDefaultComparision(Self);
   ImplArithmeticAssignOperation(Self);
-
+  template <class E>
+  enable_if_t<is_integral_v<E>, Self> pow(E n) {
+    return PowBinaryLift(*this, n);
+  }
   friend inline IStream &operator>>(IStream &is, Self &x) {
     Type val;
     is >> val;

@@ -4,126 +4,121 @@
 
 namespace dalt {
 namespace segtree_beat {
-template <class T, class = enable_if_t<is_arithmetic<T>::value>>
-struct SegTreeBeatNode {
-  using Self = SegTreeBeatNode<T>;
-  const static T INF = numeric_limits<T>::max() / 2;
-  SegTreeBeatNode *left;
-  SegTreeBeatNode *right;
-  T first;
-  T second;
-  int first_cnt;
-  T sum;
+// verify by: https://cses.fi/problemset/task/2416
+template <class T>
+struct SegTreeBeat {
+  static_assert(is_arithmetic<T>::value);
 
-  SegTreeBeatNode(i32 l, i32 r, const Indexer<T> &indexer)
-      : left(NULL), right(NULL) {
-    if (l < r) {
-      int m = (l + r) / 2;
-      left = new Self(l, m, indexer);
-      right = new Self(m + 1, r, indexer);
-      push_up();
-    } else {
-      sum = first = indexer(l);
-      second = -INF;
-      first_cnt = 1;
+private:
+  Node *tree;
+  int n;
+  struct Node {
+    using Self = SegTreeBeatNode<T>;
+    const static T INF = numeric_limits<T>::max() / 2;
+    SegTreeBeatNode *left;
+    SegTreeBeatNode *right;
+    T first;
+    T second;
+    int first_cnt;
+    T sum;
+
+    SegTreeBeatNode(i32 l, i32 r, const Indexer<T> &indexer)
+        : left(NULL), right(NULL) {
+      if (l < r) {
+        int m = (l + r) / 2;
+        left = new Self(l, m, indexer);
+        right = new Self(m + 1, r, indexer);
+        push_up();
+      } else {
+        sum = first = indexer(l);
+        second = -INF;
+        first_cnt = 1;
+      }
     }
-  }
 
-  inline void push_up() {
-    first = max(left->first, right->first);
-    second = max(left->first == first ? left->second : left->first,
-                 right->first == first ? right->second : right->first);
-    first_cnt = (left->first == first ? left->first_cnt : 0) +
-                (right->first == first ? right->first_cnt : 0);
-    sum = left->sum + right->sum;
-  }
-
-  inline void push_down() {
-    left->set_min(first);
-    right->set_min(first);
-  }
-
-  inline void set_min(const T &x) {
-    if (first <= x) {
-      return;
+    void push_up() {
+      first = Max(left->first, right->first);
+      second = Max(left->first == first ? left->second : left->first,
+                   right->first == first ? right->second : right->first);
+      first_cnt = (left->first == first ? left->first_cnt : 0) +
+                  (right->first == first ? right->first_cnt : 0);
+      sum = left->sum + right->sum;
     }
-    sum -= (first - x) * first_cnt;
-    first = x;
-  }
 
-  void update_min(int L, int R, int l, int r, const T &x) {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return;
+    void push_down() {
+      left->set_min(first);
+      right->set_min(first);
     }
-    if (SegmentCover(L, R, l, r)) {
+
+    void set_min(const T &x) {
       if (first <= x) {
         return;
       }
-      if (second < x) {
-        set_min(x);
+      sum -= (first - x) * first_cnt;
+      first = x;
+    }
+
+    void update_min(int L, int R, int l, int r, const T &x) {
+      if (SegmentNoIntersection(L, R, l, r)) {
         return;
       }
+      if (SegmentCover(L, R, l, r)) {
+        if (first <= x) {
+          return;
+        }
+        if (second < x) {
+          set_min(x);
+          return;
+        }
+      }
+      push_down();
+      int m = (l + r) / 2;
+      left->update_min(L, R, l, m, x);
+      right->update_min(L, R, m + 1, r, x);
+      push_up();
     }
-    push_down();
-    int m = (l + r) / 2;
-    left->update_min(L, R, l, m, x);
-    right->update_min(L, R, m + 1, r, x);
-    push_up();
-  }
 
-  T query_sum(int L, int R, int l, int r) {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return 0;
+    T query_sum(int L, int R, int l, int r) {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return 0;
+      }
+      if (SegmentCover(L, R, l, r)) {
+        return sum;
+      }
+      push_down();
+      int m = (l + r) / 2;
+      return left->query_sum(L, R, l, m) + right->query_sum(L, R, m + 1, r);
     }
-    if (SegmentCover(L, R, l, r)) {
-      return sum;
-    }
-    push_down();
-    int m = (l + r) / 2;
-    return left->query_sum(L, R, l, m) + right->query_sum(L, R, m + 1, r);
-  }
 
-  T query_max(int L, int R, int l, int r) {
-    if (SegmentNoIntersection(L, R, l, r)) {
-      return -INF;
+    T query_max(int L, int R, int l, int r) {
+      if (SegmentNoIntersection(L, R, l, r)) {
+        return -INF;
+      }
+      if (SegmentCover(L, R, l, r)) {
+        return first;
+      }
+      push_down();
+      int m = (l + r) / 2;
+      return Max(left->query_max(L, R, l, m), right->query_max(L, R, m + 1, r));
     }
-    if (SegmentCover(L, R, l, r)) {
-      return first;
+
+    void travel(const Consumer<T> &consumer, T min_val) const {
+      min_val = Min(min_val, first);
+      if (left == NULL) {
+        consumer(min_val);
+        return;
+      }
+      left->travel(consumer, min_val);
+      right->travel(consumer, min_val);
     }
-    push_down();
-    int m = (l + r) / 2;
-    return max(left->query_max(L, R, l, m), right->query_max(L, R, m + 1, r));
-  }
 
-  void travel(const Consumer<T> &consumer, T min_val) const {
-    min_val = min(min_val, first);
-    if (left == NULL) {
-      consumer(min_val);
-      return;
+    ~Node() {
+      delete left;
+      delete right;
     }
-    left->travel(consumer, min_val);
-    right->travel(consumer, min_val);
-  }
+  };
 
-  static void Destroy(Self *self) {
-    if (self == NULL) {
-      return;
-    }
-    Destroy(self->left);
-    Destroy(self->right);
-    delete self;
-  }
-};
-
-// verify by: https://cses.fi/problemset/task/2416
-template <class T, class = enable_if_t<is_arithmetic<T>::value>>
-struct SegTreeBeat {
-private:
-  using Node = SegTreeBeatNode<T>;
-  Node *tree;
-  int n;
-
-public:
+ public:
   using Self = SegTreeBeat<T>;
 
   SegTreeBeat(int _n, const Indexer<T> &indexer) : n(_n) {
@@ -145,9 +140,9 @@ public:
     return res;
   }
 #ifdef DROP
-  ~SegTreeBeat() { Node::Destroy(tree); }
+  ~SegTreeBeat() { delete tree; }
 #endif
 };
-} // namespace segtree_beat
+}  // namespace segtree_beat
 using segtree_beat::SegTreeBeat;
-} // namespace dalt
+}  // namespace dalt

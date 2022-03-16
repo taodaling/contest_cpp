@@ -1,29 +1,31 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "prefix_sum2.cpp"
-#include "math.cpp"
-#include "input.cpp"
+#include "modint.cpp"
+using Mi = ModInt998244353;
+#include "linear_recurrence.cpp"
+using namespace poly;
+#include "ntt.cpp"
+#include "function.cpp"
+using Conv = NTTConv<Mi>;
+using Poly = Polynomial<Conv>;
 void SolveOne(IStream &in, OStream &out) {
-  int n, m;
-  in >> n >> m;
-  int L = 5e3 + 10;
-  Vec<Vec<u16>> data(L, Vec<u16>(L));
-  for(int i = 0; i < n; i++) {
-    int x, y, v;
-    in >> x >> y >> v;
-    data[x][y] += v;
+  i32 d;
+  i64 k;
+  in >> d >> k;
+  Vec<Mi> a(d);
+  Vec<Mi> c(d + 1);
+  for (int i = 0; i < d; i++) {
+    in >> a[i];
   }
-  Debug(data);
-  PrefixSum2<u16> ps(L, L, [&](int i, int j) { return data[i][j]; });
-  Debug(ps.to_vec());
-  u16 best = 0;
-  for(int i = 0; i + m - 1 < L; i++) {
-    for(int j = 0; j + m - 1 < L; j++) {
-      Chmax(best, ps.query(i, i + m - 1, j, j + m - 1));
-    } 
+  for (int i = 1; i <= d; i++) {
+    in >> c[i]; 
+    c[i] =  - c[i];
   }
-  out << best << '\n';
+  c[0] = Mi(1);
+  Mi res = KthTermOfLinearRecurrence<Poly>(60, ReverseIndexer(60, BinaryIndexer(k)), 
+      c, a);
+  out << res << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {

@@ -6,6 +6,7 @@
 #include "math.cpp"
 #include "modint.cpp"
 #include "poly.cpp"
+#include "brute_force_conv.cpp"
 namespace dalt {
 namespace poly {
 template <class M>
@@ -66,11 +67,14 @@ enable_if_t<is_modular_v<M>> NumberTheoryTransform(Vec<ModInt<M>> &p,
 }
 template <class M>
 struct NTTConv {
-  static_assert(is_modular_v<M>);
-  using mi = ModInt<M>;
+  static_assert(is_modint_v<M>);
+  using mi = M;
   using Type = mi;
   using P = Vec<mi>;
   static P conv(const P &a, const P &b) {
+    if (Size(a) <= 20 || Size(b) <= 20) {
+      return BruteForceConv<Type>::conv(a, b);
+    }
     if (&a == &b) {
       return conv2(a);
     }

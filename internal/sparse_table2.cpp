@@ -2,6 +2,7 @@
 #include "binary.cpp"
 #include "common.cpp"
 namespace dalt {
+// verified by: https://codeforces.com/contest/713/problem/D
 template <class T>
 struct SparseTable2 {
  private:
@@ -9,6 +10,7 @@ struct SparseTable2 {
   Reducer<T> reducer;
 
  public:
+  //O(nm\log n\log m)
   SparseTable2(int n, int m, const Indexer2<T> &indexer,
                const Reducer<T> &_reducer)
       : reducer(_reducer) {
@@ -45,6 +47,7 @@ struct SparseTable2 {
       }
     }
   }
+  //O(1)
   T query(int b, int t, int l, int r) const {
     int h = t - b + 1;
     int w = r - l + 1;
