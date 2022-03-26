@@ -95,12 +95,8 @@ struct FFTConv {
         let x = b[i].value;
         b_cpx[i] = cpx(x & mask, x >> step);
       }
-      Debug(a_cpx);
-      Debug(b_cpx);
       fft(a_cpx, false);
       fft(b_cpx, false);
-      Debug(a_cpx);
-      Debug(b_cpx);
       i32 i = 0;
       i32 j = 0;
       while (i <= j) {
@@ -141,12 +137,8 @@ struct FFTConv {
         i += 1;
         j = n - i;
       }
-      Debug(a_cpx);
-      Debug(b_cpx);
       fft(a_cpx, true);
       fft(b_cpx, true);
-      Debug(a_cpx);
-      Debug(b_cpx);
       i64 modulus = M::modulus();
       Vec<mi> ans(n);
       for (int i = 0; i < n; i++) {

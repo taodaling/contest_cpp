@@ -2,7 +2,6 @@
 #include "common.cpp"
 #include "math.cpp"
 namespace dalt {
-namespace math {
 template <class T, T MAX = std::numeric_limits<T>::max()>
 struct LimitValue {
   static_assert(is_integral_v<T>);
@@ -41,5 +40,4 @@ OStream& operator<<(OStream& os, const LimitValue<T, MAX>& lv) {
   os << lv.value;
   return os;
 }
-}  // namespace math
 }  // namespace dalt

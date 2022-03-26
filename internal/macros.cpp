@@ -7,6 +7,7 @@
 #define MakeUnique(data) data.resize(std::unique(All(data)) - data.begin())
 #define MakeAttribute(struct_name, Type, attr_name)               \
   struct struct_name {                                            \
+    using attr_name ## _type = Type;                              \
     Type attr_name;                                               \
     mut_ref(Type) get_##attr_name() { return attr_name; }         \
     const_ref(Type) get_##attr_name() const { return attr_name; } \
@@ -14,6 +15,7 @@
 #define MakeTemplateAttribute(struct_name, attr_name)          \
   template <class T>                                           \
   struct struct_name {                                         \
+    using attr_name##_type = T;                             \
     T attr_name;                                               \
     mut_ref(T) get_##attr_name() { return attr_name; }         \
     const_ref(T) get_##attr_name() const { return attr_name; } \

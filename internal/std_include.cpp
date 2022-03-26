@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstring>
 #include <deque>
+#include <fstream>
 //#include <ext/pb_ds/assoc_container.hpp>
 #include <functional>
 #include <iomanip>

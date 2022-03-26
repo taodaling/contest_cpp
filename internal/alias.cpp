@@ -39,7 +39,8 @@ FunctionAlias(std::clamp, Clamp);
 FunctionAlias(std::shuffle, Shuffle);
 template <typename _Signature>
 using Function = std::function<_Signature>;
-using String = std::string;
+using Str = std::string;
+using String = Str;
 using StringStream = std::stringstream;
 using IStream = std::istream;
 using OStream = std::ostream;

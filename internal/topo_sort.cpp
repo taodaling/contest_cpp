@@ -3,7 +3,7 @@
 namespace dalt {
 namespace graph {
 template <class E>
-enable_if_t<is_base_of_v<WithTo, E>, Vec<int>> TopoSort(const Graph<E> &g) {
+IsDiGraph(E, Vec<int>) TopoSort(const Graph<E> &g) {
   int n = Size(g);
   Vec<bool> visited(n);
   Vec<int> res;

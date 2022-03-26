@@ -2,33 +2,30 @@
 #include "common.cpp"
 using namespace dalt;
 #include "modint.cpp"
-using Mi = ModInt998244353;
-#include "linear_recurrence.cpp"
-using namespace poly;
-#include "ntt.cpp"
-#include "function.cpp"
-using Conv = NTTConv<Mi>;
-using Poly = Polynomial<Conv>;
+#include "matrix.cpp"
+#include "math.cpp"
+using Mi = ModInt<DynamicModular<i64>>;
+using Mat = math::Matrix<Mi>;
 void SolveOne(IStream &in, OStream &out) {
-  i32 d;
-  i64 k;
-  in >> d >> k;
-  Vec<Mi> a(d);
-  Vec<Mi> c(d + 1);
-  for (int i = 0; i < d; i++) {
-    in >> a[i];
-  }
-  for (int i = 1; i <= d; i++) {
-    in >> c[i]; 
-    c[i] =  - c[i];
-  }
-  c[0] = Mi(1);
-  Mi res = KthTermOfLinearRecurrence<Poly>(60, ReverseIndexer(60, BinaryIndexer(k)), 
-      c, a);
-  out << res << '\n';
+  i64 N, K, M;
+  in >> N >> K >> M;
+  Mi::Modular::Register(M);
+  //zero
+  Mat T(2, Vec<Mi>{
+    0, 1,
+    K - 1, K - 1,
+  });
+  Mat Tp = T.pow(N - 1);
+  Mat V(1, Vec<Mi>{
+    0,
+    K - 1,
+  });
+  Mat final_V = Tp * V;
+  out << final_V[0][0] + final_V[1][0] << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {
+  //std::ifstream input("in");
   int num_of_input = 1;
   for (int i = 0; i < num_of_input; i++) {
     SolveOne(in, out);

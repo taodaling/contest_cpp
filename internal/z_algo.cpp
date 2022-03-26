@@ -1,8 +1,9 @@
 #include "common.cpp"
 namespace dalt {
 namespace seq {
+//Z[i] = longest common prefix of s and s[i..]
 template <class T>
-Vec<i32> ZAlgorithm(const Indexer<T> &s, int n) {
+Vec<i32> ZAlgorithm(int n, const Indexer<T> &s) {
   if (n == 0) {
     return Vec<i32>();
   }

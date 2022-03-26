@@ -2,9 +2,11 @@
 #include "cost_flow.cpp"
 namespace dalt {
 namespace graph {
-template <class T, class E>
-enable_if_t<is_base_of_v<CostFlowBaseEdge<T>, E>, Tuple<Vec<T>, Vec<int>>>
-AugmentPathSpfa(Graph<E> &g, int s, T inf) {
+template <class E>
+IsCostFlow(E, Tuple<Vec<typename E::flow_type> COMMA Vec<int>>)
+    AugmentPathSpfa(Graph<E> &g, int s, typename E::flow_type inf) {
+  Timer timer("AugmentPathSpfa");
+  using T = typename E::flow_type;
   int n = Size(g);
   Deque<int> dq;
   Vec<T> dist(n, inf);
@@ -17,6 +19,7 @@ AugmentPathSpfa(Graph<E> &g, int s, T inf) {
   while (!dq.empty()) {
     int root = dq.front();
     dq.pop_front();
+    inq[root] = false;
     Assert(threshold-- >= 0);
     for (auto &e : g[root]) {
       if (g[e.to][e.rev].flow == 0 || dist[e.to] <= dist[root] + e.cost) {
@@ -32,17 +35,19 @@ AugmentPathSpfa(Graph<E> &g, int s, T inf) {
   }
   return {dist, prev};
 }
-
-template <class T, class E>
-enable_if_t<is_base_of_v<CostFlowBaseEdge<T>, E>, Array<T, 2>>
-MinCostFlowDijkstra(
-    Graph<E> &g, int s, int t, T send, bool use_pq = true,
-    const Function<bool(T, T)> &call_back = [](auto x, auto y) {
-      return true;
-    }) {
+//return {flow, cost}
+template <class E>
+IsCostFlow(E, Array<typename E::flow_type COMMA 2>) MinCostFlowDijkstra(
+    Graph<E> &g, int s, int t, typename E::flow_type send, bool use_pq = true,
+    const Function<bool(typename E::flow_type, typename E::flow_type)>
+        &call_back = [](auto x, auto y) { return true; },
+    Vec<typename E::flow_type> last_dist = Vec<typename E::flow_type>()) {
+  using T = typename E::flow_type;
   int n = Size(g);
   T inf = std::numeric_limits<T>::max() / 2;
-  auto last_dist = std::get<0>(AugmentPathSpfa(g, s, inf));
+  if(last_dist.empty()) {
+    last_dist = std::get<0>(AugmentPathSpfa(g, s, inf));
+  }
   Vec<E *> prev(n, NULL);
   Vec<T> cur_dist(n, inf);
   auto fix_dist = [&]() {
@@ -61,12 +66,14 @@ MinCostFlowDijkstra(
     while (!set.empty()) {
       auto top = set.begin();
       i32 root = *top;
+      Debug(root);
       set.erase(top);
       for (auto &e : g[root]) {
         if (g[e.to][e.rev].flow == 0) {
           continue;
         }
         T dist = cur_dist[root] + e.cost - last_dist[e.to] + last_dist[root];
+        Assert(dist >= cur_dist[root]);
         if (dist < cur_dist[e.to]) {
           set.erase(e.to);
           cur_dist[e.to] = dist;
@@ -110,6 +117,7 @@ MinCostFlowDijkstra(
   T remain = send;
   T cost = 0;
   while (remain > 0) {
+    Timer one_batch_push_flow("push flow");
     algo();
     fix_dist();
     if (prev[t] == NULL) {
@@ -134,5 +142,5 @@ MinCostFlowDijkstra(
 
   return {send - remain, cost};
 }
-} // namespace graph
-} // namespace dalt
+}  // namespace graph
+}  // namespace dalt

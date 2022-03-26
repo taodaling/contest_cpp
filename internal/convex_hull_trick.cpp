@@ -41,7 +41,7 @@ struct ConvexHullTrick {
   T constant;
 
  private:
-  const static T INF = std::numeric_limits<T>::max() / 2;
+  static T INF;
   T intersect(const L &x, const L &y) {
     Assert(y.a > x.a);
     return DivCeil(x.b - y.b, y.a - x.a);
@@ -53,6 +53,8 @@ struct ConvexHullTrick {
   Vec<L> to_vec_l() { return Vec<L>(sort_by_l.begin(), sort_by_l.end()); }
 
  public:
+  ConvexHullTrick() : constant(0) {}
+
   // call this method for id only
   const L &best_line(T x) const {
     L q;
@@ -125,11 +127,13 @@ struct ConvexHullTrick {
   }
   Vec<L> to_vec() const {
     auto ans = Vec<L>(sort_by_a.begin(), sort_by_a.end());
-    for (auto& l : ans) {
+    for (auto &l : ans) {
       l.b = l.b + constant;
     }
     return ans;
   }
 };
+template <class T, class I>
+T ConvexHullTrick<T, I>::INF = std::numeric_limits<T>::max() / 2;
 
 }  // namespace dalt

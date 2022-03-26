@@ -83,7 +83,7 @@ struct Matrix {
     int mid = lhs.col_num();
     int m = rhs.col_num();
     Vec<u128> accummulate(n * m);
-    
+
     u64 threshold = std::numeric_limits<u64>::max() -
                     u64(Modular::modulus - 1) * u64(Modular::modulus - 1);
     Self res(n, m);
@@ -91,8 +91,7 @@ struct Matrix {
       for (int k = 0; k < mid; k++) {
         for (int j = 0; j < m; j++) {
           i32 ij = i * m + j;
-          accummulate[ij] += u64(lhs[i][k].value) *
-                         rhs[k][j].value;
+          accummulate[ij] += u64(lhs[i][k].value) * rhs[k][j].value;
         }
       }
     }
@@ -171,6 +170,18 @@ struct Matrix {
       }
     }
     return {r};
+  }
+  template <class E>
+  enable_if_t<is_integral_v<E>, Self> pow(E exp) {
+    if (exp == 0) {
+      return Self::mul_identity(col_num());
+    }
+    auto res = pow(exp / 2);
+    res = res * res;
+    if (exp % 2 == 1) {
+      res = res * (*this);
+    }
+    return res;
   }
 
  private:

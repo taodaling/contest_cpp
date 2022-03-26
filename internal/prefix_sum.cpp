@@ -1,6 +1,6 @@
 #pragma once
 #include "common.cpp"
-
+#include "function.cpp"
 namespace dalt {
 template <class T> struct PrefixSum {
 private:
@@ -18,6 +18,7 @@ public:
       sum[i] = sum[i - 1] + sum[i];
     }
   }
+  PrefixSum(int n, const Indexer<T> &indexer): PrefixSum(ExpandIndexer(n, indexer)) {}
   T prefix(int i) const {
     if (i < 0) {
       return T();

@@ -9,8 +9,22 @@ inline T& Chmin(T& a, const T& b) {
   return a;
 }
 template <class T>
+inline T& Chmin(T& a, const T& b, const Comparator<T> &comp) {
+  if (comp(b, a)) {
+    a = b;
+  }
+  return a;
+}
+template <class T>
 inline T& Chmax(T& a, const T& b) {
   if (a < b) {
+    a = b;
+  }
+  return a;
+}
+template <class T>
+inline T& Chmax(T& a, const T& b, const Comparator<T>& comp) {
+  if (comp(a, b)) {
     a = b;
   }
   return a;

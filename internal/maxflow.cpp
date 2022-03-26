@@ -5,9 +5,7 @@ namespace dalt {
 namespace graph {
 
 template <class T, class E>
-enable_if_t<is_base_of_v<WithTo, E> && is_base_of_v<WithFlow<T>, E> &&
-                is_base_of_v<WithRev, E>,
-            Tuple<Vec<int>, Vec<int>>>
+IsFlow(E, Tuple<Vec<int> COMMA Vec<int>>)
 AugmentPathBfs(const Graph<E> &g, int t, int inf) {
   int n = Size(g);
   Vec<int> dist(n, inf);
@@ -31,8 +29,10 @@ AugmentPathBfs(const Graph<E> &g, int t, int inf) {
   }
   return Tuple<Vec<int>, Vec<int>>(dist, prev);
 }
-template <class T, class E>
-IsFlow(T, E, T) MaxFlowDinic(Graph<E> &g, int s, int t, T send) {
+template <class E>
+IsFlow(E, typename E::flow_type)
+    MaxFlowDinic(Graph<E> &g, int s, int t, typename E::flow_type send) {
+  using T = typename E::flow_type;
   T remain = send;
   int n = Size(g);
   Vec<int> iters(n);
@@ -46,10 +46,10 @@ IsFlow(T, E, T) MaxFlowDinic(Graph<E> &g, int s, int t, T send) {
       auto &e = g[root][iters[root]];
       auto &rev_e = g[e.to][e.rev];
       if (dist[e.to] + 1 == dist[root] && rev_e.flow > 0) {
-        T sent = dfs(dfs, e.to, min(rev_e.flow, flow));
+        T sent = dfs(dfs, e.to, Min(rev_e.flow, flow));
         if (sent != 0) {
           flow -= sent;
-          PushFlow<T, E>(g, e, sent);
+          PushFlow(g, e, sent);
           continue;
         }
       }
@@ -59,7 +59,7 @@ IsFlow(T, E, T) MaxFlowDinic(Graph<E> &g, int s, int t, T send) {
   };
   int inf = (int)1e9;
   while (remain > 0) {
-    dist = get<0>(AugmentPathBfs<T, E>(g, t, inf));
+    dist = std::get<0>(AugmentPathBfs<T, E>(g, t, inf));
     if (dist[s] == inf) {
       break;
     }

@@ -5,17 +5,18 @@ namespace graph {
 MakeTemplateAttribute(WithFlow, flow);
 MakeAttribute(WithReal, bool, real);
 template <class T>
-struct FlowBaseEdge : WithTo, WithRev, WithFlow<T>, WithReal {};
+struct FlowBaseEdge : BiBaseEdge, WithFlow<T>, WithReal {};
 
-#define IsFlow(T, E, ret) enable_if_t<is_base_of_v<FlowBaseEdge<T>, E>, ret>
-template <class T, class E>
-IsFlow(T, E, void) PushFlow(Graph<E> &g, E &e, T flow) {
+#define IsFlow(E, ret) enable_if_t<is_base_of_v<FlowBaseEdge<typename E::flow_type>, E>, ret>
+template <class E>
+IsFlow(E, void) PushFlow(Graph<E> &g, E &e, typename E::flow_type flow) {
   e.flow += flow;
   g[e.to][e.rev].flow -= flow;
 }
 
-template <class T, class E>
-IsFlow(T, E, void) AddFlowEdge(Graph<E> &g, int s, int t, T flow) {
+template <class E>
+IsFlow(E, void)
+    AddFlowEdge(Graph<E> &g, int s, int t, typename E::flow_type flow) {
   if (s == t) {
     return;
   }

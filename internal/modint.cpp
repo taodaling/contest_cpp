@@ -5,7 +5,7 @@
 #include "math.cpp"
 #pragma once
 namespace dalt {
-namespace modint {
+
 // using Type = T;
 // static T modulus;
 // static T primitive_root;
@@ -71,7 +71,7 @@ TEMPLATE_ARGS struct ModInt {
         value += MOD;
       }
     }
-    value = v;
+    Assert(value >= 0);
   }
   static Self nil() {
     Self res;
@@ -167,8 +167,6 @@ TEMPLATE_ARGS struct is_modint<ModInt<MODULAR>> {
 };
 #undef TEMPLATE_TYPE
 #undef MOD
-}  // namespace modint
-using namespace modint;
 using ModInt998244353 = ModInt<MOD998244353>;
 using ModInt1000000007 = ModInt<MOD1000000007>;
 using ModInt1000000009 = ModInt<MOD1000000009>;
