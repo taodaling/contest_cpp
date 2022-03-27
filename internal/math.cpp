@@ -95,4 +95,16 @@ inline T AddLimit(T a, T b, T max) {
 i64 Round(f32 x) { return roundf(x); }
 i64 Round(f64 x) { return round(x); }
 i64 Round(f80 x) { return roundl(x); }
+//l + ... + r
+template<class T>
+T SumOfInterval(T l, T r) {
+  if(l > r) {
+    return T(0);
+  }
+  return (l + r) * (r - l + 1) / T(2);
+}
+template<class T>
+T Pow2(T x) {
+  return x * x;
+}
 }  // namespace dalt

@@ -11,22 +11,20 @@ namespace dalt {
 // static T primitive_root;
 MakeAnnotation(modular);
 
-template <class T, i64 M, i64 PR>
+template <class T, i64 M, i64 PR, i64 PHI = M - 1>
 struct StaticModular {
   static_assert(is_integral_v<T>);
-  const static T modulus;
-  const static T primitive_root;
+  const static T modulus = M;
+  const static T primitive_root = PR;
+  const static T phi = PHI;
   using Type = T;
 };
-template <class T, i64 M, i64 PR>
-struct is_modular<StaticModular<T, M, PR>> {
+template <class T, i64 M, i64 PR, i64 PHI>
+struct is_modular<StaticModular<T, M, PR, PHI>> {
   static const bool value = true;
 };
-template <class T, i64 M, i64 PR>
-const T StaticModular<T, M, PR>::modulus = M;
-template <class T, i64 M, i64 PR>
-const T StaticModular<T, M, PR>::primitive_root = PR;
-using MOD998244353 = StaticModular<i32, 998244353, 3>;
+using MOD998244353 =
+    StaticModular<i32, 998244353, 3>;
 using MOD1000000007 = StaticModular<i32, 1000000007, 5>;
 using MOD1000000009 = StaticModular<i32, 1000000009, 13>;
 using MOD_BIG = StaticModular<i64, 2305843009213693951, -1>;
@@ -36,10 +34,13 @@ struct DynamicModular {
   static_assert(is_integral_v<T>);
   static T modulus;
   static T primitive_root;
-  static void Register(T _modulus, T _primitive_root = T()) {
+  static T phi;
+  static void Register(T _modulus, T _primitive_root = T(), T _phi = T()) {
     modulus = _modulus;
     primitive_root = _primitive_root;
+    phi = _phi;
   }
+
   using Type = T;
 };
 template <class T, i64 CID, i64 ID>

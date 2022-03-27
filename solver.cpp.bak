@@ -1,27 +1,16 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "modint.cpp"
-#include "matrix.cpp"
-#include "math.cpp"
-using Mi = ModInt<DynamicModular<i64>>;
-using Mat = math::Matrix<Mi>;
+#include "stirling_number.cpp"
+#include "ntt.cpp"
+using Mi = ModInt998244353; 
 void SolveOne(IStream &in, OStream &out) {
-  i64 N, K, M;
-  in >> N >> K >> M;
-  Mi::Modular::Register(M);
-  //zero
-  Mat T(2, Vec<Mi>{
-    0, 1,
-    K - 1, K - 1,
-  });
-  Mat Tp = T.pow(N - 1);
-  Mat V(1, Vec<Mi>{
-    0,
-    K - 1,
-  });
-  Mat final_V = Tp * V;
-  out << final_V[0][0] + final_V[1][0] << '\n';
+  int N;
+  in >> N;
+  auto res = math::SecondKindStirlingNumber<poly::NTTConv<Mi>>(N);
+  for(auto x : res) {
+    out << x << ' ';
+  } 
 }
 
 void SolveMulti(IStream &in, OStream &out) {

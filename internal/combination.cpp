@@ -9,18 +9,25 @@ struct Combination {
   Vec<T> fact;
   Vec<T> inv_fact;
   Combination(int cap) {
-    cap += 10;
-    cap = Min(cap, Modular::modulus);
+    cap += 1;
     fact.resize(cap);
     inv_fact.resize(cap);
     fact[0] = T(1);
     for (int i = 1; i < cap; i++) {
-      fact[i] = fact[i - 1] * T(i);
+      T v = T(i);
+      if (v != T(0)) {
+        fact[i] = fact[i - 1] * v;
+      } else {
+        fact[i] = fact[i];
+      }
     }
     T inv = T(1) / fact.back();
     for (int i = cap - 1; i >= 0; i--) {
+      T v = T(i);
       inv_fact[i] = inv;
-      inv = inv * T(i);
+      if (v != T(0)) {
+        inv = inv * T(i);
+      }
     }
   }
   T inverse(int x) { return inv_fact[x] * fact[x - 1]; }

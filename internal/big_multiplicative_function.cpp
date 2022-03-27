@@ -46,6 +46,10 @@ I MobiusEval(I n) {
   return BigMultiplicativeFunctionEval<I, I>(
       n, [](auto x, auto xp) { return xp == x ? I(-1) : I(0); });
 }
-
+template <class I>
+I EulerFunctionEval(I n) {
+  return BigMultiplicativeFunctionEval<I, I>(
+      n, [](auto x, auto xp) { return xp - xp / x; });
+}
 }  // namespace math
 }  // namespace dalt

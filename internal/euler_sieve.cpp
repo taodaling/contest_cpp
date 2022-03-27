@@ -82,10 +82,10 @@ struct EulerSieve {
     ensure(n);
     Vec<T> ans(n);
     if (n > 0) {
-      ans[0] = T(0);
+      ans[0] = f(0);
     }
     if (n > 1) {
-      ans[1] = T(1);
+      ans[1] = f(1);
     }
     for (int i = 2; i < n; i++) {
       if (smallest_prime_factor[i] != i) {
@@ -98,13 +98,10 @@ struct EulerSieve {
     return ans;
   }
   template <class T>
-  static Vec<int> powmod(int n, int k, int mod) {
+  static enable_if_t<is_modint_v<T>, Vec<T>> powmod(int n, int k) {
     static const i64 ID = -1;
-    using Modular = DynamicModular<i32, ID>;
-    using InternalMi = ModInt<Modular>;
-    Modular::Register(mod);
-    return calc_totally_multiplicative_function<int>(n, [&](auto x) -> int {
-      return PowBinaryLift(InternalMi(x), k).value;
+    return calc_totally_multiplicative_function<T>(n, [&](auto x) -> T {
+      return PowBinaryLift(T(x), k);
     });
   }
 

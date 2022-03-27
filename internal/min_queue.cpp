@@ -4,7 +4,7 @@
 namespace dalt {
 // verified by:
 //  - https://www.luogu.com.cn/problem/P1886
-template <class T, class COMPARER = Less<T>, class MAX = NoTag>
+template <class T, class COMPARER = Less<T>, bool SUPPORT_MAX = false>
 struct MinQueue {
  private:
   // maintain incremental sequence
@@ -13,22 +13,21 @@ struct MinQueue {
   Deque<T> dec;
   COMPARER comparer;
 
-  IsType(YesTag, MAX, void)
-  push_max(const T& x) {
+  IsBool(SUPPORT_MAX, void) push_max(const T& x) {
     while (!dec.empty() && comparer(dec.back(), x)) {
       dec.pop_back();
     }
     dec.push_back(x);
   }
 
-  IsType(NoTag, MAX, void) push_max(const T& x) {}
-  IsType(YesTag, MAX, void) pop_max(const T& x) {
+  IsBool(!SUPPORT_MAX, void) push_max(const T& x) {}
+  IsBool(SUPPORT_MAX, void) pop_max(const T& x) {
     // dec.front() >= x
     if (!comparer(x, dec.front())) {
       dec.pop_front();
     }
   }
-  IsType(NoTag, MAX, void) pop_max(const T& x) {}
+  IsBool(!SUPPORT_MAX, void) pop_max(const T& x) {}
 
  public:
   MinQueue(COMPARER _comparer = COMPARER()) : comparer(_comparer) {}
@@ -39,8 +38,8 @@ struct MinQueue {
     }
     inc.push_back(x);
     push_max(x);
-    //Debug(inc);
-    //Debug(dec);
+    // Debug(inc);
+    // Debug(dec);
   }
   const T& front() const { return data.front(); }
   T& front() { return data.front(); }
@@ -56,6 +55,6 @@ struct MinQueue {
   bool empty() const { return data.empty(); }
   decltype(data.size()) size() const { return data.size(); }
   const T& min() const { return inc.front(); }
-  IsType(YesTag, MAX, const T&) max() const { return dec.front(); }
+  IsBool(SUPPORT_MAX, const T&) max() const { return dec.front(); }
 };
 }  // namespace dalt

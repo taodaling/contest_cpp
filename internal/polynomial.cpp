@@ -269,6 +269,15 @@ struct Polynomial {
     };
     return dfs(dfs, 0, Size(data) - 1);
   }
+  //ret[i] = \sum_{j} this[i + j] * rhs[j]
+  Self delta_convolution(const Self& rhs) const {
+    Vec<T> lhs = data;
+    Reverse(All(lhs));
+    auto ans = Conv::conv(lhs, rhs.data);
+    ans.resize(Size(lhs));
+    Reverse(All(ans));
+    return Self(Move(ans));
+  }
 };
 AssignAnnotationTemplate(Polynomial, polynomial, class);
 }  // namespace poly
