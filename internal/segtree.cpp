@@ -231,7 +231,7 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
   Optional<Tuple<int, S>> first_true_const(int L, int R,
                                            Checker<S> &checker) const {
     S sum = SegTree::s_nil;
-    auto dfs = [&](Node *root, const U &upd, int l, int r) -> Optional<int> {
+    auto dfs = [&](auto& dfs, Node *root, const U &upd, int l, int r) -> Optional<int> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -261,7 +261,7 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
   Optional<Tuple<int, S>> last_true_const(int L, int R,
                                           const Checker<S> &checker) const {
     S sum = SegTree::s_nil;
-    auto dfs = [&](Node *root, const U &upd, int l, int r) -> Optional<int> {
+    auto dfs = [&](auto& dfs, Node *root, const U &upd, int l, int r) -> Optional<int> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }

@@ -3,27 +3,24 @@
 #include "segtree_common.cpp"
 
 namespace dalt {
-namespace segtree_beat {
+namespace sbt {
 // verify by: https://cses.fi/problemset/task/2416
 template <class T>
 struct SegTreeBeat {
-  static_assert(is_arithmetic<T>::value);
-
-private:
-  Node *tree;
-  int n;
+  using Self = SegTreeBeat<T>;
+  static_assert(is_arithmetic_v<T>);
   struct Node {
-    using Self = SegTreeBeatNode<T>;
-    const static T INF = numeric_limits<T>::max() / 2;
-    SegTreeBeatNode *left;
-    SegTreeBeatNode *right;
+    using Self = Node;
+    const static T INF = std::numeric_limits<T>::max() / 2;
+    Node *left;
+    Node *right;
     T first;
     T second;
     int first_cnt;
     T sum;
 
-    SegTreeBeatNode(i32 l, i32 r, const Indexer<T> &indexer)
-        : left(NULL), right(NULL) {
+    Node(i32 l, i32 r, const Indexer<T> &indexer) {
+      left = right = NULL;
       if (l < r) {
         int m = (l + r) / 2;
         left = new Self(l, m, indexer);
@@ -118,9 +115,11 @@ private:
     }
   };
 
- public:
-  using Self = SegTreeBeat<T>;
+ private:
+  Node *tree;
+  int n;
 
+ public:
   SegTreeBeat(int _n, const Indexer<T> &indexer) : n(_n) {
     tree = new Node(0, n - 1, indexer);
   }
@@ -143,6 +142,5 @@ private:
   ~SegTreeBeat() { delete tree; }
 #endif
 };
-}  // namespace segtree_beat
-using segtree_beat::SegTreeBeat;
+} 
 }  // namespace dalt

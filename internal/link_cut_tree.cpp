@@ -18,7 +18,7 @@ struct LCTNode
   S weight;
   U upd;
   bool rev;
-  i64 ID;
+  i32 id;
   int tree_size;
   int vtree_size;
   i8 tree_weight;

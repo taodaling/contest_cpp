@@ -1,3 +1,4 @@
+#pragma once
 #include "common.cpp"
 #include "math.cpp"
 #include "modint.cpp"

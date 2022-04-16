@@ -5,11 +5,12 @@ namespace ds {
 template <class T>
 struct LinkedNode {
   using Self = LinkedNode<T>;
+  using Node = Self;
   T data;
   Node *next;
   Node *prev;
 
-  Node(T _data = T()) : data(_data) { next = prev = this; }
+  LinkedNode(T _data = T()) : data(_data) { next = prev = this; }
   void append(Node *b) {
     Assert(b->is_single());
     Node *a = this;
@@ -52,7 +53,7 @@ struct LinkedList {
     node->detach();
     size--;
   }
-  int size() const { return size; }
+  int get_size() const { return size; }
   bool empty() const { return size == 0; }
   Node *front() { return head->next; }
   Node *back() { return head->prev; }

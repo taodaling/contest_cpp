@@ -6,7 +6,7 @@
 namespace dalt {
 namespace poly {
 template <class T> struct GravityLargrangeInterpolation {
-  hash::HashMap_ht<T, T> points;
+  hash::HashMap<T, T> points;
   Vec<T> xs;
   Vec<T> ys;
   Vec<T> lx;

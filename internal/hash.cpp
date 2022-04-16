@@ -1,3 +1,4 @@
+#pragma once
 #include "modint.cpp"
 namespace dalt {
 namespace hash {

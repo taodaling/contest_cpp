@@ -29,8 +29,8 @@ struct CRT {
     if ((x2 - x1) % g != 0) {
       return valid = false;
     }
-    using MOD = modint::DynamicModular<T, CID>;
-    using Mi = modint::ModInt<MOD>;
+    using MOD = DynamicModular<T, CID>;
+    using Mi = ModInt<MOD>;
     m = m1 / g * m2;
     MOD::Register(m, -1);
     r = (Mi(a) * Mi((x2 - x1) / g) * Mi(m1) + Mi(x1)).value;

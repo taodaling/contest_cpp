@@ -7,7 +7,7 @@ namespace graph {
 // https://github.com/indy256/codelibrary/blob/master/java/graphs/lca/LcaSchieberVishkin.java
 template <class E>
 struct LowestCommonAncestorBySchieberVishkin {
-  static_assert(IsBiGraph(E, void));
+  static_assert(is_base_of_v<BiBaseEdge, E>);
 
  private:
   Vec<int> parent;

@@ -10,8 +10,8 @@ namespace math {
     //[x^i](1+x)^n = {n\choose i}
     using P = poly::Polynomial<C>;
     using T = typename C::Type;
-    auto modulus = C.modulus;
-    auto phi = C.phi;
+    auto modulus = C::modulus;
+    auto phi = C::phi;
     auto res = P(Vec<T>{1, 1}).powmod_fast(n % modulus, n % phi, n, k + 1);
     auto vec = Move(res.data);
     vec.resize(k + 1);

@@ -30,23 +30,26 @@ struct Point {
   ImplDefaultComparision(Self);
   bool operator==(const Self& rhs) const { return x == rhs.x && y == rhs.y; }
   bool operator!=(const Self& rhs) const { return !(*this == rhs); }
-  T square() { return Self::dot(*this, *this); }
-  FType abs() { return square().sqrt(); }
+  T square() const { return Self::dot(*this, *this); }
+  FType abs() const{ return square().sqrt(); }
   static T dist2(const Self& lhs, const Self& rhs) {
     return (lhs - rhs).square();
   }
   static FType dist(const Self& lhs, const Self& rhs) {
     return (lhs - rhs).abs();
   }
-  Self arg() { return std::atan2(y, x); }
-  Self operator-() { return {-x, -y}; }
+  Self arg() const { return std::atan2(y, x); }
+  Self operator-() const { return {-x, -y}; }
+  FType atan2() const {
+    return T::atan2(y, x);
+  }
   static int half(T x, T y) {
     return y > T(0) || y == T(0) && x < T(0) ? 1 : 0;
   }
-  int half() { return half(x, y); }
-  Self norm(T d = T(1)) { return *this * d / abs(); }
-  Self conj() { return {x, -y}; }
-  Self perpendicular() { return {-y, x}; }
+  int half() const { return half(x, y); }
+  Self norm(T d = T(1)) const { return *this * d / abs(); }
+  Self conj() const { return {x, -y}; }
+  Self perpendicular() const { return {-y, x}; }
   static Self rotate(const Self& pt, FType cos, FType sin,
                      const Self& center = Self()) {
     auto a = pt - center;
@@ -97,7 +100,7 @@ struct Point {
     }
   }
   Self linear_transform(const Self& p, const Self& fp, const Self& q,
-                        const Self& fq) {
+                        const Self& fq) const {
     return fp + (*this - p) * ((fq - fp) / (q - p));
   }
   //判断c是否落在以a与b为直径两端的圆中（包含边界）

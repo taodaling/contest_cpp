@@ -1,4 +1,4 @@
-#pragma 
+#pragma once
 #include "common.cpp"
 #include "nil.cpp"
 namespace dalt {

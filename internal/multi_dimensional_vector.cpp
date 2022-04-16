@@ -1,3 +1,4 @@
+#pragma once
 #include "std_include.cpp"
 template <class T, int S>
 struct MDVecDef {

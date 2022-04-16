@@ -2,13 +2,14 @@
 
 namespace dalt {
 String ReadAll(IStream &in, int cap = 10 << 20) {
-  String s, token;
+  in >> std::noskipws;
+  String s;
   s.reserve(cap);
-  token.reserve(cap);
-  while (in >> token) {
-    s.append(token);
-    s.push_back('\n');
+  char c;
+  while (in >> c) {
+    s.push_back(c);
   }
+  in >> std::skipws;
   return s;
 }
 } // namespace dalt

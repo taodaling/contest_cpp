@@ -77,6 +77,8 @@ struct NearValue {
   }
   bool operator!=(const Self& rhs) const { return !(*this == rhs); }
   static AccurateComparer accurate_comparer() { return AccurateComparer(); }
+  i64 ceil() const { return std::ceil(value - EPS); }
+  i64 floor() const { return std::floor(value + EPS); }
   F sin() const { return std::sin(F(value)); }
   F cos() const { return std::cos(F(value)); }
   F tan() const { return std::tan(F(value)); }
@@ -86,9 +88,11 @@ struct NearValue {
   F asin() const { return std::asin(F(value)); }
   F acos() const { return std::acos(F(value)); }
   F atan() const { return std::atan(F(value)); }
+  static F atan2(const T& y, const T& x) { return std::atan2(F(y), F(x)); }
   Self pow(const Self& exp) const { return Self(std::pow(value, exp.value)); }
   Self abs() const { return Self(std::abs(value)); }
   Self operator-() const { return Self(-value); }
+  ImplArithmeticAssignOperation(Self);
 };
 template <class T, int EPS_DIGIT, class F>
 struct is_near_value<NearValue<T, EPS_DIGIT, F>> {

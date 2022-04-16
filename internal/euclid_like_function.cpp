@@ -2,7 +2,7 @@
 #include "gcd.cpp"
 #include "math.cpp"
 #include "modular.cpp"
-#include "prefer_div.cpp"
+#include "number.cpp"
 namespace dalt {
 namespace math {
 i64 EuclidLikeFloorAffineSum1(i64 n, i64 a, i64 b, i64 c);

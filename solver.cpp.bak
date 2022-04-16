@@ -1,22 +1,17 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "stirling_number.cpp"
-#include "ntt.cpp"
-using Mi = ModInt998244353; 
-void SolveOne(IStream &in, OStream &out) {
-  int N;
-  in >> N;
-  auto res = math::SecondKindStirlingNumber<poly::NTTConv<Mi>>(N);
-  for(auto x : res) {
-    out << x << ' ';
-  } 
+#include "all"
+void SolveOne(int test_id, IStream &in, OStream &out) {
+  
 }
 
 void SolveMulti(IStream &in, OStream &out) {
+  out << std::setprecision(2);
   //std::ifstream input("in");
   int num_of_input = 1;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    SolveOne(in, out);
+    SolveOne(i + 1, in, out);
   }
 }

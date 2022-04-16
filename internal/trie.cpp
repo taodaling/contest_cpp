@@ -1,9 +1,10 @@
 #pragma once
 #include "common.cpp"
 #include "optional.cpp"
+#include "nil.cpp"
 namespace dalt {
 namespace trie {
-template <class S, int C = 26, i64 ID = 0> struct Trie {
+template <class S = Nil, int C = 26, i64 ID = 0> struct Trie {
   using Self = Trie<S, C, ID>;
   static S s_nil;
   static void Register(S _s_nil) { s_nil = _s_nil; }

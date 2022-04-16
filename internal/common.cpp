@@ -9,4 +9,5 @@
 #include "random.cpp"
 #include "timer.cpp"
 #include "alias.cpp"
+#include "vec.cpp"
 //#include "array_adder.cpp"

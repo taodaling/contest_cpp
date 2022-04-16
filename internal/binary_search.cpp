@@ -1,7 +1,7 @@
 #pragma once
 #include "common.cpp"
 #include "optional.cpp"
-#include "prefer_div.cpp"
+#include "number.cpp"
 namespace dalt {
 template <class T>
 enable_if_t<is_integral_v<T>, Optional<T>> FirstTrue(T l, T r, const Checker<T> &checker) {

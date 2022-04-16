@@ -82,5 +82,4 @@
   CastToScalar(field, f32);    \
   CastToScalar(field, f64);    \
   CastToScalar(field, f80);
-#define CONSTRUCT(name) void __attribute__((constructor)) name()
 #define COMMA ,

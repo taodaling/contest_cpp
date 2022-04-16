@@ -3,9 +3,10 @@
 #include "common.cpp"
 #include "hash.cpp"
 #include "interval_test.cpp"
+#include "nil.cpp"
 namespace dalt {
 namespace hash {
-template <class K, class V>
+template <class K, class V = Nil>
 struct HashMap {
   using Self = HashMap<K, V>;
 
@@ -16,7 +17,7 @@ struct HashMap {
   i32 mask;
   i32 size;
 
-  int index_of(const K& key, i32 h) {
+  int index_of(const K& key, i32 h) const {
     i32 index = h & mask;
     while (hash_val[index] != NON_EXIST) {
       if (hash_val[index] == h && entries[index].first == key) {
@@ -128,7 +129,11 @@ struct HashMap {
     }
   }
 
-  i32 get_hash(i64 hash) {
+  bool contain(const K& key) const {
+    return find(key) != end();
+  }
+
+  i32 get_hash(i64 hash) const {
     hash = Shuffle(hash);
     if (hash == NON_EXIST) {
       hash = -1;
@@ -176,7 +181,7 @@ struct HashMap {
     i32 pos = index_of(key, hash);
     if (hash_val[pos] != NON_EXIST) {
       return CIter{
-          .hm = *this,
+          .hm = this,
           .index = pos,
       };
     }

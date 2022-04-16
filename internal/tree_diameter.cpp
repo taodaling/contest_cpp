@@ -48,7 +48,7 @@ enable_if_t<is_base_of_v<WithWeight<T>, E> && is_base_of_v<BiBaseEdge, E>,
             Tuple<T, i32, i32>>
 ForestDiameter(const Graph<E> &g) {
   int n = Size(g);
-  DSUCompressPath dsu(n);
+  DSU dsu(n);
   for (int i = 0; i < n; i++) {
     for (auto &e : g[i]) {
       dsu.merge(i, e.to);

@@ -1,31 +1,32 @@
 #include "common.cpp"
-#include "prefer_div.cpp"
+#include "number.cpp"
 #include "segtree_common.cpp"
 namespace dalt {
-namespace lichao_segtree {
-template <class T> struct Line {
-  using Self = Line;
-  T a;
-  T b;
-  T apply(T x) const { return a * x + b; }
-};
-template <class T> struct LCNode {
-  using L = Line<T>;
-  using Self = LCNode<T>;
-  L line;
-  Self *left;
-  Self *right;
-  LCNode() : left(NULL), right(NULL) {}
-};
+namespace sbt {
 template <class T> struct LichaoSegTree {
   static_assert(is_floating_point_v<T> || is_integral_v<T>,
                 "only integer and float are supported");
+  struct Line {
+    using Self = Line;
+    T a;
+    T b;
+    T apply(T x) const { return a * x + b; }
+  };
+  struct LCNode {
+    using L = Line;
+    using Self = LCNode;
+    L line;
+    Self *left;
+    Self *right;
+    LCNode() : left(NULL), right(NULL) {}
+  };
+
   using Self = LichaoSegTree<T>;
-  using Node = LCNode<T>;
+  using Node = LCNode;
   using Ln = typename Node::L;
   Node *tree;
   Vec<T> sorted;
-  const static T INF = numeric_limits<T>::max() / 2;
+  const static T INF = std::numeric_limits<T>::max() / 2;
 
 private:
   Node *make_tree(int l, int r) {
@@ -133,6 +134,5 @@ public:
     return res;
   }
 };
-} // namespace lichao_segtree
-using lichao_segtree::LichaoSegTree;
+} 
 } // namespace dalt

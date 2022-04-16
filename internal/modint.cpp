@@ -48,6 +48,8 @@ T DynamicModular<T, CID, ID>::modulus = T();
 template <class T, i64 CID, i64 ID>
 T DynamicModular<T, CID, ID>::primitive_root = T();
 template <class T, i64 CID, i64 ID>
+T DynamicModular<T, CID, ID>::phi = T();
+template <class T, i64 CID, i64 ID>
 struct is_modular<DynamicModular<T, CID, ID>> {
   static const bool value = true;
 };

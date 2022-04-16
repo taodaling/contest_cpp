@@ -14,7 +14,7 @@ private:
 
 public:
   TwoSat(int n) : g(2 * n) {}
-  i64 ID(int x) const { return x * 2; }
+  int id(int x) const { return x * 2; }
   int negate_id(int x) const { return x * 2 + 1; }
   int negate(int x) const { return x ^ 1; }
   void deduce(int a, int b) {

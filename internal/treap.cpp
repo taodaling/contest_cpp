@@ -42,7 +42,7 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
     return res;
   }
   IsBool(!P,void) do_perm() {}
-  IsType(PermTag, P, void) do_perm() {
+  IsBool(P, void) do_perm() {
     left = left->clone();
     right = right->clone();
   }
@@ -93,7 +93,7 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
   U upd;
   S weight;
   int size;
-  i64 ID;
+  int id;
   Self *left;
   Self *right;
   bool rev;

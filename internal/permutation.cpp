@@ -3,9 +3,8 @@
 namespace dalt {
 struct Permutation : public Vec<int> {
   using Self = Permutation;
-  Permutation(int n = 0) : Vec<int>(n) {}
-  Permutation(Vec<int> &&data) : Vec<int>(data) {}
-  Permutation(const Vec<int> &data) : Vec<int>(data) {}
+  Permutation(int n = 0) : Permutation(Vec<int>(n)) {}
+  Permutation(Vec<int> data) : Vec<int>(Move(data)) {}
   friend Self operator+(const Self &a, const Self &b) {
     int n = Size(a);
     Self res(n);

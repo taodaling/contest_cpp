@@ -8,28 +8,27 @@ template <class T>
 struct RangeAffineRangeSum {
  private:
   using A = Array<T, 2>;
-  using ST = SegTree<A, A, NoTag, CID>;
+  using ST = SegTree<A, A, false, CID>;
   ST st;
-  static bool initialized;
+
+  struct InitJob {
+    InitJob() {
+      ST::Register(
+          A{0, 0}, A{1, 0},
+          [&](auto a, auto b) {
+            return A{a[0] + b[0], a[1] + b[1]};
+          },
+          [&](auto a, auto b) {
+            return A{a[0] * b[0] + a[1] * b[1], a[1]};
+          },
+          [&](auto a, auto b) {
+            return A{a[0] * b[0], b[0] * a[1] + b[1]};
+          });
+    }
+  };
+  static InitJob init_job;
 
  public:
-  static CONSTRUCT(_init) {
-    init();
-  }
-  static void init() {
-    initialized = true;
-    ST::Register(
-        A{0, 0}, A{1, 0},
-        [&](auto a, auto b) {
-          return A{a[0] + b[0], a[1] + b[1]};
-        },
-        [&](auto a, auto b) {
-          return A{a[0] * b[0] + a[1] * b[1], a[1]};
-        },
-        [&](auto a, auto b) {
-          return A{a[0] * b[0], b[0] * a[1] + b[1]};
-        });
-  }
   using Self = RangeAffineRangeSum<T>;
   RangeAffineRangeSum(int n, const Indexer<T> &indexer)
       : st(n, [&](auto i) -> A {
@@ -48,7 +47,7 @@ struct RangeAffineRangeSum {
   }
 };
 template <class T>
-bool RangeAffineRangeSum<T>::initialized = false;
+typename RangeAffineRangeSum<T>::InitJob RangeAffineRangeSum<T>::init_job;
 #undef CID
 }  // namespace sbt
 }  // namespace dalt

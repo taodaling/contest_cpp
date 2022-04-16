@@ -10,8 +10,7 @@ struct HashBase {
   static Vec<Mi> xp;
   static Vec<Mi> inv_xp;
 
-  static CONSTRUCT(_init) { HashBase::init(); }
-  static void init() {
+  HashBase() {
     int cap = 1e6 + 10;
     x = Mi(random_choice<i64>(1, Modular::modulus - 1));
     inv_x = Mi(1) / x;
@@ -23,9 +22,6 @@ struct HashBase {
     inv_xp.push_back(Mi(1));
   }
   static void ensure(i32 n) {
-    if(xp.empty()) {
-      init();
-    }
     Assert(x != Mi(0));
     while (Size(xp) < n) {
       xp.push_back(xp.back() * x);
@@ -48,7 +44,7 @@ struct HashBase {
     ensure(size + 1);
     return hash + xp[size];
   }
-};
+} __HASH_BASE__;
 decltype(HashBase::x) HashBase::x;
 decltype(HashBase::inv_x) HashBase::inv_x;
 decltype(HashBase::xp) HashBase::xp;

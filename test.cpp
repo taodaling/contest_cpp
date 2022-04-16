@@ -1,22 +1,18 @@
-// #include <bits/stdc++.h>
 #include <iostream>
-#include <vector>
 using namespace std;
 
-struct A {
-  using Type = int;
+struct S {
+  static int val;
+  struct B{
+    B() {
+      S::val = 1;
+    }
+  } b;
 };
-struct B: public A{
-
-};
-template<class T>
-enable_if_t<is_same_v<int, typename T::Type>, void> Add(vector<T>& data, typename T::Type val) {
-
-}
-
+int S::val;
 
 int main() {
-  vector<B> vec;
-  Add<B>(vec, 1);
-  return  0;
+  cout << S::val << endl;
+  return 0;
+
 }

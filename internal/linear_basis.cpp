@@ -131,7 +131,7 @@ struct LinearBasis {
   }
   i64 xor_number_count() const { return i64(1) << size(); }
   Type the_kth(Type k) const {
-    i64 ID = 0;
+    int id = 0;
     Type num;
     for (int i = 0; i < B; i++) {
       if (!set[i]) {

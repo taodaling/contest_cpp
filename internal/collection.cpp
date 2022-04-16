@@ -1,3 +1,4 @@
+#pragma once
 #include "common.cpp"
 namespace dalt {
 template <class T, class F>

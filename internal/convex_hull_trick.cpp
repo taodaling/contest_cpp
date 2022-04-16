@@ -1,7 +1,7 @@
 #pragma once
 #include "common.cpp"
 #include "nil.cpp"
-#include "prefer_div.cpp"
+#include "number.cpp"
 namespace dalt {
 template <class T, class I = Nil>
 struct CHTLine {

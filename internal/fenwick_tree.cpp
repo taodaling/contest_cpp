@@ -26,7 +26,7 @@ struct FenwickTree {
   }
 
   // A[l] + ... + A[r]
-  T query(int l, int r) {
+  T query(int l, int r) const {
     if (l > r) {
       return T();
     }

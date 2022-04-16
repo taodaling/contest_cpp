@@ -19,8 +19,7 @@ struct Polynomial {
   using Self = Polynomial<Conv>;
   Seq data;
   Polynomial(T v = T(0)): Polynomial(Vec<T>{v}) {}
-  Polynomial(Vec<T> &&_data) : data(_data) { Normalize(data); }
-  Polynomial(const Vec<T> &_data) : data(_data) { Normalize(data); }
+  Polynomial(Vec<T> _data) : data(Move(_data)) { Normalize(data); }
   T operator()(T x) const { return Apply(data, x); }
   T apply(T x) const { return (*this)(x); }
   Self integral() const {

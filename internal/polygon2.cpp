@@ -1,10 +1,13 @@
 #pragma once
 #include "point2.cpp"
+#include "line2.cpp"
 namespace dalt {
 namespace geo2 {
 template <class T>
 struct Polygon {
+  static_assert(is_near_value_v<T>);
   using Type = Point<T>;
+  using Self = Polygon<T>;
   using Pt = Type;
   Vec<Pt> data;
   Polygon(Vec<Pt> _data) : data(Move(_data)) {}
@@ -71,6 +74,26 @@ struct Polygon {
   enable_if_t<is_same_v<X, T> && is_integral_v<typename T::Type>, T>
   lattice_point_number_inside_or_on_boundary() const {
     return (area_2() + T(2) + lattice_point_number_on_boundary()) / T(2);
+  }
+  Vec<Line<T>> to_line_polygon() const {
+    int n = Size(data);
+    Vec<Line<T>> ans(n);
+    for(int i = 0; i < n; i++) {
+      ans[i] = Line<T>::from_ends(data[i], data[(i + 1) % n]);
+    }
+    return ans;
+  }
+  static Self from_line_polygon(const Vec<Line<T>> &lines) {
+    int n = Size(lines);
+    Assert(n >= 3);
+    Vec<Pt> data(n);
+    for(int i = 0; i < n; i++) {
+      data[i] = Line<T>::intersect(lines[i], lines[(i + 1) % n]);
+    }
+    return Self(Move(data));
+  }
+  Vec<Pt> to_vec() const {
+    return data;
   }
 };
 }  // namespace geo2

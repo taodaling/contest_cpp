@@ -4,6 +4,7 @@
  * faster. Initial capacity must be a power of 2 if provided. Source: KACTL
  * Usage: ht<int,int> h({},{},{},{},{1<<16});
  */
+ /*
 #include "common.cpp"
 #include "hash.cpp"
 namespace dalt {
@@ -26,3 +27,4 @@ OStream &operator<<(OStream &os, const HashMap_ht<K, V> &hv) {
 }
 }  // namespace hash
 }  // namespace dalt
+*/

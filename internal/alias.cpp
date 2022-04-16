@@ -38,6 +38,7 @@ FunctionAlias(std::make_pair, MakePair);
 FunctionAlias(std::clamp, Clamp);
 FunctionAlias(std::shuffle, Shuffle);
 FunctionAlias(std::to_string, ToString);
+FunctionAlias(std::tie, Tie);
 template <typename _Signature>
 using Function = std::function<_Signature>;
 using Str = std::string;

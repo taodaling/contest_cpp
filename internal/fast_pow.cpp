@@ -21,11 +21,11 @@ struct FastPower2 {
     low.resize(mask);
     mask--;
     low[0] = one;
-    for (int i = 1; i <= MASK; i++) {
+    for (int i = 1; i <= mask; i++) {
       low[i] = low[i - 1] * x;
     }
     T y = low.back() * x;
-    for (int i = 1; i <= MASK; i++) {
+    for (int i = 1; i <= mask; i++) {
       high[i] = high[i - 1] * y;
     }
   }
