@@ -1,17 +1,31 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "all"
+
 void SolveOne(int test_id, IStream &in, OStream &out) {
+  i64 L, R, V;
+  in >> L >> R >> V;
   
+  auto count_pair = [&](i64 l, i64 r, i64 lsign, i64 rsign, i64 step) {
+    
+  };
+
+  //0 1
+  i64 ans = 0;
+  {
+    if(V == 0) {
+      //4 | n
+
+    }
+  }
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  out << std::setprecision(2);
   //std::ifstream input("in");
   int num_of_input = 1;
   //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    SolveOne(i + 1, in, out);
+    //SolveOne(i + 1, input, out);
+	SolveOne(i + 1, in, out);
   }
 }

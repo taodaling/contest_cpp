@@ -4,7 +4,6 @@
 #include "optional_field.cpp"
 #include "sbt_common.cpp"
 #include "sbt_reverse.cpp"
-#include "tag.cpp"
 namespace dalt {
 namespace sbt {
 #define CID -202202131700

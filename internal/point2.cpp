@@ -38,7 +38,6 @@ struct Point {
   static FType dist(const Self& lhs, const Self& rhs) {
     return (lhs - rhs).abs();
   }
-  Self arg() const { return std::atan2(y, x); }
   Self operator-() const { return {-x, -y}; }
   FType atan2() const {
     return T::atan2(y, x);

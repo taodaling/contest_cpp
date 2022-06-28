@@ -26,6 +26,10 @@ struct Optional {
   const T &operator*() const { return value(); }
   bool is_some() const { return show_up; }
   bool is_none() const { return !show_up; }
+  const T *operator->() const {
+    return &value();
+  }
+  T *operator->() { return &value(); }
   inline operator T() const { return value(); }
   T or_else(T def) const {
     if (is_some()) {

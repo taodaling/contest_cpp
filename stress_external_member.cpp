@@ -4,9 +4,7 @@ void StressSolve(IStream &in, OStream &out) {}
 
 void StressGenerate(int test_id, std::mt19937 &mt, OStream &out) {}
 
-String StressMatch(const String &a, const String &b) {
-  StringStream ai = StringStream(a);
-  StringStream bi = StringStream(b);
+String StressMatch(IStream &input, IStream &ai, IStream &bi) {
   String x, y;
   bool succ_x, succ_y;
   while (true) {

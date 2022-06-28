@@ -57,6 +57,7 @@ struct LinkedList {
   bool empty() const { return size == 0; }
   Node *front() { return head->next; }
   Node *back() { return head->prev; }
+  Node *guard() { return head; }
   const Node *front() const { return head->next; }
   const Node *back() const { return head->prev; }
   void pop_front() {

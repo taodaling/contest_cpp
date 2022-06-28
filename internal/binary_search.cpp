@@ -1,10 +1,11 @@
 #pragma once
 #include "common.cpp"
-#include "optional.cpp"
 #include "number.cpp"
+#include "optional.cpp"
 namespace dalt {
 template <class T>
-enable_if_t<is_integral_v<T>, Optional<T>> FirstTrue(T l, T r, const Checker<T> &checker) {
+enable_if_t<is_integral_v<T>, Optional<T>> FirstTrue(
+    T l, T r, const Checker<T> &checker) {
   if (!checker(r)) {
     return {};
   }
@@ -34,15 +35,14 @@ enable_if_t<is_integral_v<T>, Optional<T>> LastTrue(T l, T r,
   }
   return l;
 }
+
 template <class T>
-enable_if_t<is_floating_point_v<T>, Optional<T>> FirstTrue(T l, T r,
-                                                     const Checker<T> &checker,
-                                                     i32 max_round) {
+enable_if_t<is_floating_point_v<T>, Optional<T>> FirstTrue(
+    T l, T r, const Checker<T> &checker, Function<bool()> stopper) {
   if (!checker(r)) {
     return {};
   }
-  while (max_round > 0) {
-    max_round -= 1;
+  while (!stopper()) {
     T m = (l + r) / 2;
     if (checker(m)) {
       r = m;
@@ -52,4 +52,10 @@ enable_if_t<is_floating_point_v<T>, Optional<T>> FirstTrue(T l, T r,
   }
   return l;
 }
-} // namespace dalt
+template <class T>
+enable_if_t<is_floating_point_v<T>, Optional<T>> FirstTrue(
+    T l, T r, const Checker<T> &checker, i32 max_round) {
+  return FirstTrue<T>(
+      l, r, checker,[&]() { return max_round-- <= 0; });
+}
+}  // namespace dalt

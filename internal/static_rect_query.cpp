@@ -1,14 +1,13 @@
 #pragma once
 #include "common.cpp"
 #include "function.cpp"
-#include "initializer.cpp"
 #include "segtree.cpp"
 namespace dalt {
 namespace misc {
 #define CID -202202131300
 template <class T, class C = Less<T>>
-struct StaticRectQuery : private ClassInitializer<CID> {
-  using PST = sbt::SegTree<i32, i32, true, CID>;
+struct StaticRectQuery {
+  using PST = sbt::SegTree<i32, i32, true, false, 0, CID>;
   using Self = StaticRectQuery<T>;
   using Node = typename PST::Node;
 
@@ -16,16 +15,21 @@ struct StaticRectQuery : private ClassInitializer<CID> {
   Vec<PST> psts;
   Vec<T> sorted_input;
   C comp;
+  struct InitJob {
+    InitJob() {
+      PST::Register(
+          0, 0, [](auto a, auto b) { return a + b; },
+          [](auto a, auto b) { return a + b; },
+          [](auto a, auto b) { return a + b; });
+    }
+  };
+  static InitJob _init_job;
 
  public:
+
+
   StaticRectQuery(int n, const Indexer<T> &indexer, C _comp = C())
-      : ClassInitializer<CID>([]() {
-          PST::Register(
-              0, 0, [](auto a, auto b) { return a + b; },
-              [](auto a, auto b) { return a + b; },
-              [](auto a, auto b) { return a + b; });
-        }),
-        comp(_comp) {
+      : comp(_comp) {
     sorted_input = ExpandIndexer(n, indexer);
     Sort(All(sorted_input), comp);
     MakeUnique(sorted_input);
@@ -77,5 +81,7 @@ struct StaticRectQuery : private ClassInitializer<CID> {
   }
 };
 #undef CID
-}  // namespace misc
+template <class T, class C>
+typename StaticRectQuery<T, C>::InitJob StaticRectQuery<T, C>::_init_job;
 }  // namespace dalt
+}

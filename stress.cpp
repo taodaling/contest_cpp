@@ -24,7 +24,11 @@ void Stress() {
     StringStream stress_in = StringStream(in);
     StressSolve(stress_in, stress_out);
     SolveMulti(solver_in, solver_out);
-    String match_res = StressMatch(stress_out.str(), solver_out.str());
+    StringStream checker_input = StringStream(in);
+    StringStream check_stress_out = StringStream(stress_out.str());
+    StringStream check_solver_out = StringStream(solver_out.str());
+    String match_res =
+        StressMatch(checker_input, check_stress_out, check_solver_out);
     if (match_res != "") {
       Stderr << "\nexpect:\n" << stress_out.str() << std::endl;
       Stderr << "\nactual:\n" << solver_out.str() << std::endl;

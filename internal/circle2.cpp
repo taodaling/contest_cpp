@@ -105,7 +105,7 @@ struct Circle {
     }
     return circle;
   }
-  static Vec<Pt> tangent(Self c1, Self c2, bool inner) {
+  static int tangent(const Self& c1, const Self& c2, Vec<Pt> &out1, Vec<Pt> &out2, bool inner = false) {
     Pt o1 = c1.center;
     T r1 = c1.r;
     Pt o2 = c2.center;
@@ -115,19 +115,18 @@ struct Circle {
     }
     Pt d = o2 - o1;
     T dr = r1 - r2, d2 = d.square(), h2 = d2 - dr * dr;
+    
     if (d2 == T(0) || h2 < T(0)) {
       Assert(h2 != T(0));
       return 0;
     }
     T sqrtH2 = h2.sqrt();
-    Vec<T> ans;
-    ans.reserve(4);
     for (int sign = -1; sign <= 1; sign += 2) {
-      Pt v = d * (dr / d2) + d.perpendicular() * (sqrtH2 * sign / d2);
-      ans.push_back(o1 + v * r1);
-      ans.push_back(o2 + v * r2);
+      Pt v = d * (dr / d2) + d.perpendicular() * (sqrtH2 * T(sign) / d2);
+      out1.push_back(o1 + v * r1);
+      out2.push_back(o2 + v * r2);
     }
-    return ans;
+    return 2;
   }
 };
 }  // namespace geo2

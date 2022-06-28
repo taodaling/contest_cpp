@@ -11,10 +11,11 @@ struct MultiHashBase {
   static Mi get(T key) {
     Mi ans = mem[key];
     if (ans == Mi(0)) {
-      ans = mem[key] = Mi(random_choice<i64>(1, Modular::modulus - 1));
+      ans = mem[key] = random();
     }
     return ans;
   }
+  static Mi random() { return Mi(random_choice<i64>(1, Modular::modulus - 1)); }
 };
 template <class T>
 HashMap<T, typename MultiHashBase<T>::Mi> MultiHashBase<T>::mem;

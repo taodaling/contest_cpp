@@ -41,10 +41,10 @@
               ret_type>
 #define IsBool(param, ret_type)       \
   template <bool OnlyWhenArg = param> \
-  enable_if_t<OnlyWhenArg == param && OnlyWhenArg, ret_type>
+  enable_if_t<OnlyWhenArg == (param) && OnlyWhenArg, ret_type>
 #define IsBoolStatic(param, ret_type) \
   template <bool OnlyWhenArg = param> \
-  static enable_if_t<OnlyWhenArg == param && OnlyWhenArg, ret_type>
+  static enable_if_t<OnlyWhenArg == (param) && OnlyWhenArg, ret_type>
 #define MakeAnnotation(name)         \
   template <class T>                 \
   struct is_##name {                 \

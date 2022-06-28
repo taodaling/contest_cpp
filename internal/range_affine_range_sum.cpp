@@ -8,7 +8,7 @@ template <class T>
 struct RangeAffineRangeSum {
  private:
   using A = Array<T, 2>;
-  using ST = SegTree<A, A, false, CID>;
+  using ST = SegTree<A, A, false, false, 0, CID>;
   ST st;
 
   struct InitJob {

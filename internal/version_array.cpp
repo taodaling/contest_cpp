@@ -28,9 +28,12 @@ struct VersionArray {
     return data[i];
   }
   int size() { return Size(data); }
-  void clear(T _def = T()) {
-    def = _def;
+  void clear() {
     timestamp++;
+  }
+  void clear(int _def) {
+    def = _def;
+    clear();
   }
 };
 }  // namespace dalt

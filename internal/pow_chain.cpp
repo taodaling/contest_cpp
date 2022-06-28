@@ -67,5 +67,6 @@ struct PowerChain {
     return dfs(dfs, l, mod).first;
   }
 };
+#undef CID
 }  // namespace math
 }  // namespace dalt

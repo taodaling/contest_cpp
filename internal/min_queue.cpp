@@ -1,6 +1,5 @@
 #pragma once
 #include "common.cpp"
-#include "tag.cpp"
 namespace dalt {
 // verified by:
 //  - https://www.luogu.com.cn/problem/P1886

@@ -1,12 +1,13 @@
 #pragma once
 #include "optional.cpp"
 #include "segtree_common.cpp"
-#include "tag.cpp"
 namespace dalt {
 namespace sbt {
-#define CID -202202131500
-template <class S, class U, bool P = false, i64 ID = 0>
-struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
+#define CLASS_ID -202202131500
+template <class S, class U, bool P = false, bool SPARSE = false, i64 ID = 0,
+          i64 CID = 0>
+struct SegTree : public SelfBalanceTreeBase<S, U, ID, CLASS_ID> {
+  static_assert(int(P) + int(SPARSE) <= 1);
   struct Node {
     using Self = Node;
     Self *left;
@@ -16,13 +17,25 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
 
 #ifdef DROP
     ~Node() {
+      if (this == NIL) {
+        return;
+      }
       delete left;
       delete right;
     }
 #endif
-    IsBool(P,Node *) clone() { return new Node(*this); }
-    IsBool(!P,Node *) clone() { return this; }
-
+    Self* clone() {
+      if (SPARSE) {
+        if (this == NIL) {
+          return new Node(*NIL);
+        }
+        return this;
+      } else if (P) {
+        return new Node(*this);
+      } else {
+        return this;
+      }
+    }
     void push_up() { sum = SegTree::s_s(left->sum, right->sum); }
     void push_down() {
       left = left->clone();
@@ -38,33 +51,49 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
       upd = SegTree::SegTree::u_u(upd, u);
     }
   };
-  using Self = SegTree<S, U, P, ID>;
-
+  using Self = SegTree<S, U, P, SPARSE, ID, CID>;
+  static Node *NIL;
   Node *tree;
   int n;
 
  private:
   Node *make_node() {
     Node *ans = new Node{
-        .left = NULL,
-        .right = NULL,
+        .left = NIL,
+        .right = NIL,
         .sum = SegTree::s_nil,
         .upd = SegTree::u_nil,
     };
     return ans;
   }
-
-  IsBool(P,Node *) make_tree() {
+  IsBool(P, Node *) make_tree() {
     Node *root = make_node();
     root->left = root->right = root;
     return root;
   }
-  IsBool(!P,Node *) make_tree() {
+  IsBool(!P, Node *) make_tree() {
     Node *root = make_node();
     return root;
   }
 
  public:
+  IsBoolStatic(SPARSE, void)
+      Register(S _s_nil, U _u_nil, const Adder<S, S> &_s_s,
+               const Adder<S, U> &_s_u, const Adder<U, U> &_u_u) {
+    SelfBalanceTreeBase<S, U, ID, CLASS_ID>::Register(_s_nil, _u_nil, _s_s,
+                                                      _s_u, _u_u);
+    NIL = new Node();
+    NIL->left = NIL;
+    NIL->right = NIL;
+    NIL->upd = _u_nil;
+    NIL->sum = _s_nil;
+  }
+  IsBoolStatic(!SPARSE, void)
+      Register(S _s_nil, U _u_nil, const Adder<S, S> &_s_s,
+               const Adder<S, U> &_s_u, const Adder<U, U> &_u_u) {
+    SelfBalanceTreeBase<S, U, ID, CLASS_ID>::Register(_s_nil, _u_nil, _s_s,
+                                                      _s_u, _u_u);
+  }
   Self clone() const {
     Self ans = *this;
     ans.tree = ans.tree->clone();
@@ -90,9 +119,12 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
     };
     tree = dfs(dfs, 0, n - 1);
   }
-  
-  IsBoolStatic(P, Self)
-  MakePersistentTree(int n) {
+  IsBoolStatic(SPARSE, Self) MakeSparseTree(int n) {
+    Self res(1);
+    res.n = n;
+    return res;
+  }
+  IsBoolStatic(P, Self) MakePersistentTree(int n) {
     Self res(1);
     res.n = n;
     return res;
@@ -167,7 +199,7 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
     travel([&](auto x) { res.push_back(x); });
     return res;
   }
-  Optional<Tuple<int, S>> first_true(int L, int R, Checker<S> &checker) {
+  Optional<Tuple<int, S>> first_true(int L, int R, const Checker<S> &checker) {
     S sum = SegTree::s_nil;
     auto dfs = [&](auto &dfs, Node *root, int l, int r) -> Optional<int> {
       if (SegmentNoIntersection(L, R, l, r)) {
@@ -194,8 +226,10 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
       return lres;
     };
     auto res = dfs(dfs, tree, 0, n - 1);
-    return res.map(
-        [&](int x) -> Tuple<int, S> { return Tuple<int, S>(x, sum); });
+    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
+      return Tuple<int, S>(x, sum);
+    };
+    return res.map(mapper);
   }
   Optional<Tuple<int, S>> last_true(int L, int R, const Checker<S> &checker) {
     S sum = SegTree::s_nil;
@@ -216,22 +250,25 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
       root->push_down();
       int m = (l + r) / 2;
       auto lres = dfs(dfs, root->left, l, m);
-      if (lres.s_some() || r < L) {
+      if ((lres.is_some() && lres.value() == m) || m < L) {
         auto rres = dfs(dfs, root->right, m + 1, r);
-        if (rres.s_some()) {
+        if (rres.is_some()) {
           return rres;
         }
       }
       return lres;
     };
     auto res = dfs(dfs, tree, 0, n - 1);
-    return res.map(
-        [&](int x) -> Tuple<int, S> { return Tuple<int, S>(x, sum); });
+    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
+      return Tuple<int, S>(x, sum);
+    };
+    return res.map(mapper);
   }
   Optional<Tuple<int, S>> first_true_const(int L, int R,
-                                           Checker<S> &checker) const {
+                                           const Checker<S> &checker) const {
     S sum = SegTree::s_nil;
-    auto dfs = [&](auto& dfs, Node *root, const U &upd, int l, int r) -> Optional<int> {
+    auto dfs = [&](auto &dfs, Node *root, const U &upd, int l,
+                   int r) -> Optional<int> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -256,12 +293,16 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
       return lres;
     };
     auto res = dfs(dfs, tree, SegTree::u_nil, 0, n - 1);
-    return res.map([&](auto x) { return Tuple<int, S>(x, sum); });
+    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
+      return Tuple<int, S>(x, sum);
+    };
+    return res.map(mapper);
   }
   Optional<Tuple<int, S>> last_true_const(int L, int R,
                                           const Checker<S> &checker) const {
     S sum = SegTree::s_nil;
-    auto dfs = [&](auto& dfs, Node *root, const U &upd, int l, int r) -> Optional<int> {
+    auto dfs = [&](auto &dfs, Node *root, const U &upd, int l,
+                   int r) -> Optional<int> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -279,7 +320,7 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
       U new_upd = SegTree::SegTree::u_u(root->upd, upd);
       int m = (l + r) / 2;
       auto lres = dfs(dfs, root->left, new_upd, l, m);
-      if (lres.is_some() || r < L) {
+      if ((lres.is_some() && lres.value() == m) || m < L) {
         auto rres = dfs(dfs, root->right, new_upd, m + 1, r);
         if (rres.is_some()) {
           return rres;
@@ -288,16 +329,48 @@ struct SegTree : public SelfBalanceTreeBase<S, U, ID, -1> {
       return lres;
     };
     auto res = dfs(dfs, tree, SegTree::u_nil, 0, n - 1);
-    return res.map([&](auto x) { return Tuple<int, S>(x, sum); });
+    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
+      return Tuple<int, S>(x, sum);
+    };
+    return res.map(mapper);
   }
 
-  IsBool(!P,void) destroy() { delete tree; }
-  IsBool(P,void) destroy() {}
+  IsBool(!(P || SPARSE), void) destroy() { delete tree; }
+  IsBool(P || SPARSE, void) destroy() {}
+  // to support merge, only support single point update
+  IsBoolStatic(SPARSE, Self) merge(Self a, Self b, const Adder<S, S> &adder) {
+    assert(a.n == b.n);
+    auto dfs = [&](auto &dfs, Node *a, Node *b, int l, int r) -> Node * {
+      if (a == NIL) {
+        return b;
+      }
+      if (b == NIL) {
+        return a;
+      }
+      if (l == r) {
+        a->sum = adder(a->sum, b->sum);
+        return a;
+      }
+      int m = (l + r) / 2;
+      // a->push_down();
+      // b->push_down();
+      a->left = dfs(dfs, a->left, b->left, l, m);
+      a->right = dfs(dfs, a->right, b->right, m + 1, r);
+      a->push_up();
+      return a;
+    };
+    a.tree = dfs(dfs, a.tree, b.tree, 0, a.n - 1);
+    return a;
+  }
 
 #ifdef DROP
   ~SegTree() { destroy(); }
 #endif
 };
-#undef CID
+#undef CLASS_ID
+template <class S, class U, bool P, bool SPARSE, i64 ID, i64 CID>
+typename SegTree<S, U, P, SPARSE, ID, CID>::Node
+    *SegTree<S, U, P, SPARSE, ID, CID>::NIL = NULL;
+
 }  // namespace sbt
 }  // namespace dalt

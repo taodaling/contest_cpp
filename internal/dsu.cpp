@@ -6,7 +6,6 @@ template <bool COMPRESS = true, class C = Nil, class P = Nil>
 struct DSU {
   using Self = DSU<COMPRESS, C, P>;
 
- private:
   Vec<int> fa;
   Vec<int> size;
   Vec<C> sum_of_connected_commponent;

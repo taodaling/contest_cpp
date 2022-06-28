@@ -56,11 +56,11 @@ struct SuffixAutomaton {
         .match_length = 0,
     };
   }
+  Node* build_last;
+  Vec<Node*> all;
 
  private:
   Node* root;
-  Node* build_last;
-  Vec<Node*> all;
   i64 distinct_substr;
   bool sorted;
 
@@ -93,15 +93,21 @@ struct SuffixAutomaton {
       trace = trace->fail;
     }
     return trace;
-  }
+  } 
   void build_next() { build_last = root; }
   void build(T c) {
     sorted = false;
     T index = c;
+    Node* candidate = build_last->next[c];
+    //generic sam
+    if (candidate != NULL && build_last->maxlen == candidate->maxlen + 1) {
+      build_last = candidate;
+      return;
+    }
     auto now = alloc();
     now->maxlen = build_last->maxlen + 1;
-
     Node* p = visit(index, build_last, NULL, now);
+    build_last = now;
     if (p == NULL) {
       now->fail = root;
     } else {
@@ -118,12 +124,15 @@ struct SuffixAutomaton {
           distinct_substr += clone->maxlen - clone->fail->maxlen;
         }
         visit(index, p, q, clone);
+        //generic sam
+        if (p->maxlen + 1 == now->maxlen) {
+          build_last = clone;
+        }
       }
     }
     if (distinct_substr != -1) {
       distinct_substr += now->maxlen - now->fail->maxlen;
     }
-    build_last = now;
   }
   Vec<Node*>& topo_sort() {
     if (sorted) {

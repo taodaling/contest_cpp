@@ -1,6 +1,7 @@
 #pragma once
 #include "common.cpp"
 #include "interval_test.cpp"
+#include "optional.cpp"
 namespace dalt {
 template <class T>
 struct IntervalMap {
@@ -29,7 +30,7 @@ public:
       const Function<void(T, T)>& _add_callback = [](T a, T b) {},
       const Function<void(T, T)>& _del_callback = [](T a, T b) {})
       : add_callback(_add_callback), del_callback(_del_callback) {}
-
+  //[begin, end)
   void add(T begin, T end) {
     auto iter = map.upper_bound(begin);
     if(iter != map.begin()) {
@@ -60,6 +61,17 @@ public:
       add0(l, begin);
       add0(end, r);
     }
+  }
+  Optional<Pair<T, T>> cover_line(T pt) {
+    auto iter = map.upper_bound(pt);
+    if(iter == map.begin()) {
+      return {};
+    }
+    --iter;
+    if(iter->second <= pt) {
+      return {};
+    }
+    return MakePair(iter->first, iter->second);
   }
   Vec<Pair<T, T>> to_vec() const {
     Vec<Pair<T, T>> res;

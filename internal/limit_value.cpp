@@ -15,6 +15,11 @@ struct LimitValue {
   Self operator+(const Self& rhs) const {
     return Self(AddLimit(value, rhs.value, MAX));
   }
+  bool operator<(const Self& rhs) const {
+    return value < rhs.value;
+  }
+  ImplDefaultComparision(Self);
+  ImplArithmeticAssignOperation(Self);
   Self operator==(const Self& rhs) const { return value == rhs.value; }
   Self operator!=(const Self& rhs) const { return !(*this == rhs); }
   template <class E>
