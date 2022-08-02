@@ -46,13 +46,10 @@ struct Optional {
       return Optional<E>();
     }
   }
-  template <class E>
-  friend bool operator==(const Optional<E> &a, const Optional<E> &b);
+  bool operator==(const Self &b) const {
+    return show_up == b.show_up && (!show_up || val == b.val);
+  }
 };
-template <class E>
-bool operator==(const Optional<E> &a, const Optional<E> &b) {
-  return a.show_up == b.show_up && (!a.show_up || a.val == b.val);
-}
 template <class E>
 bool operator!=(const Optional<E> &a, const Optional<E> &b) {
   return !(a == b);

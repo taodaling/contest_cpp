@@ -38,8 +38,6 @@ FirstKindStirlingNumber(int n) {
           ans[i] += ans[i - 1];
         }
       }
-      Debug(n);
-      Debug(ans);
       return Poly(Move(ans));
     } else {
       int half = n / 2;

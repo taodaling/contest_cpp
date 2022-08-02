@@ -102,6 +102,12 @@ struct Matrix {
     }
     return res;
   }
+  bool operator==(const Self &rhs) const {
+    return col_num() == rhs.col_num() && data == rhs.data;
+  }
+  bool operator!=(const Self &rhs) const {
+    return !(*this == rhs);
+  }
   T determinant() const {
     Assert(row_num() == col_num());
     Self self = *this;
@@ -211,6 +217,7 @@ struct Matrix {
       ptr_a[i] = ptr_a[i] + ptr_b[i] * f;
     }
   }
+public:
   Vec<Vec<T>> to_vec() const {
     Vec<Vec<T>> res(row_num(), Vec<T>(col_num()));
     for (int i = 0; i < row_num(); i++) {

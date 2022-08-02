@@ -2,6 +2,7 @@
 #define const_ref(T) const T &
 #define mut_ref(T) T &
 #define let auto
+#define var auto
 #define Size(T) int((T).size())
 #define All(data) data.begin(), data.end()
 #define MakeUnique(data) data.resize(std::unique(All(data)) - data.begin())

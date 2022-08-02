@@ -1,6 +1,7 @@
 #include "2sat.cpp"
 #include "ac_automaton.cpp"
-#include "ad-hoc"
+#include "ad-hoc/pair_of_point_intersect_with_circle.cpp"
+#include "ad-hoc/prefixsum3d_sparse.cpp"
 #include "affine.cpp"
 #include "alias.cpp"
 #include "bigint.cpp"
