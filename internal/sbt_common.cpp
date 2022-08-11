@@ -1,9 +1,10 @@
 #pragma once
 #include "common.cpp"
+#include "nil.cpp"
 namespace dalt {
 namespace sbt {
-template <class S, class U, i64 ID, i64 CID>
-struct SelfBalanceTreeBase {
+template <class S, class U, i64 ID, class CID = Nil>
+struct SelfBalanceTreeRegistry {
   static S s_nil;
   static U u_nil;
   static Adder<S, S> s_s;
@@ -18,15 +19,22 @@ struct SelfBalanceTreeBase {
     u_u = _u_u;
   }
 };
-template <class S, class U, i64 ID, i64 CID>
-S SelfBalanceTreeBase<S, U, ID, CID>::s_nil;
-template <class S, class U, i64 ID, i64 CID>
-U SelfBalanceTreeBase<S, U, ID, CID>::u_nil;
-template <class S, class U, i64 ID, i64 CID>
-Adder<S, S> SelfBalanceTreeBase<S, U, ID, CID>::s_s;
-template <class S, class U, i64 ID, i64 CID>
-Adder<S, U> SelfBalanceTreeBase<S, U, ID, CID>::s_u;
-template <class S, class U, i64 ID, i64 CID>
-Adder<U, U> SelfBalanceTreeBase<S, U, ID, CID>::u_u;
+template <class S, class U, i64 ID, class CID>
+S SelfBalanceTreeRegistry<S, U, ID, CID>::s_nil;
+template <class S, class U, i64 ID, class CID>
+U SelfBalanceTreeRegistry<S, U, ID, CID>::u_nil;
+template <class S, class U, i64 ID, class CID>
+Adder<S, S> SelfBalanceTreeRegistry<S, U, ID, CID>::s_s;
+template <class S, class U, i64 ID, class CID>
+Adder<S, U> SelfBalanceTreeRegistry<S, U, ID, CID>::s_u;
+template <class S, class U, i64 ID, class CID>
+Adder<U, U> SelfBalanceTreeRegistry<S, U, ID, CID>::u_u;
+
+MakeAnnotation(sbt_registry);
+template<class S, class U, i64 ID, class CID>
+struct is_sbt_registry<SelfBalanceTreeRegistry<S, U, ID, CID>> {
+  static const bool value = true;
+};
+
 }  // namespace sbt
 }  // namespace dalt

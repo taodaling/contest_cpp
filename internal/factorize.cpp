@@ -18,7 +18,7 @@ enable_if_t<is_integral_v<T>, T> PollardRho(T n) {
   for (int k = 2;; k <<= 1, y = x, q = 1) {
     for (int i = 1; i <= k; ++i) {
       x = AddMod(MulMod(x, x, n), c, n);
-      q = MulMod(q, Abs(x - y), n);
+      q = MulMod<T>(q, Abs(x - y), n);
       if ((i & 127) == 0) {
         t = Gcd(q, n);
         if (t > 1) {

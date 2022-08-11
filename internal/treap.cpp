@@ -6,13 +6,11 @@
 #include "sbt_reverse.cpp"
 namespace dalt {
 namespace sbt {
-#define CID -202202131700
-template <class S, class U, i64 ID = 0, bool P = false, bool DIR = false>
-struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
-               protected SbtReverse<S, U, DIR,
-                                    SelfBalanceTreeBase<S, U, ID, CID>> {
+template <class SBT, class S, class U, i64 ID = 0, bool P = false, bool DIR = false>
+struct Treap : protected SbtReverse<S, U, DIR, SBT> {
+ static_assert(is_sbt_registry_v<SBT>);
  private:
-  using Self = Treap<S, U, ID, P, DIR>;
+  using Self = Treap<SBT, S, U, ID, P, DIR>;
   using AT2 = Array<Self *, 2>;
   AT2 split_by_weight_first_true(const Checker<S> &checker, bool &find) {
     if (this == NIL) {
@@ -51,10 +49,10 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
     if (this == NIL) {
       return;
     }
-    U new_upd = Self::u_u(upd, u);
+    U new_upd = SBT::u_u(upd, u);
     bool new_rev_upd = rev_upd != rev;
     (new_rev_upd ? right : left)->travel(new_upd, new_rev_upd, consumer);
-    consumer(Self::s_u(weight, u));
+    consumer(SBT::s_u(weight, u));
     (new_rev_upd ? left : right)->travel(new_upd, new_rev_upd, consumer);
   }
 
@@ -74,7 +72,7 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
     NIL->rev = false;
     NIL->left = NIL->right = NIL;
 
-    SelfBalanceTreeBase<S, U, ID, CID>::Register(s_nil, u_nil, _s_s, _s_u,
+    SBT::Register(s_nil, u_nil, _s_s, _s_u,
                                                  _u_u);
   }
   Treap(int _id = 0, S _sum = S())
@@ -86,7 +84,7 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
         left(NIL),
         right(NIL),
         rev(false) {
-    this->init_sum_rev(Self::s_nil);
+    this->init_sum_rev(SBT::s_nil);
   }
   S sum;
   U upd;
@@ -111,7 +109,7 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
     if (this == NIL) {
       return;
     }
-    sum = Self::s_s(Self::s_s(left->sum, weight), right->sum);
+    sum = SBT::s_s(SBT::s_s(left->sum, weight), right->sum);
     this->push_up_sum_rev(*left, *right);
     size = left->size + 1 + right->size;
   }
@@ -119,9 +117,9 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
     if (this == NIL) {
       return;
     }
-    sum = Self::s_u(sum, u);
-    upd = Self::u_u(upd, u);
-    weight = Self::s_u(weight, u);
+    sum = SBT::s_u(sum, u);
+    upd = SBT::u_u(upd, u);
+    weight = SBT::s_u(weight, u);
     this->apply_sum_rev(u);
   }
 
@@ -262,8 +260,7 @@ struct Treap : public SelfBalanceTreeBase<S, U, ID, CID>,
     return res;
   }
 };
-template <class S, class U, i64 ID, bool P, bool DIR>
-Treap<S, U, ID, P, DIR> *Treap<S, U, ID, P, DIR>::NIL = NULL;
-#undef CID
+template <class SBT, class S, class U, i64 ID, bool P, bool DIR>
+Treap<SBT, S, U, ID, P, DIR> *Treap<SBT, S, U, ID, P, DIR>::NIL = NULL;
 }  // namespace sbt
 }  // namespace dalt

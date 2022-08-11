@@ -4,6 +4,7 @@ namespace dalt {
 namespace sbt {
 template <class S, class U, bool EXIST, class REG>
 struct SbtReverse {
+  static_assert(is_sbt_registry_v<REG>);
   using Self = SbtReverse<S, U, EXIST, REG>;
 
  protected:

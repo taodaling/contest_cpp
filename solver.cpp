@@ -5,6 +5,7 @@ using namespace dalt;
 #include "modint.cpp"
 using Mod = DynamicModular<i64>;
 using Mi = ModInt<Mod>;
+#include "all"
 
 void SolveOne(int test_id, IStream &in, OStream &out) {
   i64 a, n, p;

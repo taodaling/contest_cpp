@@ -18,3 +18,4 @@
 #include <bitset>
 #include <set>
 #include <list>
+#include <array>

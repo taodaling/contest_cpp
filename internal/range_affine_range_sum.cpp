@@ -3,12 +3,12 @@
 #include "segtree.cpp"
 namespace dalt {
 namespace sbt {
-#define CID -202202131600
 template <class T>
 struct RangeAffineRangeSum {
+  using Self = RangeAffineRangeSum<T>;
  private:
   using A = Array<T, 2>;
-  using ST = SegTree<A, A, false, false, 0, CID>;
+  using ST = SegTree<SelfBalanceTreeRegistry<A, A, 0, Self>, A, A, false, false, 0>;
   ST st;
 
   struct InitJob {
@@ -29,7 +29,6 @@ struct RangeAffineRangeSum {
   static InitJob init_job;
 
  public:
-  using Self = RangeAffineRangeSum<T>;
   RangeAffineRangeSum(int n, const Indexer<T> &indexer)
       : st(n, [&](auto i) -> A {
           return A{indexer(i), 1};
@@ -48,6 +47,5 @@ struct RangeAffineRangeSum {
 };
 template <class T>
 typename RangeAffineRangeSum<T>::InitJob RangeAffineRangeSum<T>::init_job;
-#undef CID
 }  // namespace sbt
 }  // namespace dalt

@@ -4,11 +4,10 @@
 #include "segtree.cpp"
 namespace dalt {
 namespace misc {
-#define CID -202202131300
 template <class T, class C = Less<T>>
 struct StaticRectQuery {
-  using PST = sbt::SegTree<i32, i32, true, false, 0, CID>;
   using Self = StaticRectQuery<T>;
+  using PST = sbt::SegTree<sbt::SelfBalanceTreeRegistry<i32, i32, 0, Self>, i32, i32, true, false, 0>;
   using Node = typename PST::Node;
 
  private:
@@ -80,7 +79,6 @@ struct StaticRectQuery {
     // return res;
   }
 };
-#undef CID
 template <class T, class C>
 typename StaticRectQuery<T, C>::InitJob StaticRectQuery<T, C>::_init_job;
 }  // namespace dalt

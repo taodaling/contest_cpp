@@ -3,12 +3,11 @@
 #include "sbt_reverse.cpp"
 namespace dalt {
 namespace sbt {
-#define CID -202202140000
-template <class S, class U, bool DIR = false, i64 ID = 0>
+template <class SBT, class S, class U, bool DIR = false, i64 ID = 0>
 struct LCTNode
-    : public SelfBalanceTreeBase<S, U, ID, CID>,
-      protected SbtReverse<S, U, DIR, SelfBalanceTreeBase<S, U, ID, CID>> {
-  using Self = LCTNode<S, U, DIR, ID>;
+    : protected SbtReverse<S, U, DIR, SBT> {
+  static_assert(is_sbt_registry_v<SBT>);
+  using Self = LCTNode<SBT, S, U, DIR, ID>;
   static Self *NIL;
   Self *left;
   Self *right;
@@ -22,12 +21,12 @@ struct LCTNode
   int tree_size;
   int vtree_size;
   i8 tree_weight;
-  LCTNode(int _id = 0, const S &_weight = Self::s_nil,
-          const U &_upd = Self::u_nil, i8 _tree_weight = 1) {
+  LCTNode(int _id = 0, const S &_weight = SBT::s_nil,
+          const U &_upd = SBT::u_nil, i8 _tree_weight = 1) {
     init(_id, _weight, _upd, _tree_weight);
   }
-  void init(int _id = 0, const S &_weight = Self::s_nil,
-            const U &_upd = Self::u_nil, i8 _tree_weight = 1) {
+  void init(int _id = 0, const S &_weight = SBT::s_nil,
+            const U &_upd = SBT::u_nil, i8 _tree_weight = 1) {
     id = _id;
     left = right = father = tree_father = NIL;
     rev = false;
@@ -44,8 +43,7 @@ struct LCTNode
     }
     NIL = new LCTNode(-1, _s_nil, _u_nil, 0);
     NIL->left = NIL->right = NIL->father = NIL->tree_father = NIL;
-    SelfBalanceTreeBase<S, U, ID, CID>::Register(_s_nil, _u_nil, _s_s, _s_u,
-                                                 _u_u);
+    SBT::Register(_s_nil, _u_nil, _s_s, _s_u,  _u_u);
   }
 
   void reverse() {
@@ -100,9 +98,9 @@ struct LCTNode
     if (x == NIL) {
       return;
     }
-    x->sum = Self::s_u(x->sum, upd);
-    x->weight = Self::s_u(x->weight, upd);
-    x->upd = Self::u_u(x->upd, upd);
+    x->sum = SBT::s_u(x->sum, upd);
+    x->weight = SBT::s_u(x->weight, upd);
+    x->upd = SBT::u_u(x->upd, upd);
     this->apply_sum_rev(upd);
   }
   static void access(Self *x) {
@@ -220,7 +218,7 @@ struct LCTNode
     return x;
   }
   void travel(const BiConsumer<int, S> &consumer, bool rev = false,
-              const U &upd = Self::u_nil) const {
+              const U &upd = SBT::u_nil) const {
     const Self *root = this;
     if (root == NIL) {
       return;
@@ -228,9 +226,9 @@ struct LCTNode
     if (root->rev) {
       rev = !rev;
     }
-    U new_upd = Self::u_u(root->upd, upd);
+    U new_upd = SBT::u_u(root->upd, upd);
     (rev ? root->right : root->left)->travel(consumer, rev, new_upd);
-    consumer(root->id, Self::s_u(root->weight, upd));
+    consumer(root->id, SBT::s_u(root->weight, upd));
     (rev ? root->left : root->right)->travel(consumer, rev, new_upd);
   }
 
@@ -266,7 +264,7 @@ struct LCTNode
       return;
     }
     root->sum =
-        Self::s_s(Self::s_s(root->left->sum, root->weight), root->right->sum);
+        SBT::s_s(SBT::s_s(root->left->sum, root->weight), root->right->sum);
     this->push_up_sum_rev(*(root->left), *(root->right));
     root->tree_size = root->left->tree_size + root->right->tree_size +
                       root->vtree_size + root->tree_weight;
@@ -298,8 +296,7 @@ struct LCTNode
     //        return findRoot(b) == a;
   }
 };
-template <class S, class U, bool DIR, i64 ID>
-LCTNode<S, U, DIR, ID> *LCTNode<S, U, DIR, ID>::NIL = NULL;
-#undef CID
+template <class SBT, class S, class U, bool DIR, i64 ID>
+LCTNode<SBT, S, U, DIR, ID> *LCTNode<SBT, S, U, DIR, ID>::NIL = NULL;
 }  // namespace sbt
 }  // namespace dalt

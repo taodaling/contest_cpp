@@ -374,7 +374,7 @@ inline bool operator!=(const_ref(BitSet) a, const_ref(BitSet) b) {
 }
 inline bool operator<(const_ref(BitSet) a, const_ref(BitSet) b) {
   Assert(a.capacity == b.capacity);
-  return memcpy((void *)a.data.data(), (void *)b.data.data(), a.capacity) < 0;
+  return memcmp((void *)a.data.data(), (void *)b.data.data(), a.capacity) < 0;
 }
 inline BitSet operator|(const_ref(BitSet) a, const_ref(BitSet) b) {
   return a.clone() |= b;

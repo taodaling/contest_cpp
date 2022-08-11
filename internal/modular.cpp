@@ -9,11 +9,13 @@ T Modular(E val, T mod) {
   }
   return T(val);
 }
-inline i32 MulMod(i32 a, i32 b, i32 modulus) {
+template<class T>
+inline T MulMod(T a, T b, T modulus) {
   i64 res = i64(a) * i64(b) % modulus;
-  return i32(res);
+  return T(res);
 }
-inline i64 MulMod(i64 a, i64 b, i64 modulus) {
+template<>
+inline i64 MulMod<i64>(i64 a, i64 b, i64 modulus) {
   i64 k = roundl((f80)a / modulus * b);
   i64 res = (a * b - k * modulus) % modulus;
   if (res < 0) {
