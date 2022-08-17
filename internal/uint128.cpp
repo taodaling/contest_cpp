@@ -22,6 +22,18 @@ struct uint128 {
     }
     return Self(l, h);
   }
+  friend OStream& operator<<(OStream &os, const Self& x) {
+    if(x.high) {
+      os << x.high;
+    }
+    os << x.low;
+    return os;
+  }
+  friend IStream& operator>>(IStream &is, Self& x) {
+    x.high = 0;
+    is >> x.low;
+    return is;
+  }
   friend Self operator*(const Self& a, const Self& b) {
     static u64 mask = ((u64(1) << 32) - 1);
     u64 all = a.low & mask;
@@ -46,13 +58,14 @@ struct uint128 {
     return MakePair(high, low) < MakePair(rhs.high, rhs.low);
   }
   ImplDefaultComparision(Self);
+  ImplArithmeticAssignOperation(Self);
   //ImplArithmeticAssignOperation(Self);
-  bool operator==(const Self& rhs) {
+  bool operator==(const Self& rhs) const {
     return high == rhs.high && low == rhs.low;
   }
-  bool operator!=(const Self& rhs) { return !(*this == rhs); }
+  bool operator!=(const Self& rhs) const { return !(*this == rhs); }
   // x < 2 ^ 31
-  u32 modular(u32 x) {
+  u32 modular(u32 x) const {
     static u64 max = std::numeric_limits<u64>::max();
     u64 ans = low < x ? low : low % x;
     if (high > 0) {
@@ -61,6 +74,22 @@ struct uint128 {
     }
     return ans;
   }
+  u32 operator%(u32 x) const {
+    return modular(x);
+  }
+  Self operator/(u32 x) const {
+    static const u32 ALL_ONE = -1;
+    u64 y = high;
+    u64 top = y / x;
+    y = y - top * x;
+    y = (y << 32) | (low >> 32);
+    u64 low_high = y / x;
+    y = y - low_high * x;
+    y = (y << 32) | (low & ALL_ONE);
+    u64 low_low = y / x;
+    return Self(low_low | (low_high << 32), top);  
+  }
 };
 using u128 = uint128;
+
 }  // namespace dalt
