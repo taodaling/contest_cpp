@@ -14,7 +14,7 @@ private:
   Comparator<i32> comparator;
   SparseTable<i32> *st;
 
-  i32 minor(i32 a, i32 b) { return comparator(a, b) <= 0 ? a : b; }
+  i32 minor(i32 a, i32 b) { return !comparator(b, a) ? a : b; }
 
 public:
   using Self = StaticRMQ;
@@ -30,7 +30,9 @@ public:
       }
     }
     st = new SparseTable<i32>(consider_part, MakeIndexer<i32>(min_indices),
-                              comparator);
+                              [&](int a, int b) {
+                                return minor(a, b);
+                              });
     int mask = 0;
     for (int i = 0; i < n; i++) {
       if ((i & AND_MASK) == 0) {
