@@ -8,7 +8,7 @@ struct RangeAffineRangeSum {
   using Self = RangeAffineRangeSum<T>;
  private:
   using A = Array<T, 2>;
-  using ST = SegTree<SelfBalanceTreeRegistry<A, A, 0, Self>, A, A, false, false, 0>;
+  using ST = SegTree<SelfBalanceTreeRegistry<A, A, 0, Self>, false, false, 0>;
   ST st;
 
   struct InitJob {

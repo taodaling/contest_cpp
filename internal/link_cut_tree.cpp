@@ -3,11 +3,12 @@
 #include "sbt_reverse.cpp"
 namespace dalt {
 namespace sbt {
-template <class SBT, class S, class U, bool DIR = false, i64 ID = 0>
-struct LCTNode
-    : protected SbtReverse<S, U, DIR, SBT> {
+template <class SBT, bool DIR = false, i64 ID = 0>
+struct LCTNode {
   static_assert(is_sbt_registry_v<SBT>);
-  using Self = LCTNode<SBT, S, U, DIR, ID>;
+  using S = typename SBT::TypeS;
+  using U = typename SBT::TypeU;
+  using Self = LCTNode<SBT, DIR, ID>;
   static Self *NIL;
   Self *left;
   Self *right;
@@ -296,7 +297,7 @@ struct LCTNode
     //        return findRoot(b) == a;
   }
 };
-template <class SBT, class S, class U, bool DIR, i64 ID>
-LCTNode<SBT, S, U, DIR, ID> *LCTNode<SBT, S, U, DIR, ID>::NIL = NULL;
+template <class SBT, bool DIR, i64 ID>
+LCTNode<SBT, DIR, ID> *LCTNode<SBT, DIR, ID>::NIL = NULL;
 }  // namespace sbt
 }  // namespace dalt

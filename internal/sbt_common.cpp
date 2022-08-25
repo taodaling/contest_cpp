@@ -3,8 +3,10 @@
 #include "nil.cpp"
 namespace dalt {
 namespace sbt {
-template <class S, class U, i64 ID, class CID = Nil>
+template <class S, class U, i64 ID = 0, class CID = Nil>
 struct SelfBalanceTreeRegistry {
+  using TypeS = S;
+  using TypeU = U;
   static S s_nil;
   static U u_nil;
   static Adder<S, S> s_s;

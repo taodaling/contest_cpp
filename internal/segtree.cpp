@@ -4,10 +4,12 @@
 namespace dalt {
 namespace sbt {
 #define CLASS_ID -202202131500
-template <class SBT, class S, class U, bool P = false, bool SPARSE = false, i64 ID = 0>
+template <class SBT, bool P = false, bool SPARSE = false, i64 ID = 0>
 struct SegTree {
   static_assert(is_sbt_registry_v<SBT>);
   static_assert(int(P) + int(SPARSE) <= 1);
+  using S = typename SBT::TypeS;
+  using U = typename SBT::TypeU;
   struct Node {
     using Self = Node;
     Self *left;
@@ -51,7 +53,7 @@ struct SegTree {
       upd = SBT::u_u(upd, u);
     }
   };
-  using Self = SegTree<SBT, S, U, P, SPARSE, ID>;
+  using Self = SegTree<SBT, P, SPARSE, ID>;
   static Node *NIL;
   Node *tree;
   int n;
@@ -368,9 +370,9 @@ struct SegTree {
 #endif
 };
 #undef CLASS_ID
-template <class SBT, class S, class U, bool P, bool SPARSE, i64 ID>
-typename SegTree<SBT, S, U, P, SPARSE, ID>::Node
-    *SegTree<SBT, S, U, P, SPARSE, ID>::NIL = NULL;
+template <class SBT, bool P, bool SPARSE, i64 ID>
+typename SegTree<SBT, P, SPARSE, ID>::Node
+    *SegTree<SBT, P, SPARSE, ID>::NIL = NULL;
 
 }  // namespace sbt
 }  // namespace dalt

@@ -7,7 +7,7 @@ namespace misc {
 template <class T, class C = Less<T>>
 struct StaticRectQuery {
   using Self = StaticRectQuery<T>;
-  using PST = sbt::SegTree<sbt::SelfBalanceTreeRegistry<i32, i32, 0, Self>, i32, i32, true, false, 0>;
+  using PST = sbt::SegTree<sbt::SelfBalanceTreeRegistry<i32, i32, 0, Self>, true, false, 0>;
   using Node = typename PST::Node;
 
  private:

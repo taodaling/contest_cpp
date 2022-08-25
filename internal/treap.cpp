@@ -6,11 +6,13 @@
 #include "sbt_reverse.cpp"
 namespace dalt {
 namespace sbt {
-template <class SBT, class S, class U, i64 ID = 0, bool P = false, bool DIR = false>
-struct Treap : protected SbtReverse<S, U, DIR, SBT> {
+template <class SBT, i64 ID = 0, bool P = false, bool DIR = false>
+struct Treap {
  static_assert(is_sbt_registry_v<SBT>);
+  using S = typename SBT::TypeS;
+  using U = typename SBT::TypeU;
  private:
-  using Self = Treap<SBT, S, U, ID, P, DIR>;
+  using Self = Treap<SBT, ID, P, DIR>;
   using AT2 = Array<Self *, 2>;
   AT2 split_by_weight_first_true(const Checker<S> &checker, bool &find) {
     if (this == NIL) {
@@ -260,7 +262,7 @@ struct Treap : protected SbtReverse<S, U, DIR, SBT> {
     return res;
   }
 };
-template <class SBT, class S, class U, i64 ID, bool P, bool DIR>
-Treap<SBT, S, U, ID, P, DIR> *Treap<SBT, S, U, ID, P, DIR>::NIL = NULL;
+template <class SBT, i64 ID, bool P, bool DIR>
+Treap<SBT, ID, P, DIR> *Treap<SBT, ID, P, DIR>::NIL = NULL;
 }  // namespace sbt
 }  // namespace dalt
