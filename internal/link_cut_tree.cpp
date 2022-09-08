@@ -4,7 +4,7 @@
 namespace dalt {
 namespace sbt {
 template <class SBT, bool DIR = false, i64 ID = 0>
-struct LCTNode {
+struct LCTNode: public SbtReverse<SBT, DIR> {
   static_assert(is_sbt_registry_v<SBT>);
   using S = typename SBT::TypeS;
   using U = typename SBT::TypeU;

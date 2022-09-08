@@ -7,7 +7,7 @@
 namespace dalt {
 namespace sbt {
 template <class SBT, i64 ID = 0, bool P = false, bool DIR = false>
-struct Treap {
+struct Treap: public SbtReverse<SBT, DIR> {
  static_assert(is_sbt_registry_v<SBT>);
   using S = typename SBT::TypeS;
   using U = typename SBT::TypeU;

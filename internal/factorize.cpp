@@ -90,4 +90,24 @@ enable_if_t<is_integral_v<T>, Vec<T>> Factorize(T n) {
   MakeUnique(set);
   return set;
 }
+template<class T>
+enable_if_t<is_integral_v<T>, Vec<T>> FindAllFactors(T n) {
+  Vec<T> small;
+  Vec<T> big;
+  for(T i = T(1); ; i++) {
+    int n_div_i = n / i;
+    if (n_div_i < i) {
+      break;
+    }
+    if(n == n_div_i * i) {
+      small.push_back(i);
+      if(i != n_div_i) {
+        big.push_back(n_div_i);
+      }
+    }
+  }
+  Reverse(All(big));
+  small.insert(small.end(), All(big));
+  return small;
+}
 }  // namespace dalt
