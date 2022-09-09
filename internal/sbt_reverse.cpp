@@ -2,10 +2,12 @@
 #include "optional_field.cpp"
 namespace dalt {
 namespace sbt {
-template <class S, class U, bool EXIST, class REG>
+template <class REG, bool EXIST>
 struct SbtReverse {
   static_assert(is_sbt_registry_v<REG>);
-  using Self = SbtReverse<S, U, EXIST, REG>;
+  using S = typename REG::TypeS;
+  using U = typename REG::TypeU;
+  using Self = SbtReverse<REG, EXIST>;
 
  protected:
   misc::OptionalField<S, EXIST> sum_rev;
