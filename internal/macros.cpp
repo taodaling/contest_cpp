@@ -6,6 +6,7 @@
 #define Size(T) int((T).size())
 #define All(data) data.begin(), data.end()
 #define MakeUnique(data) data.resize(std::unique(All(data)) - data.begin())
+#define MakeUniqueAndSort(data) Sort(All(data)); MakeUnique(data) 
 #define MakeAttribute(struct_name, Type, attr_name)               \
   struct struct_name {                                            \
     using attr_name ## _type = Type;                              \

@@ -25,7 +25,7 @@ FunctionAlias(std::abs, Abs);
 FunctionAlias(std::sin, Sin);
 FunctionAlias(std::asin, Asin);
 FunctionAlias(std::cos, Cos);
-FunctionAlias(std::acos, Acon);
+FunctionAlias(std::acos, Acos);
 FunctionAlias(std::tan, Tan);
 FunctionAlias(std::atan, Atan);
 FunctionAlias(std::sort, Sort);

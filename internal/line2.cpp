@@ -45,7 +45,7 @@ public:
   T dist(const Pt& pt) const { return side0(pt).abs() / vec.abs(); }
   T square_dist(const Pt& pt) const { return Pow2(side0(pt)) / vec.square(); }
   Self perpendicular_through(const Pt& pt) const {
-    return Self(pt, pt + vec.perpendicular());
+    return Self::from_ends(pt, pt + vec.perpendicular());
   }
   //判断一条平行的直线处于当前的上方还是下方，上方为1，下方为-1，重合为0
   int side(const Self& line) const {

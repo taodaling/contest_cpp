@@ -74,7 +74,8 @@ struct Point {
   }
   // ret \in [0, pi)
   static FType angle(const Self& lhs, const Self& rhs) {
-    return Acos(Clamp<FType>(lhs.dot(rhs) / lhs.abs() / rhs.abs(), -1, 1));
+    return Acos(Clamp<FType>(dot(lhs, rhs).value / lhs.abs() / rhs.abs(),
+                             FType(-1), FType(1)));
   }
 
   static int orient(const Self& b, const Self& c) { return cross(b, c).sign(); }

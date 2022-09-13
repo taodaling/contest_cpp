@@ -1,127 +1,29 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "link_cut_tree.cpp"
-#include "math/mat3d.cpp"
-#include "suffix_automaton.cpp"
-using namespace math;
-void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, K;
-  in >> N >> K;
-  seq::SuffixAutomaton<> sa(1e5);
-  // Debug("build sa");
-  Vec<Str> ss(N);
-  for (int i = 0; i < N; i++) {
-    Str &s = ss[i];
-    in >> s;
-    sa.build_next();
-    for (char c : s) {
-      sa.build(c);
-    }
-  }
-  var &nodes = sa.all;
-  // Debug("Join lct");
-  using SBT = sbt::SelfBalanceTreeRegistry<Vec3<int>, Mat3<int>>;
-  using LCT = sbt::LCTNode<SBT, false>;
-  LCT::Register(
-      Vec3<int>{0, 0, 0},
-      Mat3<int>{Vec3<int>{1, 0, 0}, Vec3<int>{0, 1, 0}, Vec3<int>{0, 0, 1}},
-      [&](var &a, var &b) { return a + b; }, 
-      [&](var &a, var &b) { return b * a; },
-      [&](var &a, var &b) { return b * a; });
 
-  Vec<LCT> lcts(Size(nodes));
-  // Debug(Size(nodes));
-  for(int i = 0; i < Size(nodes); i++) {
-    lcts[i].id = i;
-    lcts[i].weight = Vec3<int>{0, 1, 1};
-    lcts[i].push_up();
-  }
-  for(int i = 0; i < Size(nodes); i++) {
-     Debug(nodes[i]->get_max_length());
-     Debug(nodes[i]->get_min_length());
-    if(nodes[i]->fail) {
-      DebugFmtln("join %d %d", i, nodes[i]->fail->id);
-      LCT::join(&lcts[i], &lcts[nodes[i]->fail->id]);
+void SolveOne(int test_id, IStream &in, OStream &out) {
+  int N;
+  in >> N;
+  int people = 2;
+  for(int i = 0; i < N; i++) {
+    Str name;
+    in >> name;
+    people++;
+    if(name.size() >= 4 && name.substr(name.size() - 4, 4) == "+one") {
+      people++;
     }
   }
-  LCT::make_root(&lcts[0]);
-  // Debug("find k");
-  Vec<int> ids(1e5);
-  for(var &s : ss) {
-    var matcher = sa.matcher();
-    ids.clear();
-    for(var c : s) {
-      matcher.match(c);
-      ids.push_back(matcher.match_last->id);
-    }
-    // Debug(s);
-    // Debug(ids);
-    for(var id : ids) {
-      LCT::access(&lcts[id]);
-      LCT::splay(&lcts[id]);
-      lcts[id].modify(Mat3<int>{
-        Vec3<int>{1, 1, 0},
-        Vec3<int>{0, 0, 0},
-        Vec3<int>{0, 0, 1},
-      });
-    }
-    for (var id : ids) {
-      LCT::access(&lcts[id]);
-      LCT::splay(&lcts[id]);
-      lcts[id].modify(Mat3<int>{
-          Vec3<int>{1, 0, 0},
-          Vec3<int>{0, 0, 1},
-          Vec3<int>{0, 0, 1},
-      });
-    }
-  }
-  Debug("find k2");
-  for(int i = 0; i < Size(nodes); i++) {
-    LCT::splay(&lcts[i]);
-     Debug(i);
-     Debug(lcts[i].weight);
-    if(lcts[i].weight[0] >= K && i > 0) {
-      int len = nodes[i]->get_max_length() - nodes[i]->get_min_length() + 1;
-      lcts[i].weight = Vec3<int>{len, len, 0};
-      //Debug(i);
-    } else {
-      lcts[i].weight = Vec3<int>();
-    }
-    lcts[i].push_up();
-    // Debug(i);
-    Debug(lcts[i].weight);
-    Debug(lcts[i].sum);
-  }
-  Debug("find result");
-  for(var &s : ss) {
-    ids.clear();
-    var matcher = sa.matcher();
-    for(var c : s) {
-      matcher.match(c);
-      ids.push_back(matcher.match_last->id);
-    }
-    i64 ans = 0;
-    //Debug(s);
-    Debug(ids);
-    for(var id : ids) {
-      LCT::access(&lcts[id]);
-      LCT::splay(&lcts[id]);
-      Debug(id);
-      Debug(lcts[id].sum);
-      Debug(lcts[id].weight);
-      ans += lcts[id].sum[0];
-    }
-    out << ans << " ";
-  }
+  people += people == 13;
+  out << people * 100;
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  // std::ifstream input("in");
+  //std::ifstream input("in");
   int num_of_input = 1;
-  // in >> num_of_input;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    // SolveOne(i + 1, input, out);
-    SolveOne(i + 1, in, out);
+    //SolveOne(i + 1, input, out);
+	SolveOne(i + 1, in, out);
   }
 }
