@@ -10,7 +10,7 @@ enable_if_t<is_integral_v<T>, Optional<T>> FirstTrue(
     return {};
   }
   while (l < r) {
-    T m = DivFloor(l + r, 2);
+    T m = DivFloor<T>(l + r, 2);
     if (checker(m)) {
       r = m;
     } else {
@@ -26,7 +26,7 @@ enable_if_t<is_integral_v<T>, Optional<T>> LastTrue(T l, T r,
     return {};
   }
   while (l < r) {
-    T m = DivCeil(l + r, 2);
+    T m = DivCeil<T>(l + r, 2);
     if (checker(m)) {
       l = m;
     } else {

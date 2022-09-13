@@ -163,6 +163,9 @@ struct SuffixAutomaton {
         }
       }
     }
+    for(int i = 0; i < Size(all); i++) {
+      all[i]->id = i;
+    }
     return all;
   }
   Vec<Right> calculate_right(const Indexer<T>& s, int n) {
