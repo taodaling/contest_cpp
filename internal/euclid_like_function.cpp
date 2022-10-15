@@ -126,7 +126,7 @@ i64 FirstOccurResidue(i64 a, i64 b, i64 m, i64 L, i64 R) {
   return dfs(dfs, a, b, m, L, R);
 }
 
- // Find minimum value for ax+b % p where 0<=x<=k
+ // Find minimum value for ax+b % m where 0<=x<=k
  // O(\log_2m)
  // credited to: https://codeforces.com/blog/entry/90690
  // The code only support 32bit integer, even though the parameter is i64
