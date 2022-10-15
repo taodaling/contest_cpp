@@ -2,6 +2,7 @@
 #include "common.cpp"
 namespace dalt {
 struct DecompsePermutation {
+  //in each run, groups[i][j] => groups[i][j + 1]
   Vec<Vec<int>> groups;
   Vec<Array<int, 2>> ids;
   DecompsePermutation(Vec<int> perm) {
@@ -34,7 +35,7 @@ struct DecompsePermutation {
     const DecompsePermutation* ptr;
     int operator[](int i) const {
       auto &g = ptr->groups[ptr->ids[i][0]];
-      return g[(i + k) % Size(g)];
+      return g[(ptr->ids[i][1] + k) % Size(g)];
     }
   };
   PowView pow(u64 k = 0) const {

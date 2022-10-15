@@ -23,10 +23,7 @@ struct StaticRectQuery {
     }
   };
   static InitJob _init_job;
-
  public:
-
-
   StaticRectQuery(int n, const Indexer<T> &indexer, C _comp = C())
       : comp(_comp) {
     sorted_input = ExpandIndexer(n, indexer);

@@ -1,5 +1,6 @@
 #pragma once
 #include "point3.cpp"
+#include "plane3.cpp"
 namespace dalt {
 namespace geo3 {
 template <class T>
@@ -16,7 +17,7 @@ struct Coords3 {
     dy = dz * dx;
   }
   Coords3(p3 p, p3 q, p3 r, p3 s) : o(p), dx(q - p), dy(r - p), dz(s - p) {}
-  pt pos2d(p3 p) const { return {(p - o) | dx, (p - o) | dy}; }
+  p3 pos2d(p3 p) const { return {(p - o) | dx, (p - o) | dy}; }
   p3 pos3d(p3 p) const { return {(p - o) | dx, (p - o) | dy, (p - o) | dz}; }
 };
 }  // namespace geo3

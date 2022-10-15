@@ -1,7 +1,7 @@
 #include "common.cpp"
 
 namespace dalt {
-String ReadAll(IStream &in, int cap = 10 << 20) {
+String ReadAll(IStream &in, int cap = 0) {
   in >> std::noskipws;
   String s;
   s.reserve(cap);

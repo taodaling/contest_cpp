@@ -1,42 +1,37 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "line3.cpp"
-using namespace geo3;
-using Nv = NearValue<f80, 6>;
-using Pt = Point3<Nv>;
-using Ln = Line3<Nv>;
+#include "D:\source\contest_cpp\internal\decomposed_permutation_tree.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  Pt a, b, c, d;
-#define READ_PT(t) in >> t.x >> t.y >> t.z
-  READ_PT(a);
-  READ_PT(b);
-  READ_PT(d);
-  READ_PT(c);
-  Ln l1(a, b);
-  Ln l2(d, c);
-  if (Ln::isPerpendicular(l1, l2)) {
-    var np = Ln::closestOnL1(l1, l2);
-    var np2 = Ln::closestOnL1(l2, l1);
-    Debug(np);
-    Debug(np2);
-    Debug((a - np).abs() - ((a - b).abs() + (b - np).abs()));
-    Debug((c - np2).abs() - ((c - d).abs() + (d - np2).abs()));
-    if (l2.dist(np) == 0 && (a - np).abs() == (a - b).abs() + (b - np).abs() &&
-        (c - np2).abs() == (c - d).abs() + (d - np2).abs()) {
-      out << "Valid";
-      return;
+  int N;
+  in >> N;
+  Vec<int> P(N);
+  in >> P;
+  int total = 0;
+  var root = BuildDecomposedPermutationTree(P, [&]() {
+    total++;
+    return new DecomposedPermutationTree();
+  });
+  int id_allocator = 0;
+  var dfs = [&](var &dfs, DecomposedPermutationTree *root) -> void {
+    int id = id_allocator++;
+    out << ' ' << root->ll << ' ' << root->rr << ' '
+        << (root->join ? "linear" : "prime") << '\n';
+    for (var node : root->adj) {
+      out << id;
+      dfs(dfs, node);
     }
-  }
-  out << "Invalid";
+  };
+  out << total << '\n' << -1;
+  dfs(dfs, root);
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  // std::ifstream input("in");
+  //std::ifstream input("in");
   int num_of_input = 1;
-  // in >> num_of_input;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    // SolveOne(i + 1, input, out);
-    SolveOne(i + 1, in, out);
+    //SolveOne(i + 1, input, out);
+	SolveOne(i + 1, in, out);
   }
 }

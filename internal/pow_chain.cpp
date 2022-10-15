@@ -5,7 +5,6 @@
 #include "totient.cpp"
 namespace dalt {
 namespace math {
-#define CID -202202162049
 //(\log mod)^2
 
 template <class E>
@@ -67,6 +66,5 @@ struct PowerChain {
     return dfs(dfs, l, mod).first;
   }
 };
-#undef CID
 }  // namespace math
 }  // namespace dalt
