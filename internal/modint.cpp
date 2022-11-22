@@ -11,7 +11,7 @@ namespace dalt {
 // static T primitive_root;
 MakeAnnotation(modular);
 
-template <class T, i64 M, i64 PR, i64 PHI = M - 1>
+template <class T, i64 M, i64 PR = -1, i64 PHI = M - 1>
 struct StaticModular {
   static_assert(is_integral_v<T>);
   const static T modulus = M;

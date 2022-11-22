@@ -3,6 +3,7 @@
 using namespace dalt;
 
 void SolveOne(int test_id, IStream &in, OStream &out) {
+
 }
 
 void SolveMulti(IStream &in, OStream &out) {

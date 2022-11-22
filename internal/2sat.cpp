@@ -7,7 +7,7 @@ private:
   using E = graph::DiBaseEdge;
   Vec<Vec<E>> g;
   void dep_on(int a, int b) {
-    DebugFmtln("%d %d", a, b);
+    DebugFmtln("dep_on(%d, %d)", a, b);
     g[a].push_back(E());
     g[a].back().to = b;
   }
@@ -62,6 +62,15 @@ public:
       res[i] = values[id(i)];
     }
     return res;
+  }
+  Vec<Vec<int>> to_vec() const {
+    Vec<Vec<int>> ans(Size(g));
+    for(int i = 0; i < Size(g); i++) {
+      for(var &e : g[i]) {
+        ans[i].push_back(e.to);
+      }
+    }
+    return ans;
   }
 };
 } // namespace dalt
