@@ -1,20 +1,21 @@
 #pragma once
 #include "common.cpp"
+#include "hashmap.cpp"
 namespace dalt {
 namespace seq {
-// verified by: 
+// verified by:
 //  - https://loj.ac/p/141
-template <int C = 26>
-struct PalindromeAutomaton {
+struct Eertree {
   struct Node {
-    Array<Node *, C> next;
-    Node* fail;
+    int id;
+    Node *fail;
     int len;
     int depth;
+    Vec<Node *> children;
   };
   Node *odd;
   Node *even;
-
+  hash::HashMap<u64, Node *> hm;
   Vec<i32> data;
   int zero;
   int front_size;
@@ -27,14 +28,23 @@ struct PalindromeAutomaton {
 
   Node *newNode() {
     auto ans = new Node();
+    ans->id = Size(all);
     all.push_back(ans);
     return ans;
   }
 
-  PalindromeAutomaton(int front_addition, int back_addition = 0)
+  Node *GetChild(Node *node, int index) {
+    var iter = hm.find(IdOf(node, index));
+    return iter == hm.end() ? NULL : iter->second;
+  }
+  void SetChild(Node *node, int index, Node *item) {
+    hm[IdOf(node, index)] = item;
+  }
+  u64 IdOf(Node *node, int index) { return u64(node->id) << 32 | index; }
+  Eertree(int back_addition, int front_addition = 0)
       : palindrome_substring_cnt(0) {
     int cap = front_addition + back_addition;
-    all.resize(2 + cap);
+    all.reserve(2 + cap);
     data.resize(cap);
     zero = front_addition;
     front_size = zero - 1;
@@ -43,14 +53,18 @@ struct PalindromeAutomaton {
     odd = newNode();
     odd->len = -1;
     odd->depth = 0;
+    odd->id = -1;
 
     even = newNode();
     even->fail = odd;
     even->len = 0;
     even->depth = 0;
+    even->id = -2;
 
     all.clear();
     back_build_last = front_build_last = odd;
+
+    hm = decltype(hm)(cap);
   }
 
   void push_front(i32 c) {
@@ -67,12 +81,13 @@ struct PalindromeAutomaton {
       trace = trace->fail;
     }
 
-    if (trace->next[index] != NULL) {
-      front_build_last = trace->next[index];
+    var next_index_iter = hm.find(IdOf(trace, index));
+    if (next_index_iter != hm.end()) {
+      front_build_last = next_index_iter->second;
     } else {
       auto now = newNode();
       now->len = trace->len + 2;
-      trace->next[index] = now;
+      hm[IdOf(trace, index)] = now;
 
       if (now->len == 1) {
         now->fail = even;
@@ -81,7 +96,7 @@ struct PalindromeAutomaton {
         while (data[front_size + trace->len + 2] != c) {
           trace = trace->fail;
         }
-        now->fail = trace->next[index];
+        now->fail = hm[IdOf(trace, index)];
       }
       now->depth = now->fail->depth + 1;
       front_build_last = now;
@@ -105,13 +120,13 @@ struct PalindromeAutomaton {
     while (data[back_size - trace->len - 2] != c) {
       trace = trace->fail;
     }
-
-    if (trace->next[index] != NULL) {
-      back_build_last = trace->next[index];
+    var next_index_iter = hm.find(IdOf(trace, index));
+    if (next_index_iter != hm.end()) {
+      back_build_last = next_index_iter->second;
     } else {
       auto now = newNode();
       now->len = trace->len + 2;
-      trace->next[index] = now;
+      hm[IdOf(trace, index)] = now;
 
       if (now->len == 1) {
         now->fail = even;
@@ -120,7 +135,7 @@ struct PalindromeAutomaton {
         while (data[back_size - trace->len - 2] != c) {
           trace = trace->fail;
         }
-        now->fail = trace->next[index];
+        now->fail = hm[IdOf(trace, index)];
       }
       now->depth = now->fail->depth + 1;
       back_build_last = now;
@@ -140,6 +155,16 @@ struct PalindromeAutomaton {
   i64 get_palindrome_substring_cnt() const { return palindrome_substring_cnt; }
 
   int get_distinct_palindrome_substring() const { return Size(all); }
+
+#ifdef DROP
+  ~Eertree() {
+    delete odd;
+    delete even;
+    for (var item : all) {
+      delete item;
+    }
+  }
+#endif
 };
 }  // namespace seq
 }  // namespace dalt

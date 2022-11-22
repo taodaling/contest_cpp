@@ -44,10 +44,11 @@ struct HashBase {
     ensure(size + 1);
     return hash + xp[size];
   }
-} __HASH_BASE__;
+};
 decltype(HashBase::x) HashBase::x;
 decltype(HashBase::inv_x) HashBase::inv_x;
 decltype(HashBase::xp) HashBase::xp;
 decltype(HashBase::inv_xp) HashBase::inv_xp;
+HashBase __HASH_BASE__;
 }  // namespace hash
 }  // namespace dalt

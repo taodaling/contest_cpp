@@ -163,6 +163,9 @@ struct HashMap {
     cap = 1 << Log2Ceil(cap);
     recap(cap * 2);
   }
+  int get_size() const {
+    return size;
+  }
   void put(Pair<K, V> kv) { put(Move(kv), get_hash(Hash(kv.first))); }
   void put(K key, V value) { put(Pair<K, V>(Move(key), Move(value))); }
   Iter find(const K& key) {

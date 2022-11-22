@@ -1,4 +1,8 @@
 #pragma once
+#ifndef LOCAL
+#undef _GLIBCXX_DEBUG
+#undef _DEBUG
+#endif
 #include <cassert>
 #include <cmath>
 #include <cstring>

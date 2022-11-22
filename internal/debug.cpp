@@ -11,6 +11,7 @@
 #define DebugRun(X)
 #define DebugPoint
 #endif
+#define Line(x) DebugFmtln("Line %d: %s", __LINE__, #x)
 template<class T>
 inline T DebugRet(T x) {
     Debug(x);

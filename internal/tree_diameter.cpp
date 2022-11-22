@@ -6,9 +6,9 @@ template <class E>
 enable_if_t<is_base_of_v<BiBaseEdge, E>, Tuple<i32, i32, i32>>
 TreeDiameter(const Graph<E> &g) {
   auto depth0 = DepthOnTree(g, [&](i32 i) { return i == 0; });
-  int a = *std::max_element(All(depth0));
+  int a = std::max_element(All(depth0)) - depth0.begin();
   auto depth1 = DepthOnTree(g, [&](i32 i) { return i == a; });
-  int b = *std::max_element(All(depth1));
+  int b = std::max_element(All(depth1)) - depth1.begin();
   return Tuple<i32, i32, i32>(depth1[b], a, b);
 }
 template <class T, class E>

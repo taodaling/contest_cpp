@@ -5,6 +5,7 @@ struct Permutation : public Vec<int> {
   using Self = Permutation;
   Permutation(int n = 0) : Permutation(Vec<int>(n)) {}
   Permutation(Vec<int> data) : Vec<int>(Move(data)) {}
+  //given permutation a, turn i => b[i]
   friend Self operator+(const Self &a, const Self &b) {
     int n = Size(a);
     Self res(n);

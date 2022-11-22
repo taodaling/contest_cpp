@@ -16,6 +16,9 @@ struct MultiHashBase {
     return ans;
   }
   static Mi random() { return Mi(random_choice<i64>(1, Modular::modulus - 1)); }
+  static void initSize(int n) {
+    mem = decltype(mem)(n);
+  }
 };
 template <class T>
 HashMap<T, typename MultiHashBase<T>::Mi> MultiHashBase<T>::mem;

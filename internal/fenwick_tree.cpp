@@ -1,4 +1,5 @@
 #pragma once
+#include "binary.cpp"
 #include "common.cpp"
 namespace dalt {
 template <class T>
@@ -7,15 +8,30 @@ struct FenwickTree {
   // data[i] = \sum_{j \in (i-lowbit(i), i]} A[i]
   Vec<T> data;
   int n;
+  int hb;
 
  public:
   FenwickTree(int _n = 0) {
     n = _n;
     data = Vec<T>(n + 1);
+    hb = HighestOneBit(n);
+  }
+  // find the smallest index i while A[0] + ... + A[i] >= v, if no such index, n will be returned
+  T lower_bound(T v) const {
+    T sum = T(0);
+    int pos = 0;
+    for (int i = hb; i > 0; i >>= 1) {
+      int np = pos + i;
+      if (np <= n && sum + data[np] < v) {
+        sum += data[np];
+        pos = np;
+      }
+    }
+    return pos;
   }
 
   // A[0] + ... + A[i]
-  T query(int i) {
+  T query(int i) const {
     i += 1;
     i = Min(i, n);
     T sum = 0;
@@ -58,7 +74,7 @@ struct FenwickTree {
   // A[i] = x
   void set(int i, T x) { update(i, x - query(i, i)); }
 
-  FenwickTree(const Indexer<T> &initial_value, i32 _n) : FenwickTree(_n) {
+  FenwickTree(i32 _n, const Indexer<T> &initial_value) : FenwickTree(_n) {
     for (int i = 1; i <= n; i++) {
       data[i] = initial_value(i - 1);
     }

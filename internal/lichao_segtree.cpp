@@ -105,7 +105,7 @@ public:
     if (sorted.empty()) {
       sorted.push_back(0);
     }
-    sort(All(sorted));
+    Sort(All(sorted));
     Unique(sorted);
     tree = make_tree(0, Size(sorted) - 1);
   }
