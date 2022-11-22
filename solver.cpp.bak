@@ -1,42 +1,65 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "line3.cpp"
-using namespace geo3;
-using Nv = NearValue<f80, 6>;
-using Pt = Point3<Nv>;
-using Ln = Line3<Nv>;
+#include "factorize.cpp"
+#include "math.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  Pt a, b, c, d;
-#define READ_PT(t) in >> t.x >> t.y >> t.z
-  READ_PT(a);
-  READ_PT(b);
-  READ_PT(d);
-  READ_PT(c);
-  Ln l1(a, b);
-  Ln l2(d, c);
-  if (Ln::isPerpendicular(l1, l2)) {
-    var np = Ln::closestOnL1(l1, l2);
-    var np2 = Ln::closestOnL1(l2, l1);
-    Debug(np);
-    Debug(np2);
-    Debug((a - np).abs() - ((a - b).abs() + (b - np).abs()));
-    Debug((c - np2).abs() - ((c - d).abs() + (d - np2).abs()));
-    if (l2.dist(np) == 0 && (a - np).abs() == (a - b).abs() + (b - np).abs() &&
-        (c - np2).abs() == (c - d).abs() + (d - np2).abs()) {
-      out << "Valid";
-      return;
+  int N, Q;
+  in >> N >> Q;
+  Vec<i64> A(N);
+  in >> A;
+  var factors = Factorize(N);
+  int K = Size(factors);
+  Debug(factors);
+  Vec<Vec<i64>> sum(K);
+  Vec<MultiTreeSet<i64>> sets(K);
+  for(int i = 0; i < K; i++) {
+    int factor = factors[i];
+    int step = N / factor;
+    sum[i] = Vec<i64>(step);
+    for(int j = 0; j < step; j++) {
+      for(int k = j; k < N; k += step) {
+        sum[i][j] += A[k];
+      }
+      sets[i].insert(sum[i][j]);
     }
   }
-  out << "Invalid";
+  Debug(sets);
+  var answer = [&]() {
+    Debug(A);
+    Debug(sets);
+    i64 best = 0;
+    for(int i = 0; i < K; i++) {
+      Chmax(best, (*sets[i].rbegin()) * (N / factors[i])); 
+    }
+    out << best << '\n';
+  };
+  answer();
+  for(int i = 0; i < Q; i++) {
+    int index;
+    i64 x;
+    in >> index >> x;
+    index--;
+    for(int j = 0; j < K; j++) {
+      int factor = factors[j];
+      int step = N / factor;
+      int id = index % step;
+      sets[j].erase(sets[j].lower_bound(sum[j][id]));
+      sum[j][id] -= A[index];
+      sum[j][id] += x;
+      sets[j].insert(sum[j][id]);
+    }
+    A[index] = x;
+    answer();
+  }
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  // std::ifstream input("in");
+  //std::ifstream input("in");
   int num_of_input = 1;
-  // in >> num_of_input;
+  in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    // SolveOne(i + 1, input, out);
-    SolveOne(i + 1, in, out);
+    //SolveOne(i + 1, input, out);
+	SolveOne(i + 1, in, out);
   }
 }

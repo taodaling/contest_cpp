@@ -47,7 +47,6 @@ enable_if_t<is_integral_v<T>, T> FindFactor(T n) {
       return f;
     }
   }
-  Debug("over");
 }
 template <class T>
 enable_if_t<is_integral_v<T>, T> FindPrimeFactor(T n) {
