@@ -2,132 +2,92 @@
 #include "common.cpp"
 using namespace dalt;
 #include "cartesian_tree.cpp"
-#include "math.cpp"
-#include "prefix_sum.cpp"
-#include "fenwick_tree_ext.cpp"
-#include "interval_map.cpp"
+#include "binary_search.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int N, Q;
   in >> N >> Q;
   Vec<int> P(N);
-  in >> P;
   Vec<int> A(N);
-  in >> A;
+  in >> P >> A;
+  int K = 0;
+  for(int a : A) {
+    K += a == 0;
+  }
+  Vec<int> S(K - 1);
+  in >> S;
   using Node = CartesianTree;
-  var root = CartesianTree::from(N, [&](int i, int j) { return P[i] > P[j]; });
+  Node *root = Node::from(N, [&](int a, int b) {return P[a] > P[b];});
   bool ok = true;
-  Vec<Pair<int, int>> range;
-  var dfs = [&](var &dfs, Node *root, int max_from_p) -> int {
+  Vec<Pair<int, int>> intervals;
+  var dfs = [&](var &dfs, Node *root, int max_from_ancestor) -> int {
     if(root == NULL) {
       return 0;
     }
-    if(A[root->index] != 0) {
-      if(max_from_p <= A[root->index]) {
+    int index = root->index;
+    if(A[index] > 0) {
+      if(max_from_ancestor <= A[index]) {
         ok = false;
       }
-      Chmin(max_from_p, A[root->index]);
+      max_from_ancestor = A[index];
     }
-    int max_left = dfs(dfs, root->left, max_from_p);
-    int max_right = dfs(dfs, root->right, max_from_p);
-    int max_child = Max(max_left, max_right);
-    if (A[root->index] != 0) {
-      if (max_child >= A[root->index]) {
+    int left = dfs(dfs, root->left, max_from_ancestor);
+    int right = dfs(dfs, root->right, max_from_ancestor);
+    int max_from_children = Max(left, right);
+    if(A[index] > 0) {
+      if(max_from_children >= A[index]) {
         ok = false;
       }
-      Chmax(max_child, A[root->index]);
+      max_from_children = A[index];
     } else {
-      range.push_back(MakePair(max_child, max_from_p));
+      intervals.push_back(MakePair(max_from_children, max_from_ancestor));
     }
-    return max_child;
+    return max_from_children;
   };
-  dfs(dfs, root, 1e9);
-  for(var &r : range) {
-    if(r.first + 1 >= r.second) { 
-      ok = false;
+  MakeUniqueAndSort(S);
+  ok = ok && Size(S) == K - 1;
+  Sort(All(intervals), [&](var &a, var &b) {
+    return a.second < b.second;
+  });
+  var try_solution = [&](Vec<int> pts, Vec<Pair<int, int>> intervals, bool chance) -> Pair<int, int> {
+    Pair<int, int> ans(0, 1e9);
+    MultiTreeSet<int> pts_set;
+    for(var x : pts) {
+      pts_set.insert(x);
     }
-  }
-  Vec<int> existing;
-  int k = 0;
-  for(int i = 0; i < N; i++) {
-    if(A[i] != 0) {
-      existing.push_back(A[i]);
-    } else {
-      k++;
+    for(var &interval : intervals) {
+      var iter = pts_set.lower_bound(interval.first + 1);
+      if(iter == pts_set.end() || *iter >= interval.second) {
+        if(chance) {
+          chance = false;
+          ans = interval;
+        } else {
+          return MakePair(0, -1);
+        }
+      } else {
+        pts_set.erase(iter);
+      }
     }
-  }
-  Vec<int> S(k - 1);
-  in >> S;
-  existing.insert(existing.end(), All(S));
-  MakeUniqueAndSort(existing);
-  if(Size(existing) != N - 1) {
+    return ans;
+  };
+  var extra = try_solution(S, intervals, true);
+  if(extra.first > extra.second) {
     ok = false;
   }
-  Sort(All(S));
-  Vec<int> begin(k - 1);
-  Vec<int> end(k - 1);
-  Vec<Pair<int, int>> bs_range;
-  for(var &r : range) {
-    int index_begin = UpperBound(All(S), r.first) - S.begin();
-    int index_end = LowerBound(All(S), r.second) - S.begin();
-    if(index_begin < index_end) {
-      if (index_begin < k - 1) {
-        begin[index_begin]++;
-      }
-      if(index_end < k - 1) {
-        end[index_end]++;
-      }
-    }
-    bs_range.push_back(MakePair(index_begin, index_end));
-  }
-  Debug(begin);
-  Debug(end);
-  Debug(range);
-  PrefixSum<int> begin_ps(k - 1, MakeIndexer<int>(begin));
-  PrefixSum<int> end_ps(k - 1, MakeIndexer<int>(end));
-  int inf = 1e9;
-  int min_x_r = inf;
-  int min_x_r_index = k;
-  Line(ft);
-  FenwickTreeExt<i64> ft(k + 1);
-  for(int i = k - 2; i >= 0; i--) {
-    int x = begin_ps.prefix(i);
-    if(min_x_r > x - i) {
-      min_x_r = x - i;
-      min_x_r_index = i;
-    }
-    if(min_x_r < end_ps.prefix(i) - i + 1) {
-      ok = false;
-    } else if (min_x_r == end_ps.prefix(i) - i + 1) {
-      Assert(i <= min_x_r_index);
-      ft.update(i, min_x_r_index, 1);
-    }
-  }
-  Debug(ft.to_vec());
-  Debug(bs_range);
-  Line(im);
-  IntervalMap<int> im;
+  Pair<int, int> range(-1, -1);
   if(ok) {
-    var iter = bs_range.begin();
-    for(var &r : range) {
-      if(ft.query(iter->first, iter->second - 1) == 0) {
-        im.add(r.first + 1, r.second);
-      }
-      ++iter;
-    }
+    var checker = [&](int M) {
+      Vec<int> data;
+      data.reserve(K);
+      data.insert(data.end(), All(S));
+      data.push_back(M);
+      var ans = try_solution(data, intervals, false);
+      return ans.first <= ans.second;
+    };
+    int L = FirstTrue<int>(0, extra.first + 1, checker);
+    int R = LastTrue<int>(extra.second - 1, (int)1e6, checker);
+    range = MakePair(L, R);
   }
-  Debug(im.to_vec());
-  Line(solve);
-  for(int i = 0; i < Q; i++) {
-    int x;
-    in >> x;
-    var iter = LowerBound(All(existing), x);
-    if((iter == existing.end() || *iter != x) && im.cover_line(x).is_some()) {
-      out << "YES";
-    } else {
-      out << "NO";
-    }
-    out << '\n';
-  }
+  
 }
 
 void SolveMulti(IStream &in, OStream &out) {

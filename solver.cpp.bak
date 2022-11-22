@@ -1,16 +1,62 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "hashmap.cpp"
-
+#include "factorize.cpp"
+#include "math.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int N, Q;
   in >> N >> Q;
   Vec<i64> A(N);
   in >> A;
+<<<<<<< HEAD
   Vec<int> factors;
   for(int i = 1; i < N; i++) {
     if(factors)
+=======
+  var factors = Factorize(N);
+  int K = Size(factors);
+  Debug(factors);
+  Vec<Vec<i64>> sum(K);
+  Vec<MultiTreeSet<i64>> sets(K);
+  for(int i = 0; i < K; i++) {
+    int factor = factors[i];
+    int step = N / factor;
+    sum[i] = Vec<i64>(step);
+    for(int j = 0; j < step; j++) {
+      for(int k = j; k < N; k += step) {
+        sum[i][j] += A[k];
+      }
+      sets[i].insert(sum[i][j]);
+    }
+  }
+  Debug(sets);
+  var answer = [&]() {
+    Debug(A);
+    Debug(sets);
+    i64 best = 0;
+    for(int i = 0; i < K; i++) {
+      Chmax(best, (*sets[i].rbegin()) * (N / factors[i])); 
+    }
+    out << best << '\n';
+  };
+  answer();
+  for(int i = 0; i < Q; i++) {
+    int index;
+    i64 x;
+    in >> index >> x;
+    index--;
+    for(int j = 0; j < K; j++) {
+      int factor = factors[j];
+      int step = N / factor;
+      int id = index % step;
+      sets[j].erase(sets[j].lower_bound(sum[j][id]));
+      sum[j][id] -= A[index];
+      sum[j][id] += x;
+      sets[j].insert(sum[j][id]);
+    }
+    A[index] = x;
+    answer();
+>>>>>>> 0644468215eb2b8e75436dff5ab3ad26e226f9c3
   }
 }
 
@@ -22,4 +68,8 @@ void SolveMulti(IStream &in, OStream &out) {
     //SolveOne(i + 1, input, out);
 	SolveOne(i + 1, in, out);
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0644468215eb2b8e75436dff5ab3ad26e226f9c3
