@@ -77,7 +77,7 @@ struct Treap: public SbtReverse<SBT, DIR> {
     SBT::Register(s_nil, u_nil, _s_s, _s_u,
                                                  _u_u);
   }
-  Treap(int _id = 0, S _sum = S())
+  Treap(i64 _id = 0, S _sum = S())
       : sum(_sum),
         weight(_sum),
         id(_id),
@@ -92,7 +92,7 @@ struct Treap: public SbtReverse<SBT, DIR> {
   U upd;
   S weight;
   int size;
-  int id;
+  i64 id;
   Self *left;
   Self *right;
   bool rev;
@@ -154,6 +154,25 @@ struct Treap: public SbtReverse<SBT, DIR> {
       res[1] = this;
     } else {
       res = right->split_by_rank(k - 1 - left->size);
+      right = res[0];
+      res[0] = this;
+    }
+    push_up();
+    return res;
+  }
+  AT2 split_by_id(i64 k) {
+    if (this == NIL) {
+      return AT2{NIL, NIL};
+    }
+    push_down();
+    AT2 res;
+    if (id > k) {
+      res = left->split_by_id(k);
+      left = res[1];
+      res[1] = this;
+    } else {
+      //id <= k
+      res = right->split_by_id(k);
       right = res[0];
       res[0] = this;
     }
