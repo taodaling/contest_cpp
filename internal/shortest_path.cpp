@@ -7,7 +7,8 @@ template <class T, class E,
                               is_base_of_v<WithWeight<T>, E>>>
 Tuple<Vec<T>, Vec<int>> ShortestPathWeightElogE(const Graph<E> &g,
                                                 const Checker<int> &is_source,
-                                                T inf) {
+                                                T inf,
+                                                T zero = 0) {
   using State = Tuple<T, int, int>;
   int n = Size(g);
   MinHeap<State> heap;
@@ -15,7 +16,7 @@ Tuple<Vec<T>, Vec<int>> ShortestPathWeightElogE(const Graph<E> &g,
   Vec<int> prev(n, -1);
   for (int i = 0; i < n; i++) {
     if (is_source(i)) {
-      heap.push(State(0, i, -1));
+      heap.push(State(zero, i, -1));
     }
   }
   while (!heap.empty()) {
@@ -40,7 +41,7 @@ template <class T, class E,
                               is_base_of_v<WithWeight<T>, E>>>
 Tuple<Vec<T>, Vec<int>> ShortestPathWeightElogV(const Graph<E> &g,
                                                 const Checker<int> &is_source,
-                                                T inf) {
+                                                T inf, T zero = 0) {
   int n = Size(g);
   Vec<T> dist(n, inf);
   Vec<int> prev(n, -1);
@@ -49,7 +50,7 @@ Tuple<Vec<T>, Vec<int>> ShortestPathWeightElogV(const Graph<E> &g,
   });
   for (int i = 0; i < n; i++) {
     if (is_source(i)) {
-      dist[i] = 0;
+      dist[i] = zero;
       set.insert(i);
     }
   }

@@ -100,7 +100,16 @@ struct Treap: public SbtReverse<SBT, DIR> {
     rev = !rev;
     this->swap_sum_rev(sum);
   }
-
+  Self *find_by_rank(int rank) {
+    push_down();
+    if(left->size >= rank) {
+      return left->find_by_rank(rank);
+    }
+    if(left->size + 1 == rank) {
+      return this;
+    }
+    return right->find_by_rank(rank - (left->size + 1));
+  }
   Self *clone() {
     if (this == NIL) {
       return this;
@@ -269,6 +278,7 @@ struct Treap: public SbtReverse<SBT, DIR> {
       return b;
     }
   }
+
 
   void travel(const Consumer<S> &consumer) const {
     bool rev_upd = false;

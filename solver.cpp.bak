@@ -1,6 +1,7 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
+<<<<<<< HEAD
 #include "cartesian_tree.cpp"
 #include "binary_search.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
@@ -72,6 +73,62 @@ void SolveOne(int test_id, IStream &in, OStream &out) {
   var extra = try_solution(S, intervals, true);
   if(extra.first > extra.second) {
     ok = false;
+=======
+
+void SolveOne(int test_id, IStream &in, OStream &out) {
+  int N;
+  in >> N;
+  Vec<int> P(N);
+  Vec<int> I(N);
+  in >> P >> I;
+  P -= 1;
+  I -= 1;
+  Vec<int> loc_in_I(N);
+  for(int i = 0; i < N; i++) {
+    loc_in_I[I[i]] = i;
+  }
+  Vec<Pair<int, int>> tree(N, MakePair(-1, -1));
+  bool ok = true;
+  var dfs = [&](var &dfs, int l, int r, int L, int R) {
+    
+    if(r - l != R - L) {
+      ok = false;
+      return -1;
+    }
+    if(l > r) {
+      return -1;
+    }
+    if(l == r) {
+      if(P[l] != I[L]) {
+        ok = false;
+      }
+      DebugFmtln("root = %d, l = %d, r = %d, L = %d, R = %d", P[l] + 1, l, r, L,
+                 R);
+      return P[l];
+    }
+    int root = P[l];
+    int root_in_I = loc_in_I[root];
+    if(root_in_I < L || root_in_I > R) {
+      ok = false;
+      return -1;
+    }
+    int left_size = root_in_I - L;
+    tree[root].first = dfs(dfs, l + 1, l + 1 + left_size - 1, L, root_in_I - 1);
+    tree[root].second = dfs(dfs, l + 1 + left_size, r, root_in_I + 1, R);
+    DebugFmtln("root = %d, l = %d, r = %d, L = %d, R = %d", root + 1, l, r, L, R);
+    return root;
+  };
+  int root = dfs(dfs, 0, N - 1, 0, N - 1);
+  if(root != 0) {
+    ok = false;
+  }
+  if(!ok) {
+    out << -1;
+    return;
+  }
+  for(int i = 0; i < N; i++) {
+    out << tree[i].first + 1 << ' ' << tree[i].second + 1 << '\n';
+>>>>>>> b46946b732639960913f85db39716635a2b19ba2
   }
   Pair<int, int> range(-1, -1);
   if(ok) {
@@ -93,7 +150,7 @@ void SolveOne(int test_id, IStream &in, OStream &out) {
 void SolveMulti(IStream &in, OStream &out) {
   //std::ifstream input("in");
   int num_of_input = 1;
-  in >> num_of_input;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
     //SolveOne(i + 1, input, out);
 	SolveOne(i + 1, in, out);

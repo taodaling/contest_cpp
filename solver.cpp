@@ -1,12 +1,17 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
+<<<<<<< HEAD
 #include "treap.cpp"
+=======
+
+>>>>>>> b46946b732639960913f85db39716635a2b19ba2
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int N, M;
   in >> N >> M;
   Vec<i64> A(N);
   in >> A;
+<<<<<<< HEAD
   TreeMap<i64, Vec<i64>> disallow;
   TreeMap<i64, i64> sg_cache;
   Vec<i64> pending;
@@ -62,6 +67,8 @@ void SolveOne(int test_id, IStream &in, OStream &out) {
     last = item + 1;
     if(last )
   }
+=======
+>>>>>>> b46946b732639960913f85db39716635a2b19ba2
 }
 
 void SolveMulti(IStream &in, OStream &out) {

@@ -33,6 +33,7 @@ FunctionAlias(std::fill, Fill);
 FunctionAlias(std::move, Move);
 FunctionAlias(std::reverse, Reverse);
 FunctionAlias(std::max_element, MaxElement);
+FunctionAlias(std::min_element, MinElement);
 FunctionAlias(std::make_tuple, MakeTuple);
 FunctionAlias(std::make_pair, MakePair);
 FunctionAlias(std::clamp, Clamp);
