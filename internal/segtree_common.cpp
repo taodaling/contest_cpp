@@ -4,10 +4,12 @@
 
 namespace dalt {
 namespace sbt {
-inline bool SegmentNoIntersection(i32 L, i32 R, i32 l, i32 r) {
+template<class T = i32>
+inline bool SegmentNoIntersection(T L, T R, T l, T r) {
   return R < l || r < L;
 }
-inline bool SegmentCover(i32 L, i32 R, i32 l, i32 r) {
+template <class T = i32>
+inline bool SegmentCover(T L, T R, T l, T r) {
   return L <= l && r <= R;
 }
 }  // namespace sbt

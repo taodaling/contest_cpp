@@ -173,6 +173,7 @@
 #include "strongly_connected_component.cpp"
 #include "suffix_array.cpp"
 #include "suffix_automaton.cpp"
+#include "ternary_search.cpp"
 #include "timer.cpp"
 #include "timer_impl.cpp"
 #include "topo_sort.cpp"

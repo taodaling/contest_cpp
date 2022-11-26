@@ -7,7 +7,7 @@ namespace sbt {
 template <class SBT, bool P = false, bool SPARSE = false, i64 ID = 0>
 struct SegTree {
   static_assert(is_sbt_registry_v<SBT>);
-  static_assert(int(P) + int(SPARSE) <= 1);
+  static_assert(i64(P) + i64(SPARSE) <= 1);
   using S = typename SBT::TypeS;
   using U = typename SBT::TypeU;
   struct Node {
@@ -56,7 +56,7 @@ struct SegTree {
   using Self = SegTree<SBT, P, SPARSE, ID>;
   static Node *NIL;
   Node *tree;
-  int n;
+  i64 n;
 
  private:
   Node *make_node() {
@@ -103,16 +103,16 @@ struct SegTree {
   }
 
   SegTree(
-      int _n = 0,
-      const Indexer<S> &indexer = [](int index) { return SBT::s_nil; })
+      i64 _n = 0,
+      const Indexer<S> &indexer = [](i64 index) { return SBT::s_nil; })
       : n(_n) {
-    auto dfs = [&](auto &dfs, int l, int r) -> Node * {
+    auto dfs = [&](auto &dfs, i64 l, i64 r) -> Node * {
       Node *root = make_tree();
       root->upd = SBT::u_nil;
       if (l == r) {
         root->sum = indexer(l);
       } else {
-        int m = (l + r) / 2;
+        i64 m = (l + r) / 2;
         root->left = dfs(dfs, l, m);
         root->right = dfs(dfs, m + 1, r);
         root->push_up();
@@ -121,19 +121,19 @@ struct SegTree {
     };
     tree = dfs(dfs, 0, n - 1);
   }
-  IsBoolStatic(SPARSE, Self) MakeSparseTree(int n) {
+  IsBoolStatic(SPARSE, Self) MakeSparseTree(i64 n) {
     Self res(1);
     res.n = n;
     return res;
   }
-  IsBoolStatic(P, Self) MakePersistentTree(int n) {
+  IsBoolStatic(P, Self) MakePersistentTree(i64 n) {
     Self res(1);
     res.n = n;
     return res;
   }
 
-  S query(int L, int R) {
-    auto dfs = [&](auto &dfs, Node *root, int l, int r) {
+  S query(i64 L, i64 R) {
+    auto dfs = [&](auto &dfs, Node *root, i64 l, i64 r) {
       if (SegmentNoIntersection(L, R, l, r)) {
         return SBT::s_nil;
       }
@@ -141,15 +141,15 @@ struct SegTree {
         return root->sum;
       }
       root->push_down();
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       auto lsum = dfs(dfs, root->left, l, m);
       auto rsum = dfs(dfs, root->right, m + 1, r);
       return SBT::s_s(lsum, rsum);
     };
     return dfs(dfs, tree, 0, n - 1);
   }
-  S query_const(int L, int R) const {
-    auto dfs = [&](auto &dfs, Node *root, int l, int r, const U &upd) {
+  S query_const(i64 L, i64 R) const {
+    auto dfs = [&](auto &dfs, Node *root, i64 l, i64 r, const U &upd) {
       if (SegmentNoIntersection(L, R, l, r)) {
         return SBT::s_nil;
       }
@@ -157,15 +157,15 @@ struct SegTree {
         return SBT::s_u(root->sum, upd);
       }
       U new_upd = SBT::u_u(root->upd, upd);
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       auto lsum = dfs(dfs, root->left, l, m, new_upd);
       auto rsum = dfs(dfs, root->right, m + 1, r, new_upd);
       return SBT::s_s(lsum, rsum);
     };
     return dfs(dfs, tree, 0, n - 1, SBT::u_nil);
   }
-  void update(int L, int R, const U &upd) {
-    auto dfs = [&](auto &dfs, Node *root, int l, int r) {
+  void update(i64 L, i64 R, const U &upd) {
+    auto dfs = [&](auto &dfs, Node *root, i64 l, i64 r) {
       if (SegmentNoIntersection(L, R, l, r)) {
         return;
       }
@@ -174,7 +174,7 @@ struct SegTree {
         return;
       }
       root->push_down();
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       dfs(dfs, root->left, l, m);
       dfs(dfs, root->right, m + 1, r);
       root->push_up();
@@ -182,13 +182,13 @@ struct SegTree {
     dfs(dfs, tree, 0, n - 1);
   }
   void travel(const Consumer<S> &consumer) const {
-    auto dfs = [&](auto &dfs, Node *root, const U &upd, int l, int r) {
+    auto dfs = [&](auto &dfs, Node *root, const U &upd, i64 l, i64 r) {
       // is leaf
       if (l == r) {
         consumer(SBT::s_u(root->sum, upd));
         return;
       }
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       U new_upd = SBT::u_u(root->upd, upd);
       dfs(dfs, root->left, new_upd, l, m);
       dfs(dfs, root->right, new_upd, m + 1, r);
@@ -201,9 +201,9 @@ struct SegTree {
     travel([&](auto x) { res.push_back(x); });
     return res;
   }
-  Optional<Tuple<int, S>> first_true(int L, int R, const Checker<S> &checker) {
+  Optional<Tuple<i64, S>> first_true(i64 L, i64 R, const Checker<S> &checker) {
     S sum = SBT::s_nil;
-    auto dfs = [&](auto &dfs, Node *root, int l, int r) -> Optional<int> {
+    auto dfs = [&](auto &dfs, Node *root, i64 l, i64 r) -> Optional<i64> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -220,7 +220,7 @@ struct SegTree {
         }
       }
       root->push_down();
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       auto lres = dfs(dfs, root->left, l, m);
       if (lres.is_none()) {
         return dfs(dfs, root->right, m + 1, r);
@@ -228,14 +228,14 @@ struct SegTree {
       return lres;
     };
     auto res = dfs(dfs, tree, 0, n - 1);
-    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
-      return Tuple<int, S>(x, sum);
+    Mapper<i64, Tuple<i64, S>> mapper = [&](const i64 &x) -> Tuple<i64, S> {
+      return Tuple<i64, S>(x, sum);
     };
     return res.map(mapper);
   }
-  Optional<Tuple<int, S>> last_true(int L, int R, const Checker<S> &checker) {
+  Optional<Tuple<i64, S>> last_true(i64 L, i64 R, const Checker<S> &checker) {
     S sum = SBT::s_nil;
-    auto dfs = [&](auto &dfs, Node *root, int l, int r) -> Optional<int> {
+    auto dfs = [&](auto &dfs, Node *root, i64 l, i64 r) -> Optional<i64> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -250,7 +250,7 @@ struct SegTree {
         }
       }
       root->push_down();
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       auto lres = dfs(dfs, root->left, l, m);
       if ((lres.is_some() && lres.value() == m) || m < L) {
         auto rres = dfs(dfs, root->right, m + 1, r);
@@ -261,16 +261,17 @@ struct SegTree {
       return lres;
     };
     auto res = dfs(dfs, tree, 0, n - 1);
-    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
-      return Tuple<int, S>(x, sum);
+    Mapper<i64, Tuple<i64, S>> mapper = [&](const i64 &x) -> Tuple<i64, S> {
+      return Tuple<i64, S>(x, sum);
     };
     return res.map(mapper);
   }
-  Optional<Tuple<int, S>> first_true_const(int L, int R,
-                                           const Checker<S> &checker) const {
-    S sum = SBT::s_nil;
-    auto dfs = [&](auto &dfs, Node *root, const U &upd, int l,
-                   int r) -> Optional<int> {
+  Optional<Tuple<i64, S>> first_true_const(i64 L, i64 R,
+                                           const Checker<S> &checker,
+                                           const S& init_sum = SBT::s_nil) const {
+    S sum = init_sum;
+    auto dfs = [&](auto &dfs, Node *root, const U &upd, i64 l,
+                   i64 r) -> Optional<i64> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -287,7 +288,7 @@ struct SegTree {
         }
       }
       U new_upd = SBT::u_u(root->upd, upd);
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       auto lres = dfs(dfs, root->left, new_upd, l, m);
       if (lres.is_none()) {
         return dfs(dfs, root->right, new_upd, m + 1, r);
@@ -295,16 +296,16 @@ struct SegTree {
       return lres;
     };
     auto res = dfs(dfs, tree, SBT::u_nil, 0, n - 1);
-    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
-      return Tuple<int, S>(x, sum);
+    Mapper<i64, Tuple<i64, S>> mapper = [&](const i64 &x) -> Tuple<i64, S> {
+      return Tuple<i64, S>(x, sum);
     };
     return res.map(mapper);
   }
-  Optional<Tuple<int, S>> last_true_const(int L, int R,
+  Optional<Tuple<i64, S>> last_true_const(i64 L, i64 R,
                                           const Checker<S> &checker) const {
     S sum = SBT::s_nil;
-    auto dfs = [&](auto &dfs, Node *root, const U &upd, int l,
-                   int r) -> Optional<int> {
+    auto dfs = [&](auto &dfs, Node *root, const U &upd, i64 l,
+                   i64 r) -> Optional<i64> {
       if (SegmentNoIntersection(L, R, l, r)) {
         return {};
       }
@@ -320,7 +321,7 @@ struct SegTree {
         }
       }
       U new_upd = SBT::u_u(root->upd, upd);
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       auto lres = dfs(dfs, root->left, new_upd, l, m);
       if ((lres.is_some() && lres.value() == m) || m < L) {
         auto rres = dfs(dfs, root->right, new_upd, m + 1, r);
@@ -331,18 +332,18 @@ struct SegTree {
       return lres;
     };
     auto res = dfs(dfs, tree, SBT::u_nil, 0, n - 1);
-    Mapper<int, Tuple<int, S>> mapper = [&](const int &x) -> Tuple<int, S> {
-      return Tuple<int, S>(x, sum);
+    Mapper<i64, Tuple<i64, S>> mapper = [&](const i64 &x) -> Tuple<i64, S> {
+      return Tuple<i64, S>(x, sum);
     };
     return res.map(mapper);
   }
 
   IsBool(!(P || SPARSE), void) destroy() { delete tree; }
   IsBool(P || SPARSE, void) destroy() {}
-  // to support merge, only support single point update
+  // to support merge, only support single poi64 update
   IsBoolStatic(SPARSE, Self) merge(Self a, Self b, const Adder<S, S> &adder) {
     assert(a.n == b.n);
-    auto dfs = [&](auto &dfs, Node *a, Node *b, int l, int r) -> Node * {
+    auto dfs = [&](auto &dfs, Node *a, Node *b, i64 l, i64 r) -> Node * {
       if (a == NIL) {
         return b;
       }
@@ -353,7 +354,7 @@ struct SegTree {
         a->sum = adder(a->sum, b->sum);
         return a;
       }
-      int m = (l + r) / 2;
+      i64 m = (l + r) / 2;
       // a->push_down();
       // b->push_down();
       a->left = dfs(dfs, a->left, b->left, l, m);
