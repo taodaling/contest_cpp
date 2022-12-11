@@ -1,87 +1,72 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "segtree.cpp"
-#include "function.cpp"
+#include "treap.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int N, M;
   in >> N >> M;
   Vec<i64> A(N);
   in >> A;
-  using namespace sbt;
-  using A2 = Array<i64, 2>;
-  using SBT = SelfBalanceTreeRegistry<i64, i64>;
-  using ST = SegTree<SBT, true>;
-  ST::Register(
-      0, 0,
-      [&](i64 a, i64 b) {
-        return Min(a, b);
-      },
-      [&](i64 a, i64 x) {
-        return a + x;
-      },
-      [&](i64 a, i64 b) { return a + b; });
-  i64 inf = 1e18;
-  i64 Size = inf + 10;
-  var root = ST::MakePersistentTree(Size);
-  TreeMap<i64, Vec<i64>> disable;
-  TreeMap<i64, i64> cache;
-  Vec<i64> events;
-  events.insert(events.end(), All(A));
-  for(int i = 0; i < M; i++) {
+  TreeMap<i64, Vec<i64>> disallow;
+  TreeMap<i64, i64> sg_cache;
+  Vec<i64> pending;
+  pending.insert(pending.end(), All(A));
+  for (int i = 0; i < M; i++) {
     i64 x, y;
     in >> x >> y;
-    disable[x].push_back(x - y);
-    events.push_back(x);
-    events.push_back(x - y);
+    y = x - y;
+    disallow[x].push_back(y);
+    pending.push_back(x);
+    pending.push_back(y);
   }
-  MakeUniqueAndSort(events);
-  var update = [&](i64 l, i64 r, i64 val) {
-    if(val == 0 || l > r) {
-      return;
+  MakeUniqueAndSort(pending);
+  using namespace sbt;
+  using SBT = SelfBalanceTreeRegistry<i64, Nil>;
+  using Tp = Treap<SBT>;
+  Tp::Register(0, Nil(), NaturalAdder<i64>(), ReturnLeftAdder<i64, Nil>(),
+               ReturnLeftAdder<Nil>());
+  Tp *root = Tp::NIL;
+
+  i64 mex = 0;
+  var update_pt = [&](i64 x, i64 val) {
+    var p0 = root->split_by_id(x);
+    var p1 = p0[0]->split_by_id(x - 1);
+    if (p1[1] == Tp::NIL) {
+      p1[1] = new Tp(x);
     }
-    DebugFmtln("update(%lld, %lld, %lld)", l, r, val);
-    root.update(l, r, val);
+    p1[1]->sum += val;
+    p1[1]->weight += val;
+    p0[0] = Tp::merge(p1[0], p1[1]);
+    root = Tp::merge(p0[0], p0[1]);
+    mex = Max(mex, x);
   };
-  var mex = [&](const ST& root) {
-    var ans = root.first_true_const(0, Size - 1, [&](var x) {
-      return x == 0;
-    }, 1).value();
-    return std::get<0>(ans);
+  var update_range = [&](i64 l, i64 r, i64 val) {
+    update_pt(l, val);
+    update_pt(r + 1, -val);
   };
-  i64 last = -1;
-  for(var e : events) {
-    Debug(e);
-    Line(previous handle);
-    if(e - 2 - last >= 0) {
-      i64 L = mex(root);
-      update(L, L + e - 2 - last, 1);
+  var query = [&](i64 x) {
+    var p0 = root->split_by_id(x);
+    i64 ans = p0[0]->sum;
+    root = Tp::merge(p0[0], p0[1]);
+    return ans;
+  };
+  i64 mex = 0;
+  i64 last = 0;
+  for (var item : pending) {
+    if (last < item) {
+      // last=>item-1
+      update_range(mex, item - last + mex - 1, 1);
     }
-    Line(point handle);
-    last = e;
-    var new_root = root.clone();
-    for(var item : disable[e]) {
-      i64 sg = cache[item];
-      new_root.update(sg, sg, -1);
-    }
-    i64 next_val = mex(new_root);
-    DebugFmtln("sg(%lld) = %lld", e, next_val);
-    update(next_val, next_val, 1);
-    cache[e] = next_val;
-  }
-  i64 ans = 0;
-  for(i64 a : A) {
-    ans ^= cache[a];
-  }
-  out << (ans != 0 ? "Takahashi" : "Aoki");
+    last = item + 1;
+    if (last) }
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  //std::ifstream input("in");
+  // std::ifstream input("in");
   int num_of_input = 1;
-  //in >> num_of_input;
+  // in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    //SolveOne(i + 1, input, out);
-	SolveOne(i + 1, in, out);
+    // SolveOne(i + 1, input, out);
+    SolveOne(i + 1, in, out);
   }
 }
