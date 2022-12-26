@@ -119,7 +119,11 @@ struct SegTree {
       }
       return root;
     };
-    tree = dfs(dfs, 0, n - 1);
+    if(n <= 0) {
+      tree = make_tree();
+    } else {
+      tree = dfs(dfs, 0, n - 1);
+    }
   }
   IsBoolStatic(SPARSE, Self) MakeSparseTree(int n) {
     Self res(1);
