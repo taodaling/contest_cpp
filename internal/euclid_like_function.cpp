@@ -15,7 +15,9 @@ i64 MinimumResidueOfLinearFunction(i64 a, i64 b, i64 m, i64 k);
  // \sum_{i=0}^n \floor((ai+b)/c)
  // O(\log_2a+\log_2c)
 i64 EuclidLikeFloorAffineSum1(i64 n, i64 a, i64 b, i64 c) {
-  Assert(n >= 0);
+  if(n < 0) {
+    return 0;
+  }
   if (a == 0) {
     return (n + 1) * (b / c);
   }

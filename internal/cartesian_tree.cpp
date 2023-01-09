@@ -6,6 +6,12 @@ struct CartesianTree {
   Self *left;
   Self *right;
   int index;
+  template<class T, class C = Less<T>>
+  static CartesianTree *from(const Vec<T>& data, C c = C()) {
+    return from(Size(data), [&](int i, int j) {
+      return c(data[i], data[j]);
+    });
+  }
   //create cartesian tree from 0..n, the smallest element becomes the root
   //return the root
   static CartesianTree *from(int n, const Comparator<int> &cmp) {
