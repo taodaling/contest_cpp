@@ -14,7 +14,7 @@ private:
   Comparator<i32> comparator;
   SparseTable<i32> *st;
 
-  i32 minor(i32 a, i32 b) { return !comparator(b, a) ? a : b; }
+  i32 minor_one(i32 a, i32 b) { return !comparator(b, a) ? a : b; }
 
 public:
   using Self = StaticRMQ;
@@ -31,7 +31,7 @@ public:
     }
     st = new SparseTable<i32>(consider_part, MakeIndexer<i32>(min_indices),
                               [&](int a, int b) {
-                                return minor(a, b);
+                                return minor_one(a, b);
                               });
     int mask = 0;
     for (int i = 0; i < n; i++) {
@@ -66,9 +66,9 @@ public:
                                   HighestKOnes32(32 - tl)) |
                (bl << SHIFT);
     int res2 = TrailingZeroNumber(to_left[r]) | (br << SHIFT);
-    int best = minor(res1, res2);
+    int best = minor_one(res1, res2);
     if (bl + 1 < br) {
-      best = minor(best, st->query(bl + 1, br - 1));
+      best = minor_one(best, st->query(bl + 1, br - 1));
     }
     return best;
   }

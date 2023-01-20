@@ -1,64 +1,77 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "treap.cpp"
+#include "modint.cpp"
+using Mi = ModInt<DynamicModular<>>;
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, M;
-  in >> N >> M;
-  Vec<i64> A(N);
-  in >> A;
-  TreeMap<i64, Vec<i64>> disallow;
-  TreeMap<i64, i64> sg_cache;
-  Vec<i64> pending;
-  pending.insert(pending.end(), All(A));
-  for (int i = 0; i < M; i++) {
-    i64 x, y;
-    in >> x >> y;
-    y = x - y;
-    disallow[x].push_back(y);
-    pending.push_back(x);
-    pending.push_back(y);
-  }
-  MakeUniqueAndSort(pending);
-  using namespace sbt;
-  using SBT = SelfBalanceTreeRegistry<i64, Nil>;
-  using Tp = Treap<SBT>;
-  Tp::Register(0, Nil(), NaturalAdder<i64>(), ReturnLeftAdder<i64, Nil>(),
-               ReturnLeftAdder<Nil>());
-  Tp *root = Tp::NIL;
+  int N, K, P;
+  in >> N >> K >> P;
+  Mi::Modular::Register(P);
+  MDVec<Mi, 3> prev(K + 1, MDVec<Mi, 2>(N + 1, Vec<Mi>(N + 1)));
+  MDVec<Mi, 3> next = prev;
+  var update = [&](MDVec<Mi, 2> &data, int b, int t, int l, int r, Mi x) {
+    if(t < 0 || r < 0) {
+      return;
+    }
+    data[t][r] += x;
+    if (b > 0) {
+      data[b - 1][r] -= x;
+    }
+    if (l > 0) {
+      data[t][l - 1] -= x;
+    }
+    if (b > 0 && l > 0) {
+      data[b - 1][l - 1] += x;
+    }
+  };
+  prev[0][N - 1][N - 1] = Mi(1);
+  for (int i = 1; i <= N; i++) {
+    Debug(i);
+    next = MDVec<Mi, 3>(K + 1, MDVec<Mi, 2>(N + 1, Vec<Mi>(N + 1)));
+    // post sum
+    Line(post sum);
+    for (int l = 0; l <= K; l++) {
+      for (int row = N; row >= 0; row--) {
+        for (int col = N - 1; col >= 0; col--) {
+          prev[l][row][col] += prev[l][row][col + 1];
+        }
 
-  i64 mex = 0;
-  var update_pt = [&](i64 x, i64 val) {
-    var p0 = root->split_by_id(x);
-    var p1 = p0[0]->split_by_id(x - 1);
-    if (p1[1] == Tp::NIL) {
-      p1[1] = new Tp(x);
+        if (row < N) {
+          for (int col = 0; col <= N; col++) {
+            prev[l][row][col] += prev[l][row + 1][col];
+          }
+        }
+      }
     }
-    p1[1]->sum += val;
-    p1[1]->weight += val;
-    p0[0] = Tp::merge(p1[0], p1[1]);
-    root = Tp::merge(p0[0], p0[1]);
-    mex = Max(mex, x);
-  };
-  var update_range = [&](i64 l, i64 r, i64 val) {
-    update_pt(l, val);
-    update_pt(r + 1, -val);
-  };
-  var query = [&](i64 x) {
-    var p0 = root->split_by_id(x);
-    i64 ans = p0[0]->sum;
-    root = Tp::merge(p0[0], p0[1]);
-    return ans;
-  };
-  i64 mex = 0;
-  i64 last = 0;
-  for (var item : pending) {
-    if (last < item) {
-      // last=>item-1
-      update_range(mex, item - last + mex - 1, 1);
+    if(i == N) {
+      break;
     }
-    last = item + 1;
-    if (last) }
+    Line(contribute);
+    int remain = N - i;
+    for (int l = 0; l <= K; l++) {
+      for (int x = 0; x <= remain; x++) {
+        for (int y = 0; y <= remain; y++) {
+          if (prev[l][x][y] == 0) {
+            continue;
+          }
+          // not same
+          update(next[l], 0, remain - 1, 0, remain - 1, prev[l][x][y]);
+          //same
+          if(l < K) {
+            update(next[l + 1], 0, x - 1, 0, y - 1, prev[l][x][y]);
+            update(next[l + 1], x, remain - 1, y, remain - 1, prev[l][x][y]);
+          }
+          update(next[l], 0, x - 1, 0, y - 1, -prev[l][x][y]);
+          update(next[l], x, remain - 1, y, remain - 1, -prev[l][x][y]);
+        }
+      }
+    }
+
+    prev.swap(next);
+  }
+
+  Mi ans = prev[K][0][0];
+  out << ans;
 }
 
 void SolveMulti(IStream &in, OStream &out) {

@@ -8,7 +8,7 @@ struct FastPower2 {
   i32 mask;
   i32 shift;
 
-  FastPower(const T& x, int n, const T& one = T(1)) {
+  FastPower2(const T& x, int n, const T& one = T(1)) {
     mask = 1;
     shift = 0;
     // n / mask <= mask
@@ -25,6 +25,7 @@ struct FastPower2 {
       low[i] = low[i - 1] * x;
     }
     T y = low.back() * x;
+    high[0] = one;
     for (int i = 1; i <= mask; i++) {
       high[i] = high[i - 1] * y;
     }

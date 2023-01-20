@@ -27,7 +27,7 @@ struct VersionArray {
     access(i);
     return data[i];
   }
-  int size() { return Size(data); }
+  int size() const { return Size(data); }
   void clear() {
     timestamp++;
   }
