@@ -1,4 +1,7 @@
 #pragma once
+#ifdef ONLINE
+#undef LOCAL
+#endif
 #ifndef LOCAL
 #undef _GLIBCXX_DEBUG
 #undef _DEBUG

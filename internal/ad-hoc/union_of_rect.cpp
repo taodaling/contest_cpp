@@ -19,7 +19,6 @@ T AreaOfUnionRect(const Vec<T> &L, const Vec<T> &R, const Vec<T> &D, const Vec<T
         all.push_back(U[i]);
         all.push_back(D[i]);
     }
-    Line(Sort);
     Sort(All(sort_by_l), [&](var a, var b) {
         return L[a] < L[b];
     });
@@ -48,7 +47,6 @@ T AreaOfUnionRect(const Vec<T> &L, const Vec<T> &R, const Vec<T> &D, const Vec<T
         return a + b;
     });
     int M = Size(all);
-    Line(ST);
     ST st(M - 1, [&](int i) {
         return MakePair(all[i + 1] - all[i], 0);
     });
@@ -70,7 +68,6 @@ T AreaOfUnionRect(const Vec<T> &L, const Vec<T> &R, const Vec<T> &D, const Vec<T
         st.update(l_index, r_index - 1, x);
     };
 
-    Line(scan);
     var l_iter = sort_by_l.begin();
     var r_iter = sort_by_r.begin();
     T left = T();

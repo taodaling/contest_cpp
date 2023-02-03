@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.cpp"
 #include "std_include.cpp"
+#ifdef LOCAL
 // copied from: https://judge.yosupo.jp/submission/75039
 struct Timer {
   const char* msg;
@@ -22,3 +23,4 @@ struct Timer {
     }
   }
 };
+#endif

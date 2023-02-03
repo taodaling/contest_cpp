@@ -51,7 +51,7 @@ struct BinaryTree {
     if (L > R) {
       return 0;
     }
-    auto dfs = [&](auto &dfs, Node *root, int l, int r) -> i64 {
+    auto dfs = [&](auto &dfs, Node *root, u64 l, u64 r) -> i64 {
       if (sbt::SegmentNoIntersection(L, R, l, r) || root == NULL) {
         return 0;
       }

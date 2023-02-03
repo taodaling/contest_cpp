@@ -1,0 +1,1 @@
+g++ main.cpp -O2 -o main.exe -std=c++17
