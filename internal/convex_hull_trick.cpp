@@ -6,7 +6,7 @@ namespace dalt {
 template <class T, class I = Nil>
 struct CHTLine {
   using Self = CHTLine;
-  Nil id;
+  I id;
   T a;
   T b;
   mutable T l;
