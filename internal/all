@@ -78,6 +78,7 @@
 #include "hash_range.cpp"
 #include "hash_range_fenwick_tree.cpp"
 #include "hash_tree.cpp"
+#include "hash_unit.cpp"
 #include "hash_whole.cpp"
 #include "hash_whole_deque.cpp"
 #include "input.cpp"

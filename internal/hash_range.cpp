@@ -1,5 +1,6 @@
 #pragma once
 #include "hash_base.cpp"
+#include "hash_unit.cpp"
 namespace dalt {
 namespace hash {
 template <class T>
@@ -15,40 +16,14 @@ struct HashRange {
       data[i] = Mi(s(i - 1)) * HashBase::xp[i] + data[i - 1];
     }
   }
-  struct Range {
-    Vec<Mi>& data;
-    Mi sum;
-    i32 size;
-
-    Range& append(int l, int r) {
-      if (l > r) {
-        return *this;
-      }
-      sum = sum + (data[r + 1] - data[l]) * HashBase::pow(size - (l + 1));
-      size += r - l + 1;
-      return *this;
+  HashUnit hash(int l, int r) const {
+    if (l > r) {
+      return HashUnit::nil();
     }
-    i64 hash() const { return sum.value; }
-    i64 hash_verbose() const { return HashBase::verbose(sum, size).value; }
-  };
-  Range range() {
-    return Range{
-        .data = data,
-        .sum = Mi(0),
-        .size = 0,
+    return HashUnit{
+        .val = (data[r + 1] - data[l]) * HashBase::inv_xp[l + 1],
+        .size = r - l + 1,
     };
-  }
-  i64 hash(int l, int r) {
-    if (l > r) {
-      return 0;
-    }
-    return ((data[r + 1] - data[l]) * HashBase::inv_xp[l + 1]).value;
-  }
-  i64 hash_verbose(int l, int r) {
-    if (l > r) {
-      return 0;
-    }
-    return HashBase::verbose(((data[r + 1] - data[l]) * HashBase::inv_xp[l + 1]), r - l + 1).value;
   }
 };
 
