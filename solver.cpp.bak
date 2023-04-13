@@ -1,56 +1,36 @@
 #pragma once
-#include "common.cpp"
+#include "min_cost_flow.cpp"
 using namespace dalt;
-#include "modint.cpp"
-#include "fast_pow.cpp"
-using Mi = ModInt<DynamicModular<>>;
+using real = double;
+
 
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int N, M;
   in >> N >> M;
-  Mi::Modular::Register(M);
-  Vec<Vec<Mi>> dp(N + 1, Vec<Mi>(N + 1));
-  math::FastPower2<Mi> fp(Mi(2), (int)1e6);
-  //math::Combination<Mi> comb(N + 1);
-  Vec<Vec<Mi>> comb_mem(N + 1, Vec<Mi>(N + 1, Mi::nil()));
-  var comb = [&](var &dfs, int n, int m) -> Mi {
-    if(m > n) {
-      return 0;
-    }
-    var& ans = comb_mem[n][m];
-    if(ans.is_nil()) {
-      if(m == 0) {
-        return ans = 1;
-      }
-      ans = dfs(dfs, n - 1, m - 1) + dfs(dfs, n - 1, m);
-    }
-    return ans;
-  };
-
-  dp[1][1] = 1;
-  var choose2 = [&](int n) {
-    return n * (n - 1) / 2;
-  };
-  for(int i = 1; i <= N; i++) {
-    for(int j = 1; j <= N; j++) {
-      if(dp[i][j] == 0) {
-        continue;
-      }
-      DebugFmtln("dp[%d][%d] = %d", i, j, dp[i][j]);
-      Mi base = fp.pow(j) - 1;
-      Mi aggre = 1;
-      for(int t = 1; i + t <= N - 1; t++) {
-        aggre *= base;
-        dp[i + t][t] += dp[i][j] * fp.pow(choose2(t)) * aggre * comb(comb, N - 1 - i, t);
-      }
-    }
+  Vec<int> need(N);
+  in >> need;
+  using namespace graph;
+  using E = CostFlowBaseEdge<i64>;
+  Graph<E> g(N + 2);
+  var id_src = [&]() {return N + 1;};
+  var id_dst = [&]() {return N;};
+  i64 inf = 1e18;
+  AddCostFlowEdge(g, id_src(), 0, inf, 0);
+  for(int i = 0; i < N; i++) {
+    AddCostFlowEdge(g, i, i + 1, inf - need[i], 0);
   }
-  Mi ans = 0;
-  for(int i = 1; i <= N; i++) {
-    ans += dp[N - 1][i] * (fp.pow(i) - 1);
+  struct Vol {
+    int s, t, c;
+  };
+  Vec<Vol> vols(M);
+  for(int i = 0; i < M; i++) {
+    in >> vols[i].s >> vols[i].t >> vols[i].c;
+    AddCostFlowEdge(g, vols[i].s - 1, vols[i].t, inf, vols[i].c);
   }
-
-  out << ans;
+  var flow = MinCostFlowDijkstra(g, id_src(), id_dst(), inf);
+  var cost = flow[1];
+  Assert(flow[0] == inf);
+  out << cost << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {

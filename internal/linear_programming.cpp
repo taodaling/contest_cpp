@@ -7,8 +7,9 @@ namespace dalt {
  * N constraints and M variables.
  * <br>
  * The target is to find an assignment for each variable to make target
- * expression as large as possible. <br> <pre> Maximize t0+t1*x1+...+tm*xm where
- * following constraint satisfied: c11*x1+...+c1m*xm <= c10
+ * expression as large as possible. <br> <pre> 
+ * Maximize t0+t1*x1+...+tm*xm where following constraint satisfied: 
+ *   c11*x1+...+c1m*xm <= c10
  *   ...
  *   cn1*x1+...+cnm*xm <= cn0
  *   x1, x2, ..., xm >= 0
@@ -251,22 +252,26 @@ struct DualLinearProgramming {
   int n;
   int m;
 
-  DualLinearProgramming(int _n, int _m, double prec) : lp(_m, _n, prec) {
+  DualLinearProgramming(int _n, int _m, double prec = 1e-10) : lp(_m, _n, prec) {
     n = _n;
     m = _m;
   }
 
   void setConstraintConstant(int constraintId, double noMoreThan) {
+    Assert(constraintId > 0);
     lp.setTargetCoefficient(constraintId, noMoreThan);
   }
 
   void setConstraintCoefficient(int constraintId, int variableId, double c) {
+    Assert(constraintId > 0);
+    Assert(variableId > 0);
     lp.setConstraintCoefficient(variableId, constraintId, c);
   }
 
   void setTargetConstant(double c) { lp.setTargetConstant(c); }
 
   void setTargetCoefficient(int variableId, double c) {
+    Assert(variableId > 0);
     lp.setConstraintConstant(variableId, c);
   }
 
@@ -279,6 +284,7 @@ struct DualLinearProgramming {
   bool isUnbound() { return lp.isInfeasible(); }
 
   double getAssignmentValueForVariable(int i) {
+    Assert(i > 0);
     if (i + n <= lp.m) {
       return -lp.mat[0][i + n];
     } else {

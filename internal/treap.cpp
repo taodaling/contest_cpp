@@ -188,6 +188,11 @@ struct Treap: public SbtReverse<SBT, DIR> {
     push_up();
     return res;
   }
+  AT2 split_by_weight(S k){
+    return split_by_weight_last_true([&](var &s) {
+      return s <= k;
+    });
+  } 
   AT2 split_by_weight_first_true(const Checker<S> &checker) {
     bool find = false;
     return split_by_weight_first_true(checker, find);

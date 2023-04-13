@@ -1,13 +1,14 @@
 #pragma once
+#include "dsu.cpp"
 #include "graph.cpp"
 #include "math.cpp"
-#include "dsu.cpp"
 namespace dalt {
-namespace graph {
-  //return O(V) edges
-  //create a new graph with K nodes which is full graph
-  //there is an edge (a, b) with weight dist(a, b) in g
-  //O(|E| log |E| log K)
+namespace adhoc {
+using namespace graph;
+// return O(V) edges
+// create a new graph with K nodes which is full graph
+// there is an edge (a, b) with weight dist(a, b) in g
+// O(|E| log |E| log K)
 template <class E, class T = typename E::weight_type>
 enable_if_t<is_base_of_v<BiBaseEdge, E> && is_base_of_v<WithWeight<T>, E>,
             TreeSet<Tuple<int, int, T>>>
@@ -91,5 +92,5 @@ DistanceMinimumSpanningTree(const Graph<E> &g, int K, T inf) {
 
   return ans;
 }
-}
+}  // namespace adhoc
 }  // namespace dalt

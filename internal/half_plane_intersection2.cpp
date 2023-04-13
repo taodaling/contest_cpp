@@ -2,6 +2,8 @@
 #include "line2.cpp"
 namespace dalt {
 namespace geo2 {
+//find the convex specified by lines
+//lines[i] means the convex can only exist in the anticlockwise side
 template <class T>
 enable_if_t<is_near_value_v<T>, Optional<Vec<Line<T>>>> HalfPlaneIntersection(
     Vec<Line<T>> lines, bool close = true, bool is_anticlockwise_sort = false) {
@@ -76,12 +78,12 @@ enable_if_t<is_near_value_v<T>, Optional<Vec<Line<T>>>> HalfPlaneIntersection(
     // Debug(deque);
   }
   auto first = deque.front();
-   Debug(deque);
+   //Debug(deque);
   deque.pop_front();
   if (!insert(first)) {
     return {};
   }
-   Debug(deque);
+   //Debug(deque);
   Vec<Line<T>> res;
   res.insert(res.end(), All(deque));
   return res;

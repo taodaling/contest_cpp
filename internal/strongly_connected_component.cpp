@@ -4,7 +4,7 @@
 namespace dalt {
 namespace graph {
 template <class E>
-enable_if_t<is_base_of_v<WithTo, E>, Vec<int>>
+IsDiGraph(E, Vec<int>) 
 StronglyConnectedComponentDi(const Graph<E> &g) {
   int n = Size(g);
   Deque<int> dq;

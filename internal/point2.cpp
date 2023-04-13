@@ -39,6 +39,8 @@ struct Point {
     return (lhs - rhs).abs();
   }
   Self operator-() const { return {-x, -y}; }
+
+  //(-pi,pi]
   FType atan2() const {
     return T::atan2(y, x);
   }
@@ -48,6 +50,7 @@ struct Point {
   int half() const { return half(x, y); }
   Self norm(T d = T(1)) const { return *this * d / abs(); }
   Self conj() const { return {x, -y}; }
+  //count-clockwise rotate pi/2
   Self perpendicular() const { return {-y, x}; }
   static Self rotate(const Self& pt, FType cos, FType sin,
                      const Self& center = Self()) {
