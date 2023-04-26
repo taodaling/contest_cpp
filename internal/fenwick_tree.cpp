@@ -18,7 +18,7 @@ struct FenwickTree {
   }
   // find the smallest index i while A[0] + ... + A[i] >= v, if no such index, n will be returned
   T lower_bound(T v) const {
-    T sum = T(0);
+    T sum = T();
     int pos = 0;
     for (int i = hb; i > 0; i >>= 1) {
       int np = pos + i;
@@ -34,7 +34,7 @@ struct FenwickTree {
   T query(int i) const {
     i += 1;
     i = Min(i, n);
-    T sum = 0;
+    T sum = T();
     for (; i > 0; i -= i & -i) {
       sum = sum + data[i];
     }

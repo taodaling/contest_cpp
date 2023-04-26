@@ -1,1 +1,1 @@
-g++ main.cpp -O2 -o main.exe -std=c++17
+g++ main.cpp -O2 -o main.exe -std=c++17 -Wl,--stack,200000000
