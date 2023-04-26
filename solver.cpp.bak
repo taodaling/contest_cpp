@@ -1,47 +1,56 @@
 #pragma once
-#include "common.cpp"
+#include "min_cost_flow.cpp"
 using namespace dalt;
-#include "math.cpp"
+#include "modint.cpp"
+#include "fast_pow.cpp"
+using Mi = ModInt<DynamicModular<>>;
+
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  i64 B, K, Sx, Sy, Gx, Gy;
-  in >> B >> K >> Sx >> Sy >> Gx >> Gy;
-  using Pt = Array<i64, 2>;
-  var around = [&](Pt pt) {
-    Vec<Pt> Ss;
-    var Sx = pt[0];
-    var Sy = pt[1];
-    Ss.push_back(Pt {Sx / B * B, Sy});
-    Ss.push_back(Pt {Sx / B * B + B, Sy});
-    Ss.push_back(Pt {Sx, Sy / B * B});
-    Ss.push_back(Pt {Sx, Sy / B * B + B});
-    return Ss;
-  };
-  Vec<Pt> Ss = around(Pt {Sx, Sy});
-  Vec<Pt> Gs = around(Pt {Gx, Gy});
-  Pt start = Pt{Sx, Sy};
-  Pt end = Pt{Gx, Gy};
-  var dist = [&](Pt& a, Pt& b) {
-    return Abs(a[0] - b[0]) + Abs(a[1] - b[1]); 
-  };
-  var dist2 = [&](Pt a, Pt b) {
-    if(a[1] % B != 0) {
-      Swap(a[0], a[1]);
-      Swap(b[0], b[1]);
+  int N, M;
+  in >> N >> M;
+  Mi::Modular::Register(M);
+  Vec<Vec<Mi>> dp(N + 1, Vec<Mi>(N + 1));
+  math::FastPower2<Mi> fp(Mi(2), (int)1e6);
+  //math::Combination<Mi> comb(N + 1);
+  Vec<Vec<Mi>> comb_mem(N + 1, Vec<Mi>(N + 1, Mi::nil()));
+  var comb = [&](var &dfs, int n, int m) -> Mi {
+    if(m > n) {
+      return 0;
     }
-    if(a[1] == b[1]) {
-      return dist(a, b);
+    var& ans = comb_mem[n][m];
+    if(ans.is_nil()) {
+      if(m == 0) {
+        return ans = 1;
+      }
+      ans = dfs(dfs, n - 1, m - 1) + dfs(dfs, n - 1, m);
     }
-    var e1 = Pt{a[0] / B * B, a[1]};
-    var e2 = Pt{a[0] / B * B + B, a[1]};
-    return Min(dist(e1, a) + dist(e1, b), dist(e2, a) + dist(e2, b));
+    return ans;
   };
-  i64 ans = dist(start, end) * K;
-  for(var &a : Ss) {
-    for(var &b : Gs) {
-      Chmin(ans, dist(start, a) * K + dist2(a, b) + dist(b, end) * K);
+
+  dp[1][1] = 1;
+  var choose2 = [&](int n) {
+    return n * (n - 1) / 2;
+  };
+  for(int i = 1; i <= N; i++) {
+    for(int j = 1; j <= N; j++) {
+      if(dp[i][j] == 0) {
+        continue;
+      }
+      DebugFmtln("dp[%d][%d] = %d", i, j, dp[i][j]);
+      Mi base = fp.pow(j) - 1;
+      Mi aggre = 1;
+      for(int t = 1; i + t <= N - 1; t++) {
+        aggre *= base;
+        dp[i + t][t] += dp[i][j] * fp.pow(choose2(t)) * aggre * comb(comb, N - 1 - i, t);
+      }
     }
   }
-  out << ans << '\n';
+  Mi ans = 0;
+  for(int i = 1; i <= N; i++) {
+    ans += dp[N - 1][i] * (fp.pow(i) - 1);
+  }
+
+  out << ans;
 }
 
 void SolveMulti(IStream &in, OStream &out) {

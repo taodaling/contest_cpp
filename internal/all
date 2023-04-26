@@ -1,5 +1,6 @@
 #include "2sat.cpp"
 #include "ac_automaton.cpp"
+#include "ad-hoc/connected_component_count.cpp"
 #include "ad-hoc/distance_minimum_spanning_tree.cpp"
 #include "ad-hoc/pair_of_point_intersect_with_circle.cpp"
 #include "ad-hoc/palindrome_factorize.cpp"

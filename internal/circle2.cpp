@@ -31,11 +31,12 @@ struct Circle {
       return {proj + vec, proj - vec};
     }
   }
-  Vec<T> intersect(const Self& c1, const Self& c2) {
+  //if two points are returned, then they will be on count-clockwise for c1, clockwise for c2
+  static Vec<Pt> intersect(const Self& c1, const Self& c2) {
     Pt d = c2.center - c1.center;
     T d2 = d.square();
     if (d2 == T(0)) {
-      return {T(0)};
+      return {};
     }
     T pd = (d2 + c1.r * c1.r - c2.r * c2.r) / T(2);
     T h2 = c1.r * c1.r - pd * pd / d2;
@@ -127,6 +128,12 @@ struct Circle {
       out2.push_back(o2 + v * r2);
     }
     return 2;
+  }
+  bool operator==(const Self& other) {
+    return center == other.center && r == other.r;
+  }
+  bool operator!=(const Self& other) {
+    return !(*this == other);
   }
 };
 }  // namespace geo2

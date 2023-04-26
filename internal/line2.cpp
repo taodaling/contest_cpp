@@ -10,7 +10,7 @@ struct Line {
 
  private:
   T side0(const Pt& pt) const {
-    Debug(Pt::cross(vec, pt) - c);
+    //Debug(Pt::cross(vec, pt) - c);
     return Pt::cross(vec, pt) - c;
   }
 

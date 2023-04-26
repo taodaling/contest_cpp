@@ -19,15 +19,17 @@ struct ConvexHull : public Polygon<T> {
     if (n <= 1) {
       return;
     }
-    for (int i = 1; i < n; i++) {
-      if (data[i] >= data[0]) {
-        continue;
+    var first = *MinElement(All(data));
+    int start_pos = 0;
+    {
+      for(int i = 0; i < n; i++) {
+        if(data[i] == first) {
+          Swap(data[start_pos++], data[i]);
+        }
       }
-      Swap(data[0], data[i]);
     }
-    auto first = data[0];
     SortByPolarAngleAround<T> sorter(first);
-    Sort(data.begin() + 1, data.end(), [&](auto& a, auto& b) {
+    Sort(data.begin() + start_pos, data.end(), [&](auto& a, auto& b) {
       int sign = sorter.compare(a, b);
       if (sign < 0 || sign == 0 && Pt::dist2(first, a) < Pt::dist2(first, b)) {
         return true;
@@ -37,7 +39,7 @@ struct ConvexHull : public Polygon<T> {
     if (!include_same_line) {
       i32 shrink_size = 2;
       int wpos = 1;
-      for (int i = 1; i < n; i++) {
+      for (int i = start_pos; i < n; i++) {
         int l = i;
         int r = i;
         Pt far = data[l];
@@ -62,6 +64,7 @@ struct ConvexHull : public Polygon<T> {
     // Debug(data);
     Deque<Pt> stack;
     stack.push_back(data[0]);
+    n = Size(data);
     for (int i = 1; i < n; i++) {
       while (Size(stack) >= 2) {
         auto last = PopBack<Pt>(stack);

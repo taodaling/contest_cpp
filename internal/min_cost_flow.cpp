@@ -66,7 +66,7 @@ IsCostFlow(E, Array<typename E::flow_type COMMA 2>) MinCostFlowDijkstra(
     while (!set.empty()) {
       auto top = set.begin();
       i32 root = *top;
-      Debug(root);
+      //Debug(root);
       set.erase(top);
       for (auto &e : g[root]) {
         if (g[e.to][e.rev].flow == 0) {
