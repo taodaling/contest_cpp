@@ -76,8 +76,8 @@ public:
     T factor = side0(pt) / vec.square();
     return Pt(pt.x - (-vec.y * factor), pt.y - vec.x * factor);
   }
-  Pt reflect(const_ref(Pt) pt) const {
-    return pt - vec.perpendicular() * (2 * side0(pt) / vec.square);
+  Pt mirror(const_ref(Pt) pt) const {
+    return pt - vec.perpendicular() * (T(2) * side0(pt) / vec.square());
   } 
   Comparator<Pt> sort_point_along_line() const {
     return [=] (const Pt& a, const Pt& b) {

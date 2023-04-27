@@ -262,7 +262,21 @@ struct Treap: public SbtReverse<SBT, DIR> {
     push_up();
     return res;
   }
-
+  static Self *MakeTree(int n, const_ref(Indexer<S>) indexer) {
+    var dfs = [&](var &dfs, int l, int r) {
+      if (l > r) {
+        return NIL;
+      }
+      int mid = (l + r) / 2;
+      var node = new Self();
+      node->weight = indexer(mid);
+      node->left = dfs(dfs, l, mid - 1);
+      node->right = dfs(dfs, mid + 1, r);
+      node->push_up();
+      return node;
+    };
+    return dfs(dfs, 0, n - 1);
+  }
   static Self *merge(AT2 ab) { return merge(ab[0], ab[1]); }
   static Self *merge(Self *a, Self *b) {
     if (a == NIL) {
