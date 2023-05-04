@@ -20,12 +20,6 @@ struct SelfBalanceTreeRegistry {
     s_s = _s_s;
     s_u = _s_u;
     u_u = _u_u;
-    if(!initialized) {
-      initialized = true;
-      Trace(Info - Initialize SBT);
-    } else {
-      Trace(Warning - Reinitialize SBT);
-    }
   }
 };
 template <class S, class U, i64 ID, class CID>

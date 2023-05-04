@@ -2,6 +2,7 @@
 #include "common.cpp"
 #include "function.cpp"
 #include "segtree.cpp"
+#include "initialize_once.cpp"
 namespace dalt {
 namespace misc {
 template <class T, class C = Less<T>>
@@ -14,18 +15,16 @@ struct StaticRectQuery {
   Vec<PST> psts;
   Vec<T> sorted_input;
   C comp;
-  struct InitJob {
-    InitJob() {
-      PST::Register(
-          0, 0, [](auto a, auto b) { return a + b; },
-          [](auto a, auto b) { return a + b; },
-          [](auto a, auto b) { return a + b; });
-    }
-  };
-  static InitJob _init_job;
+  static bool done;
  public:
   StaticRectQuery(int n, const Indexer<T> &indexer, C _comp = C())
-      : comp(_comp) {
+      : comp(
+            ReturnWithExecuteOnce(_comp), done, [&]() {
+              PST::Register(
+                  0, 0, [](auto a, auto b) { return a + b; },
+                  [](auto a, auto b) { return a + b; },
+                  [](auto a, auto b) { return a + b; });
+            }) {
     sorted_input = ExpandIndexer(n, indexer);
     Sort(All(sorted_input), comp);
     MakeUnique(sorted_input);
@@ -77,6 +76,6 @@ struct StaticRectQuery {
   }
 };
 template <class T, class C>
-typename StaticRectQuery<T, C>::InitJob StaticRectQuery<T, C>::_init_job;
+bool StaticRectQuery<T, C>::done = false;
 }  // namespace dalt
 }
