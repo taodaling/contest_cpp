@@ -35,4 +35,20 @@ int Compare(const Vec<T>& lhs, const Vec<T>& rhs) {
   }
   return Size(lhs) < Size(rhs) ? -1 : Size(lhs) > Size(rhs) ? 1 : 0;
 }
+template <class T>
+bool operator<(const Vec<T>& lhs, const Vec<T>& rhs) {
+  return Compare(lhs, rhs) < 0;
+}
+template <class T>
+bool operator>(const Vec<T>& lhs, const Vec<T>& rhs) {
+  return Compare(lhs, rhs) > 0;
+}
+template <class T>
+bool operator<=(const Vec<T>& lhs, const Vec<T>& rhs) {
+  return Compare(lhs, rhs) <= 0;
+}
+template <class T>
+bool operator>=(const Vec<T>& lhs, const Vec<T>& rhs) {
+  return Compare(lhs, rhs) >= 0;
+}
 }  // namespace dalt

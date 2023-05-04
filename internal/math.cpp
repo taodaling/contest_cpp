@@ -1,8 +1,8 @@
 #pragma once
 #include "common.cpp"
 namespace dalt {
-template <class T>
-inline T& Chmin(T& a, const T& b) {
+template <class A, class B>
+inline A& Chmin(A& a, const B& b) {
   if (a > b) {
     a = b;
   }
@@ -15,8 +15,8 @@ inline T& Chmin(T& a, const T& b, const Comparator<T> &comp) {
   }
   return a;
 }
-template <class T>
-inline T& Chmax(T& a, const T& b) {
+template <class A, class B>
+inline A& Chmax(A& a, const B& b) {
   if (a < b) {
     a = b;
   }

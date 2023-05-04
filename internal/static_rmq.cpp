@@ -52,6 +52,7 @@ public:
     }
   }
 
+  //get the index of minimum element in range [l, r]
   i32 query(int l, int r) {
     Assert(l <= r);
     int bl = l >> SHIFT;
