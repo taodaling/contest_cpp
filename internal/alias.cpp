@@ -42,6 +42,8 @@ FunctionAlias(std::to_string, ToString);
 FunctionAlias(std::tie, Tie);
 template <typename _Signature>
 using Function = std::function<_Signature>;
+template <typename _Signature>
+using Func = Function<_Signature>;
 using Str = std::string;
 using String = Str;
 using StringStream = std::stringstream;
@@ -80,27 +82,27 @@ using Queue = std::queue<T>;
 template <class T>
 using Vec = std::vector<T>;
 template <class T>
-using Reducer = Function<T(const T &, const T &)>;
+using Reducer = Func<T(const T &, const T &)>;
 template <class T>
-using Comparator = Function<bool(const T &, const T &)>;
+using Comparator = Func<bool(const T &, const T &)>;
 template <class T>
-using Indexer = Function<T(i32)>;
+using Indexer = Func<T(i32)>;
 template <class T>
-using Indexer2 = Function<T(i32, i32)>;
+using Indexer2 = Func<T(i32, i32)>;
 template <class A, class B = A, class C = A>
-using Adder = Function<C(const A &, const B &)>;
+using Adder = Func<C(const A &, const B &)>;
 template <class I>
-using Checker = Function<bool(const I &)>;
+using Checker = Func<bool(const I &)>;
 template <class A, class B>
-using BiChecker = Function<bool(const A &, const B &)>;
+using BiChecker = Func<bool(const A &, const B &)>;
 template <class T>
-using Consumer = Function<void(const T &)>;
+using Consumer = Func<void(const T &)>;
 template<class T>
-using Supplier = Function<T()>;
+using Supplier = Func<T()>;
 template <class FIRST, class SECOND>
-using BiConsumer = Function<void(const FIRST &, const SECOND &)>;
+using BiConsumer = Func<void(const FIRST &, const SECOND &)>;
 template <class F, class T = F>
-using Mapper = Function<T(const F &)>;
+using Mapper = Func<T(const F &)>;
 template <class T>
 using MinHeap = std::priority_queue<T, Vec<T>, Greater<T>>;
 template <class T>

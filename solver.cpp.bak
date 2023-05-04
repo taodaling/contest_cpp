@@ -1,36 +1,60 @@
 #pragma once
-#include "min_cost_flow.cpp"
+#include "common.cpp"
 using namespace dalt;
-using real = double;
-
+#include "maxflow.cpp"
 
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, M;
-  in >> N >> M;
-  Vec<int> need(N);
-  in >> need;
+  int H, W;
+  in >> H >> W;
+  Vec<Vec<int>> cost(H, Vec<int>(W));
+  in >> cost;
   using namespace graph;
-  using E = CostFlowBaseEdge<i64>;
-  Graph<E> g(N + 2);
-  var id_src = [&]() {return N + 1;};
-  var id_dst = [&]() {return N;};
-  i64 inf = 1e18;
-  AddCostFlowEdge(g, id_src(), 0, inf, 0);
-  for(int i = 0; i < N; i++) {
-    AddCostFlowEdge(g, i, i + 1, inf - need[i], 0);
-  }
-  struct Vol {
-    int s, t, c;
+  using E = FlowBaseEdge<i64>;
+  var id_row = [&](int i) {
+    return i;
   };
-  Vec<Vol> vols(M);
-  for(int i = 0; i < M; i++) {
-    in >> vols[i].s >> vols[i].t >> vols[i].c;
-    AddCostFlowEdge(g, vols[i].s - 1, vols[i].t, inf, vols[i].c);
+  var id_col = [&](int i) {
+    return H + i;
+  };
+  var id_src = [&]() {
+    return H + W;
+  };
+  var id_dst = [&]() {
+    return id_src() + 1;
+  };
+  Graph<E> g(id_dst() + 1);
+  i64 total = 0;
+  for(int i = 0; i < H; i++) {
+    i64 sum = 0;
+    for(var x : cost[i]) {
+      sum += x;
+    }
+    sum = Max<i64>(0, sum);
+    total += sum;
+    AddFlowEdge(g, id_src(), id_row(i), sum);
   }
-  var flow = MinCostFlowDijkstra(g, id_src(), id_dst(), inf);
-  var cost = flow[1];
-  Assert(flow[0] == inf);
-  out << cost << '\n';
+  for(int i = 0; i < W; i++) {
+    i64 sum = 0;
+    for(int j = 0; j < H; j++) {
+      sum += cost[j][i];
+    }
+    sum = Max<i64>(0, sum);
+    total += sum;
+    AddFlowEdge(g, id_col(i), id_dst(), sum);
+  }
+  i64 inf = 1e18;
+  for(int i = 0; i < H; i++) {
+    for(int j = 0; j < W; j++) {
+      i64 val = cost[i][j];
+      if(val < 0) {
+        val = inf;
+      }
+      AddFlowEdge(g, id_row(i), id_col(j), val);
+    }
+  }
+  var min_cut = MaxFlowDinic(g, id_src(), id_dst(), inf);
+  i64 ans = total - min_cut;
+  out << ans << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {

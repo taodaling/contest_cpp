@@ -12,6 +12,7 @@ struct SelfBalanceTreeRegistry {
   static Adder<S, S> s_s;
   static Adder<S, U> s_u;
   static Adder<U, U> u_u;
+  static bool initialized;
   static void Register(S _s_nil, U _u_nil, const Adder<S, S> &_s_s,
                        const Adder<S, U> &_s_u, const Adder<U, U> &_u_u) {
     s_nil = _s_nil;
@@ -19,10 +20,18 @@ struct SelfBalanceTreeRegistry {
     s_s = _s_s;
     s_u = _s_u;
     u_u = _u_u;
+    if(!initialized) {
+      initialized = true;
+      Trace(Info - Initialize SBT);
+    } else {
+      Trace(Warning - Reinitialize SBT);
+    }
   }
 };
 template <class S, class U, i64 ID, class CID>
 S SelfBalanceTreeRegistry<S, U, ID, CID>::s_nil;
+template <class S, class U, i64 ID, class CID>
+bool SelfBalanceTreeRegistry<S, U, ID, CID>::initialized = false;
 template <class S, class U, i64 ID, class CID>
 U SelfBalanceTreeRegistry<S, U, ID, CID>::u_nil;
 template <class S, class U, i64 ID, class CID>

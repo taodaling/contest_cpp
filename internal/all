@@ -135,6 +135,7 @@
 #include "nil.cpp"
 #include "ntt.cpp"
 #include "number.cpp"
+#include "operand.cpp"
 #include "optional.cpp"
 #include "optional_field.cpp"
 #include "partition_number.cpp"

@@ -17,7 +17,7 @@ void Stress() {
     StringStream input;
     StressGenerate(i, mt, input);
     String in = input.str();
-    Stderr << "INPUT:\n" << in << std::endl;
+    Stderr << "INPUT:\n" << StressFormatInput(in) << std::endl;
     StringStream solver_out;
     StringStream stress_out;
     StringStream solver_in = StringStream(in);
