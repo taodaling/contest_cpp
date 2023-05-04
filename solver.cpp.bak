@@ -1,62 +1,66 @@
 #pragma once
-#include "min_cost_flow.cpp"
+#include "common.cpp"
 using namespace dalt;
-#include "modint.cpp"
-#include "fast_pow.cpp"
-using Mi = ModInt<DynamicModular<>>;
+#include "maxflow.cpp"
 
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, M;
-  in >> N >> M;
-  Mi::Modular::Register(M);
-  Vec<Vec<Mi>> dp(N + 1, Vec<Mi>(N + 1));
-  math::FastPower2<Mi> fp(Mi(2), (int)1e6);
-  //math::Combination<Mi> comb(N + 1);
-  Vec<Vec<Mi>> comb_mem(N + 1, Vec<Mi>(N + 1, Mi::nil()));
-  var comb = [&](var &dfs, int n, int m) -> Mi {
-    if(m > n) {
-      return 0;
-    }
-    var& ans = comb_mem[n][m];
-    if(ans.is_nil()) {
-      if(m == 0) {
-        return ans = 1;
-      }
-      ans = dfs(dfs, n - 1, m - 1) + dfs(dfs, n - 1, m);
-    }
-    return ans;
+  int H, W;
+  in >> H >> W;
+  Vec<Vec<int>> cost(H, Vec<int>(W));
+  in >> cost;
+  using namespace graph;
+  using E = FlowBaseEdge<i64>;
+  var id_row = [&](int i) {
+    return i;
   };
-
-  dp[1][1] = 1;
-  var choose2 = [&](int n) {
-    return n * (n - 1) / 2;
+  var id_col = [&](int i) {
+    return H + i;
   };
-  for(int i = 1; i <= N; i++) {
-    for(int j = 1; j <= N; j++) {
-      if(dp[i][j] == 0) {
-        continue;
+  var id_src = [&]() {
+    return H + W;
+  };
+  var id_dst = [&]() {
+    return id_src() + 1;
+  };
+  Graph<E> g(id_dst() + 1);
+  i64 total = 0;
+  for(int i = 0; i < H; i++) {
+    i64 sum = 0;
+    for(var x : cost[i]) {
+      sum += x;
+    }
+    sum = Max<i64>(0, sum);
+    total += sum;
+    AddFlowEdge(g, id_src(), id_row(i), sum);
+  }
+  for(int i = 0; i < W; i++) {
+    i64 sum = 0;
+    for(int j = 0; j < H; j++) {
+      sum += cost[j][i];
+    }
+    sum = Max<i64>(0, sum);
+    total += sum;
+    AddFlowEdge(g, id_col(i), id_dst(), sum);
+  }
+  i64 inf = 1e18;
+  for(int i = 0; i < H; i++) {
+    for(int j = 0; j < W; j++) {
+      i64 val = cost[i][j];
+      if(val < 0) {
+        val = inf;
       }
-      DebugFmtln("dp[%d][%d] = %d", i, j, dp[i][j]);
-      Mi base = fp.pow(j) - 1;
-      Mi aggre = 1;
-      for(int t = 1; i + t <= N - 1; t++) {
-        aggre *= base;
-        dp[i + t][t] += dp[i][j] * fp.pow(choose2(t)) * aggre * comb(comb, N - 1 - i, t);
-      }
+      AddFlowEdge(g, id_row(i), id_col(j), val);
     }
   }
-  Mi ans = 0;
-  for(int i = 1; i <= N; i++) {
-    ans += dp[N - 1][i] * (fp.pow(i) - 1);
-  }
-
-  out << ans;
+  var min_cut = MaxFlowDinic(g, id_src(), id_dst(), inf);
+  i64 ans = total - min_cut;
+  out << ans << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {
   //std::ifstream input("in");
   int num_of_input = 1;
-  in >> num_of_input;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
     //SolveOne(i + 1, input, out);
 	SolveOne(i + 1, in, out);
