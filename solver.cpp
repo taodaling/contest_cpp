@@ -1,95 +1,106 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "modint.cpp"
-#include "range_affine_range_sum.cpp"
-#include "segtree.cpp"
+#include "fenwick_tree.cpp"
+#include "operand.cpp"
+#include "math.cpp"
 
-using Mi = ModInt998244353;
-void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, M, Q;
-  in >> N >> M >> Q;
-  struct Limit {
-    int l;
-    int r;
-    int x;
+  struct Pt {
+    i64 x;
+    i64 y;
+    i64 z;
+    i64 a;
+    i64 max_sum;
   };
-  Vec<Limit> Ls(Q);
-  for (int i = 0; i < Q; i++) {
-    in >> Ls[i].l >> Ls[i].r >> Ls[i].x;
+
+  DebugRun(
+    OStream& operator<<(OStream& os, const Pt &pt) {
+      return os << MakeTuple(pt.x, pt.y, pt.z, pt.a);
+    }
+  )
+void SolveOne(int test_id, IStream &in, OStream &out) {
+  int N;
+  in >> N;
+
+  Vec<Pt> pts(N + 1);
+  i64 inf = 1e18;
+  for(int i = 0; i < N; i++) {
+    i64 t, x, y, a;
+    in >> t >> x >> y >> a;
+    pts[i].x = t - x - y;
+    pts[i].y = t + x - y;
+    pts[i].z = y;
+    pts[i].a = a;
+    pts[i].max_sum = -inf;
   }
-  Sort(All(Ls), [&](var &a, var &b) {
-    return a.r < b.r;
+  Vec<i64> ys(N + 1);
+  for(var &pt : pts) {
+    ys.push_back(pt.y);
+  }
+  MakeUniqueAndSort(ys);
+  for(var &pt : pts) {
+    pt.y = LowerBound(All(ys), pt.y) - ys.begin();
+  }
+  Debug(pts);
+  Sort(All(pts), [&](var &a, var &b) {
+    return MakeTuple(a.z, a.y, a.x) < MakeTuple(b.z, b.y, b.x);
   });
 
-  using SBT = sbt::SelfBalanceTreeRegistry<int, int>;
-  using ST = sbt::SegTree<SBT>;
-  var inf = M;
-  var MinOp = [&](int a, int b) { return Min(a, b); };
-  ST::Register(inf, inf, MinOp, MinOp, MinOp);
-  ST st(N + 1);
-  for (var &op : Ls) {
-    st.update(op.l, op.r, op.x);
-  }
-  var limits = st.to_vec();
-  Debug(limits);
-  TreeMap<int, Vec<int>> group_by_limits;
-  TreeMap<int, Vec<Limit>> group_by_x;
-  for (int i = 1; i <= N; i++) {
-    group_by_limits[limits[i]].push_back(i);
-  }
-  for (var &op : Ls) {
-    group_by_x[op.x].push_back(op);
-  }
+  using Op = Operand<i64>;
+  Op::add_op = [&](var &a, var &b) {
+    return Max(a, b);
+  };
+  Op::default_val = -inf;
 
-  sbt::RangeAffineRangeSum<Mi> rars(N + 1);
-  Mi ans = 1;
-  for (var &pair : group_by_limits) {
-    var ls = group_by_x[pair.first];
-    var &indices = pair.second;
-    var ls_iter = ls.begin();
-    var is_iter = indices.begin();
-    rars.update(0, N, 0, 0);
-    rars.update(0, 0, 0, 1);
-    while (ls_iter != ls.end() || is_iter != indices.end()) {
-      if (is_iter != indices.end() &&
-          (ls_iter == ls.end() || *is_iter <= ls_iter->r)) {
-        var index = *is_iter;
-        ++is_iter;
-        var total = rars.query(0, N);
-        rars.update(index, index, 0, total);
-        Assert(limits[index] == pair.first);
-        rars.update(0, index - 1, limits[index], 0);
-        Debug(index);
-        Debug(rars.to_vec());
+  FenwickTree<Op> fwt(N + 1);
+  var dac = [&](var &dac, int l, int r) {
+    if(l == r) {
+      return;
+    }
+    int m = (l + r) / 2;
+    Sort(pts.begin() + l, pts.begin() + r + 1, [&](var &a, var &b) {
+      return MakeTuple(a.z, a.y, a.x) < MakeTuple(b.z, b.y, b.x);
+    });
+    dac(dac, l, m);
+    Sort(pts.begin() + l, pts.begin() + m + 1, [&](var &a, var &b) {
+      return MakeTuple(a.x, a.y) < MakeTuple(b.x, b.y);
+    });
+    Sort(pts.begin() + m + 1, pts.begin() + r + 1, [&](var &a, var &b) {
+      return MakeTuple(a.x, a.y) < MakeTuple(b.x, b.y);
+    });
+
+    int i = l;
+    int j = m + 1;
+    while(i <= m || j <= r) {
+      if(j > r || i <= m && MakeTuple(pts[i].x, pts[i].y) <= MakeTuple(pts[j].x, pts[j].y)) {
+        fwt.update(pts[i].y, pts[i].max_sum);
+        i++;
       } else {
-        var &item = *ls_iter;
-        ++ls_iter;
-        rars.update(0, item.l - 1, 0, 0);
-        DebugFmtln("[%d, %d]", item.l, item.r);
-        Debug(rars.to_vec());
+        Chmax(pts[j].max_sum, pts[j].a + fwt.query(pts[j].y).value);
+        j++;
       }
     }
-    var local_contrib = rars.query(0, N);
-    ans *= local_contrib;
-    group_by_x.erase(pair.first);
+    for(int i = l; i <= m; i++) {
+      fwt.recover(pts[i].y);
+    }
 
-    Debug(pair);
-    Debug(local_contrib);
-    Debug(rars.to_vec());
+    dac(dac, m + 1, r);
+  };
+
+  dac(dac, 0, N);
+  i64 best = -inf;
+  for(var &pt : pts) {
+    Chmax(best, pt.max_sum);
   }
-  if (Size(group_by_x) > 0) {
-    ans = 0;
-  }
-  out << ans << '\n';
+  out << best << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  // std::ifstream input("in");
+  //std::ifstream input("in");
   int num_of_input = 1;
-  // in >> num_of_input;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    // SolveOne(i + 1, input, out);
-    SolveOne(i + 1, in, out);
+    //SolveOne(i + 1, input, out);
+	SolveOne(i + 1, in, out);
   }
 }

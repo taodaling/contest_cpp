@@ -30,7 +30,7 @@ public:
    }
   }
   //ax + by = c
-  static Pt from_formula(T a, T b, T c) {
+  static Self from_formula(T a, T b, T c) {
     return Self(Pt(b, -a), c);
   }
   static Self from_ends(const Pt& a, const Pt& b) {

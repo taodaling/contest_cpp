@@ -1,77 +1,36 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "segtree.cpp"
 #include "modint.cpp"
-#include "range_affine_range_sum.cpp"
-
 using Mi = ModInt998244353;
+#include "combination.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, M, Q;
-  in >> N >> M >> Q;
-  struct Limit {
-    int l;
-    int r;
-    int x;
-  };
-  Vec<Limit> Ls(Q);
-  for(int i = 0; i < Q; i++) {
-    in >> Ls[i].l >> Ls[i].r >> Ls[i].x;
-  }
+  int R, G, B, K;
+  in >> R >> G >> B >> K;
+  R -= K;
+  G -= K;
+  int N = R + G + B + K;
+  math::Combination<Mi> comb(N + 1);
+  Mi ans = 0;
+  for(int i = 0; i <= N && i + i <= N && R - i >= 0 && G - i >= 0; i++) {
+    Mi contrib = comb.combination(N - i, i);
+    //N - i - i
+    //R - i
+    //G - i
+    //B
+    //K
+    contrib *= comb.fact[N - i - i];
+    contrib *= comb.inv_fact[R - i];
+    contrib *= comb.inv_fact[G - i];
+    contrib *= comb.inv_fact[B];
+    contrib *= comb.inv_fact[K];
 
-  using SBT = sbt::SelfBalanceTreeRegistry<int, int>;
-  using ST = sbt::SegTree<SBT>;
-  var inf = Mi::modulus() - 1;
-  var MinOp = [&](int a, int b) {return Min(a, b);};
-  Trace(gen limits);
-  ST::Register(inf, inf, MinOp, MinOp, MinOp);
-  ST st(N + 1);
-  for(var& op : Ls) {
-    st.update(op.l, op.r, op.x);
-  }
-  var limits = st.to_vec();
-  Debug(limits);
-  TreeMap<int, Vec<int>> group_by_limits;
-  TreeMap<int, Vec<Limit>> group_by_x;
-  for(int i = 1; i <= N; i++) {
-    group_by_limits[limits[i]].push_back(i);
-  }
-  for(var &op : Ls) {
-    group_by_x[op.x].push_back(op);
-  }
-  
-  sbt::RangeAffineRangeSum<Mi> rars(N + 1);
-  Mi ans = 1;
-  for(var& pair : group_by_limits) {
-    var ls = group_by_x[pair.first];
-    var& indices = pair.second;
-    var ls_iter = ls.begin();
-    var is_iter = indices.begin();
-    rars.update(0, N, 0, 0);
-    rars.update(0, 0, 0, 1);
-    while(ls_iter != ls.end() || is_iter != indices.end()) {
-      if(is_iter != indices.end() && (ls_iter == ls.end() || *is_iter <= ls_iter->r)) {
-        var index = *is_iter;
-        ++is_iter;
-        var total = rars.query(0, N);
-        rars.update(index, index, 0, total);
-        rars.update(0, index - 1, limits[index], 0);    
-      } else {
-        var &item = *ls_iter;
-        ++ls_iter;
-        rars.update(0, item.l - 1, 0, 0);
-      }
+    if(i & 1) {
+      contrib = -contrib;
     }
-    var local_contrib = rars.query(0, N);
-    ans *= local_contrib;
-    group_by_x.erase(pair.first);
+    ans += contrib;
+  }
 
-    Debug(pair);
-    Debug(local_contrib);
-  }
-  if(Size(group_by_x) > 0) {
-    ans = 0;
-  }
   out << ans << '\n';
 }
 
