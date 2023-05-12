@@ -6,6 +6,70 @@
 namespace dalt {
 namespace adhoc {
 using namespace geo2;
+
+// get the number of pairs of lines that the intersection is contained in circle
+// O(n\log_2n)
+template <class T>
+enable_if_t<is_near_value_v<T>, i64> PairOfLinesWhoseIntersectionContainedInCircle(
+    const Vec<Line<T>> &lines, const Circle<T> &circle) {
+  int n = Size(lines);
+  using Type = typename T::Type;
+  using A2 = Array<Type, 2>;
+  Vec<A2> ints;
+  ints.reserve(n);
+  Vec<Point<T>> out1;
+  Vec<Point<T>> out2;
+  for (var &line : lines) {
+    auto res = circle.intersect(line);
+    if(Size(res) == 2) {
+      auto &tangent_points = out1;
+      A2 thetas = A2{(res.front() - circle.center).atan2(),
+                    (res.back() - circle.center).atan2()};
+      if (thetas[0] > thetas[1]) {
+        Swap(thetas[0], thetas[1]);
+      }
+      ints.push_back(thetas);
+    }
+  }
+  int m = Size(ints);
+  Vec<int> left(m);
+  Vec<int> right(m);
+  for (int i = 0; i < m; i++) {
+    left[i] = right[i] = i;
+  }
+  Sort(All(left), [&](int a, int b) { return ints[a][0] < ints[b][0]; });
+  Sort(All(right), [&](int a, int b) { return ints[a][1] < ints[b][1]; });
+  Vec<int> to_rank(m);
+  for (int i = 0; i < m; i++) {
+    to_rank[left[i]] = i;
+  }
+  FenwickTree<int> fwt(m);
+  auto left_iter = left.begin();
+  auto right_iter = right.begin();
+  int total = 0;
+  i64 ans = 0;
+  while (right_iter != right.end()) {
+    if (left_iter != left.end() &&
+        ints[*right_iter][1] >= ints[*left_iter][0]) {
+      int id = *left_iter;
+      ++left_iter;
+
+      fwt.update(to_rank[id], 1);
+      total++;
+    } else {
+      int id = *right_iter;
+      ++right_iter;
+
+      total--;
+      fwt.update(to_rank[id], -1);
+
+      ans += total - fwt.query(to_rank[id]);
+    }
+  }
+
+  return ans;
+}
+
 // get the number of pairs of points that intersect with solid circle
 // O(n\log_2n)
 template <class T>

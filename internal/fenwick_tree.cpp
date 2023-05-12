@@ -69,6 +69,16 @@ struct FenwickTree {
     update(r + 1, -mod);
   }
 
+  void recover(int i) {
+    i += 1;
+    if (i <= 0) {
+      return;
+    }
+    for (; i <= n; i += i & -i) {
+      data[i] = T();
+    }
+  }
+
   int size() { return n; }
 
   // A[i] = x
