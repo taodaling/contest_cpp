@@ -1,37 +1,59 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "modint.cpp"
-using Mi = ModInt998244353;
-#include "combination.cpp"
-void SolveOne(int test_id, IStream &in, OStream &out) {
-  int R, G, B, K;
-  in >> R >> G >> B >> K;
-  R -= K;
-  G -= K;
-  int N = R + G + B + K;
-  math::Combination<Mi> comb(N + 1);
-  Mi ans = 0;
-  for(int i = 0; i <= N && i + i <= N && R - i >= 0 && G - i >= 0; i++) {
-    Mi contrib = comb.combination(N - i, i);
-    //N - i - i
-    //R - i
-    //G - i
-    //B
-    //K
-    contrib *= comb.fact[N - i - i];
-    contrib *= comb.inv_fact[R - i];
-    contrib *= comb.inv_fact[G - i];
-    contrib *= comb.inv_fact[B];
-    contrib *= comb.inv_fact[K];
+#include "ac_automaton.cpp"
 
-    if(i & 1) {
-      contrib = -contrib;
+
+void SolveOne(int test_id, IStream &in, OStream &out) {
+  Str S;
+  int N;
+  in >> S >> N;
+#ifdef LOCAL
+  seq::ACAutomaton<> ac((int)1e2);
+#else
+  seq::ACAutomaton<> ac((int)1e6);
+#endif
+  Vec<int> ids(N);
+  for(int i = 0; i < N; i++) {
+    Str T;
+    in >> T;
+    var builder = ac.builder();
+    for(var c : T) {
+      builder.build(c - 'a');
     }
-    ans += contrib;
+    ids[i] = builder.build_last;
+  }
+  var topo = ac.topo_sort();
+  Vec<bool> invalid(Size(topo));
+  for(var id : ids) {
+    invalid[id] = true;
+  }
+  Debug(ac.fails);
+  for(int i = 0; i < Size(topo); i++) {
+    Debug(i);
+    Debug(ac.debug_node(i));
+  }
+  Debug(topo);
+  for(int i : topo) {
+    if(ac.fails[i] != -1) {
+      invalid[i] = invalid[i] || invalid[ac.fails[i]];
+    }
+  }
+  Debug(ids);
+  Debug(invalid);
+  var matcher = ac.matcher();
+  int change = 0;
+  for(char c : S) {
+    matcher.match(c - 'a');
+    Debug(matcher.match_last);
+    Debug(ac.debug_node(matcher.match_last));
+    if(invalid[matcher.match_last]) {
+      change++;
+      matcher = ac.matcher();
+    }
   }
 
-  out << ans << '\n';
+  out << change;
 }
 
 void SolveMulti(IStream &in, OStream &out) {

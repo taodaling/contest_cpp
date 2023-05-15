@@ -1,98 +1,70 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "fenwick_tree.cpp"
-#include "operand.cpp"
-#include "math.cpp"
-
-  struct Pt {
-    i64 x;
-    i64 y;
-    i64 z;
-    i64 a;
-    i64 max_sum;
-  };
-
-  DebugRun(
-    OStream& operator<<(OStream& os, const Pt &pt) {
-      return os << MakeTuple(pt.x, pt.y, pt.z, pt.a);
-    }
-  )
+#include "min_queue.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N;
-  in >> N;
-
-  Vec<Pt> pts(N + 1);
-  i64 inf = 1e18;
+  int N, M;
+  in >> N >> M;
+  TreeMap<int, int> cnts;
+  int current = 0;
   for(int i = 0; i < N; i++) {
-    i64 t, x, y, a;
-    in >> t >> x >> y >> a;
-    pts[i].x = t - x - y;
-    pts[i].y = t + x - y;
-    pts[i].z = y;
-    pts[i].a = a;
-    pts[i].max_sum = -inf;
+    int a, b;
+    in >> a >> b;
+    cnts[b - a]++;
+    current += a;
   }
-  Vec<i64> ys(N + 1);
-  for(var &pt : pts) {
-    ys.push_back(pt.y);
-  }
-  MakeUniqueAndSort(ys);
-  for(var &pt : pts) {
-    pt.y = LowerBound(All(ys), pt.y) - ys.begin();
-  }
-  Debug(pts);
-  Sort(All(pts), [&](var &a, var &b) {
-    return MakeTuple(a.z, a.y, a.x) < MakeTuple(b.z, b.y, b.x);
-  });
-
-  using Op = Operand<i64>;
-  Op::add_op = [&](var &a, var &b) {
-    return Max(a, b);
-  };
-  Op::default_val = -inf;
-
-  FenwickTree<Op> fwt(N + 1);
-  var dac = [&](var &dac, int l, int r) {
-    if(l == r) {
-      return;
+  int inf = 1e9;
+  Vec<int> min_cost(M + 1, inf);
+  Debug(current);
+  min_cost[current] = 0;
+  MinQueue<int> mq;
+  Debug(min_cost);
+  for(var p : cnts) {
+    var v = p.first;
+    var c = p.second;
+    if(v == 0) {
+      continue;
     }
-    int m = (l + r) / 2;
-    Sort(pts.begin() + l, pts.begin() + r + 1, [&](var &a, var &b) {
-      return MakeTuple(a.z, a.y, a.x) < MakeTuple(b.z, b.y, b.x);
-    });
-    dac(dac, l, m);
-    Sort(pts.begin() + l, pts.begin() + m + 1, [&](var &a, var &b) {
-      return MakeTuple(a.x, a.y) < MakeTuple(b.x, b.y);
-    });
-    Sort(pts.begin() + m + 1, pts.begin() + r + 1, [&](var &a, var &b) {
-      return MakeTuple(a.x, a.y) < MakeTuple(b.x, b.y);
-    });
-
-    int i = l;
-    int j = m + 1;
-    while(i <= m || j <= r) {
-      if(j > r || i <= m && MakeTuple(pts[i].x, pts[i].y) <= MakeTuple(pts[j].x, pts[j].y)) {
-        fwt.update(pts[i].y, pts[i].max_sum);
-        i++;
-      } else {
-        Chmax(pts[j].max_sum, pts[j].a + fwt.query(pts[j].y).value);
-        j++;
+    Vec<int> next(M + 1, inf);
+    if(v > 0) {
+      for(int i = 0; i < v; i++) {
+        mq.clear();
+        for(int j = i; j <= M; j += v) {
+          mq.push_back(min_cost[j] - j / v);
+          next[j] = mq.min() + j / v;
+          if(j - c * v >= 0) {
+            mq.pop_front();
+          }
+        }
+        Debug(i);
+        Debug(next);
+      }
+    } else {
+      v = -v;
+      for(int i = 0; i < v; i++) {
+        mq.clear();
+        for(int j = M - i; j >= 0; j -= v) {
+          mq.push_back(min_cost[j] + j / v);
+          next[j] = mq.min() - j / v;
+          if(j + c * v <= M) {
+            mq.pop_front();
+          }
+        }
       }
     }
-    for(int i = l; i <= m; i++) {
-      fwt.recover(pts[i].y);
-    }
-
-    dac(dac, m + 1, r);
-  };
-
-  dac(dac, 0, N);
-  i64 best = -inf;
-  for(var &pt : pts) {
-    Chmax(best, pt.max_sum);
+    min_cost = Move(next);
+    Debug(p);
+    Debug(min_cost);
   }
-  out << best << '\n';
+
+  for(int i = 0; i <= M; i++) {
+    if(min_cost[i] > N) {
+      out << -1;
+    } else {
+      out << min_cost[i];
+    }
+    out << ' ';
+  }
 }
 
 void SolveMulti(IStream &in, OStream &out) {

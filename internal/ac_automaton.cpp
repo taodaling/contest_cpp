@@ -6,6 +6,10 @@ template <int C = 26>
 struct ACAutomaton {
   Vec<Array<i32, C>> next;
   Vec<i32> fails;
+#ifdef LOCAL
+  Vec<int> chars;
+  Vec<int> fathers;
+#endif
 
  private:
   int alloc_indicator;
@@ -17,6 +21,10 @@ struct ACAutomaton {
   ACAutomaton(int cap) {
     next.resize(cap + 1);
     fails.resize(cap + 1);
+#ifdef LOCAL
+    chars.resize(cap + 1);
+    fathers.resize(cap + 1);
+#endif
     init();
   }
 
@@ -26,6 +34,10 @@ struct ACAutomaton {
     void build(int c) {
       if (ac->next[build_last][c] == 0) {
         ac->next[build_last][c] = ac->alloc();
+#ifdef LOCAL
+        ac->chars[ac->next[build_last][c]] = c;
+        ac->fathers[ac->next[build_last][c]] = build_last;
+#endif
       }
       build_last = ac->next[build_last][c];
     }
@@ -95,7 +107,6 @@ struct ACAutomaton {
       }
     }
 
-    Reverse(All(dq));
     Assert(dq_tail == alloc_indicator);
     return dq;
   }
@@ -106,6 +117,18 @@ struct ACAutomaton {
     }
     return trace;
   }
+
+#ifdef LOCAL
+    Vec<int> debug_node(int i) {
+      Vec<int> seq;
+      while(i != 0) {
+        seq.push_back(chars[i]);
+        i = fathers[i];
+      }
+      Reverse(All(seq));
+      return seq;
+    }
+#endif
 };
 }  // namespace seq
 }  // namespace dalt
