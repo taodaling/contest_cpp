@@ -1,65 +1,58 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "ac_automaton.cpp"
+#include "modint.cpp"
+#include "euclid_like_function.cpp"
+#include "generic_log.cpp"
 
-
+using DM = DynamicModular<>;
+using Mi = ModInt<DM>;
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  Str S;
-  int N;
-  in >> S >> N;
-#ifdef LOCAL
-  seq::ACAutomaton<> ac((int)1e2);
-#else
-  seq::ACAutomaton<> ac((int)1e6);
-#endif
-  Vec<int> ids(N);
-  for(int i = 0; i < N; i++) {
-    Str T;
-    in >> T;
-    var builder = ac.builder();
-    for(var c : T) {
-      builder.build(c - 'a');
+  int P, A, B, S, G;
+  in >> P >> A >> B >> S >> G;
+  DM::Register(P); 
+  if(S == G) {
+    out << 0 << '\n';
+    return;
+  }
+  if(Mi(A) * Mi(S) + Mi(B) == Mi(G)) {
+    out << 1 << '\n';
+    return;
+  }
+  if(A == 0) {
+    if(B == G) {
+      out << 1 << '\n';
+    } else {
+      out << -1 << '\n';
     }
-    ids[i] = builder.build_last;
+    return;
   }
-  var topo = ac.topo_sort();
-  Vec<bool> invalid(Size(topo));
-  for(var id : ids) {
-    invalid[id] = true;
-  }
-  Debug(ac.fails);
-  for(int i = 0; i < Size(topo); i++) {
-    Debug(i);
-    Debug(ac.debug_node(i));
-  }
-  Debug(topo);
-  for(int i : topo) {
-    if(ac.fails[i] != -1) {
-      invalid[i] = invalid[i] || invalid[ac.fails[i]];
+  if(A == 1) {
+    if(B == 0) {
+      out << -1 << '\n';
+    } else {
+      out << (Mi(G) - Mi(S)) / Mi(B) << '\n';
     }
+    return;
   }
-  Debug(ids);
-  Debug(invalid);
-  var matcher = ac.matcher();
-  int change = 0;
-  for(char c : S) {
-    matcher.match(c - 'a');
-    Debug(matcher.match_last);
-    Debug(ac.debug_node(matcher.match_last));
-    if(invalid[matcher.match_last]) {
-      change++;
-      matcher = ac.matcher();
-    }
+  if(Mi(A) * Mi(S) - Mi(S) + Mi(B) == Mi(0)) {
+    out << -1 << '\n';
+    return;
   }
-
-  out << change;
+  math::CoprimeModLog<Mi> loger(A);
+  Mi right = (Mi(G) * Mi(A - 1) + Mi(B)) / (Mi(A) * Mi(S) - Mi(S) + Mi(B));
+  var ans = loger.log(right);
+  if(ans.is_none()) {
+    out << -1 << '\n';
+  } else {
+    out << *ans << '\n';
+  }
 }
 
 void SolveMulti(IStream &in, OStream &out) {
   //std::ifstream input("in");
   int num_of_input = 1;
-  //in >> num_of_input;
+  in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
     //SolveOne(i + 1, input, out);
 	SolveOne(i + 1, in, out);

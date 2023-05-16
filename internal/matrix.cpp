@@ -46,6 +46,25 @@ struct Matrix {
     }
     return res;
   }
+  Self& operator/=(T value) {
+    data /= value;
+    return *this;
+  }
+  Self operator/(T value) {
+    var ans = *this;
+    ans /= value;
+    return ans; 
+  }
+  Self& operator*=(T value) {
+    data *= value;
+    return *this;
+  }
+  Self operator*(T value) {
+    var ans = *this;
+    ans *= value;
+    return ans; 
+  }
+
   Self operator/(const Self &rhs) const {
     return *this * (*rhs.possible_inv());
   }
