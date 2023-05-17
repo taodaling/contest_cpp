@@ -19,9 +19,11 @@ struct CoprimeModLog {
     map = hash::HashMap<T, int>(m);
     T inv_x = T(1) / x;
     inv_m = inv_x.pow(m);
-    T prod = T(1);
+    T prod = 1;
     for (int i = 0; i < m; i++) {
-      map[prod] = i;
+      if(map.find(prod) == map.end()) {
+        map[prod] = i;
+      }
       prod = prod * x;
     }
   }

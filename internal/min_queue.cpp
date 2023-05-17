@@ -55,5 +55,10 @@ struct MinQueue {
   decltype(data.size()) size() const { return data.size(); }
   const T& min() const { return inc.front(); }
   IsBool(SUPPORT_MAX, const T&) max() const { return dec.front(); }
+  void clear() {
+    while(!empty()) {
+      pop_front();
+    }
+  }
 };
 }  // namespace dalt
