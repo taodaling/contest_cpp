@@ -16,6 +16,7 @@ IStream& operator>>(IStream& is, Vec<T>& val) {
     }                                      \
     return data;                           \
   }
+
 VEC_OP(+=)
 VEC_OP(-=)
 VEC_OP(*=)

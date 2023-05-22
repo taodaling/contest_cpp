@@ -55,6 +55,7 @@ struct is_modular<DynamicModular<T, CID, ID>> {
 };
 
 MakeAnnotation(modint);
+MakeAnnotation(modint_32);
 #define MOD MODULAR::modulus
 #define SELF ModInt<MODULAR>
 #define TEMPLATE_ARGS template <class MODULAR>
@@ -167,6 +168,9 @@ TEMPLATE_ARGS inline enable_if_t<is_same_v<MODULAR, MOD_BIG>, SELF> operator*(
 
 TEMPLATE_ARGS struct is_modint<ModInt<MODULAR>> {
   static const bool value = true;
+};
+TEMPLATE_ARGS struct is_modint_32<ModInt<MODULAR>> {
+  static const bool value = is_same_v<typename MODULAR::Type, i32>;
 };
 #undef TEMPLATE_TYPE
 #undef MOD

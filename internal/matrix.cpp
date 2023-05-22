@@ -13,7 +13,7 @@ struct Matrix {
   Matrix(int _m, Vec<T> _data) : m(_m), data(Move(_data)) {}
   Matrix(int _n, int _m) : data(_n * _m), m(_m) {}
   Matrix() : Matrix(0, 0) {}
-  static Self mul_identity(int n) {
+  static Self MulIdentity(int n) {
     Self res(n, n);
     for (int i = 0; i < n; i++) {
       res[i][i] = T(1);
@@ -31,8 +31,8 @@ struct Matrix {
     Assert(lhs.shape() == rhs.shape());
     int n = Size(lhs.data);
     Self res(lhs.row_num(), lhs.col_num());
-    for (int i = 0; i < n; i++) {
-      res[i][0] = lhs[i][0] + rhs[i][0];
+    for(int i = 0; i < n; i++) {
+      res.data[i] = lhs.data[i] + rhs.data[i];
     }
     return res;
   }
@@ -41,8 +41,8 @@ struct Matrix {
     Assert(lhs.shape() == rhs.shape());
     int n = Size(lhs.data);
     Self res(lhs.row_num(), lhs.col_num());
-    for (int i = 0; i < n; i++) {
-      res[i][0] = lhs[i][0] - rhs[i][0];
+    for(int i = 0; i < n; i++) {
+      res.data[i] = lhs.data[i] - rhs.data[i];
     }
     return res;
   }
@@ -70,7 +70,7 @@ struct Matrix {
   }
   template <class V = T>
   enable_if_t<is_same_v<V, T> &&
-                  !(is_modint_v<T> && is_same_v<i32, typename T::Type>),
+                  !(is_modint_v<T>),
               Self>
   operator*(const Self &rhs) const {
     const Self &lhs = *this;
@@ -92,7 +92,7 @@ struct Matrix {
   // operation
   template <class V = T>
   enable_if_t<is_same_v<V, T> &&
-                  (is_modint_v<T> && is_same_v<i32, typename T::Type>),
+                  is_modint_32_v<T>,
               Self>
   operator*(const Self &rhs) const {
     using Modular = typename T::Modular;
@@ -165,7 +165,7 @@ struct Matrix {
     }
     let n = row_num();
     Self l = *this;
-    Self r = mul_identity(n);
+    Self r = MulIdentity(n);
 
     for (int i = 0; i < n; i++) {
       let max_row = i;
@@ -199,7 +199,7 @@ struct Matrix {
   template <class E>
   enable_if_t<is_integral_v<E>, Self> pow(E exp) {
     if (exp == 0) {
-      return Self::mul_identity(col_num());
+      return Self::MulIdentity(col_num());
     }
     auto res = pow(exp / 2);
     res = res * res;
