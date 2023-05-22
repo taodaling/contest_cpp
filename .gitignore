@@ -1,3 +1,5 @@
 external/*
 *.exe
 .vscode/*
+solver.cpp.bak
+in
