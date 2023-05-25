@@ -1,60 +1,80 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "modint.cpp"
-#include "euclid_like_function.cpp"
-#include "generic_log.cpp"
+#include "bipartite_match.cpp"
+#include "graph.cpp"
 
-using DM = DynamicModular<>;
-using Mi = ModInt<DM>;
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int P, A, B, S, G;
-  in >> P >> A >> B >> S >> G;
-  DM::Register(P); 
-  if(S == G) {
-    out << 0 << '\n';
-    return;
-  }
-  if(Mi(A) * Mi(S) + Mi(B) == Mi(G)) {
-    out << 1 << '\n';
-    return;
-  }
-  if(A == 0) {
-    if(B == G) {
-      out << 1 << '\n';
-    } else {
-      out << -1 << '\n';
+  int H, W;
+  in >> H >> W;
+  Trace(grid);
+  Vec<Vec<int>> grid(H, Vec<int>(W));
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      char c;
+      in >> c;
+      grid[i][j] = c == '#';
     }
-    return;
   }
-  if(A == 1) {
-    if(B == 0) {
-      out << -1 << '\n';
-    } else {
-      out << (Mi(G) - Mi(S)) / Mi(B) << '\n';
+  Vec<Vec<int>> V_ids(H, Vec<int>(W, -1));
+  Vec<Vec<int>> H_ids(H, Vec<int>(W, -1));
+  int id = 0;
+  var next = [&]() { return id++; };
+  Trace(V_ids);
+  for (int i = 0; i < W; i++) {
+    for (int j = 0; j < H; j++) {
+      if (grid[j][i]) {
+        continue;
+      }
+      if (j == 0 || V_ids[j - 1][i] == -1) {
+        V_ids[j][i] = next();
+      } else {
+        V_ids[j][i] = V_ids[j - 1][i];
+      }
     }
-    return;
   }
-  if(Mi(A) * Mi(S) - Mi(S) + Mi(B) == Mi(0)) {
-    out << -1 << '\n';
-    return;
+  Trace(H_ids);
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (grid[i][j]) {
+        continue;
+      }
+      if (j == 0 || H_ids[i][j - 1] == -1) {
+        H_ids[i][j] = next();
+      } else {
+        H_ids[i][j] = H_ids[i][j - 1];
+      }
+    }
   }
-  math::CoprimeModLog<Mi> loger(A);
-  Mi right = (Mi(G) * Mi(A - 1) + Mi(B)) / (Mi(A) * Mi(S) - Mi(S) + Mi(B));
-  var ans = loger.log(right);
-  if(ans.is_none()) {
-    out << -1 << '\n';
-  } else {
-    out << *ans << '\n';
+  Trace(make graph);
+  using namespace graph;
+  using E = BiBaseEdge;
+  Debug(id);
+  Graph<E> g(id);
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (V_ids[i][j] != -1) {
+        DebugFmtln("%d, %d", i, j);
+        AddBiEdge(g, V_ids[i][j], H_ids[i][j]);
+      }
+    }
   }
+  Trace(match);
+  var match = BipartiteMatch(g);
+  int ans = 0;
+  for (int x : match) {
+    ans += x >= 0;
+  }
+  ans /= 2;
+  out << ans;
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  //std::ifstream input("in");
+  // std::ifstream input("in");
   int num_of_input = 1;
-  in >> num_of_input;
+  // in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    //SolveOne(i + 1, input, out);
-	SolveOne(i + 1, in, out);
+    // SolveOne(i + 1, input, out);
+    SolveOne(i + 1, in, out);
   }
 }

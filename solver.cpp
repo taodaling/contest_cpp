@@ -1,86 +1,48 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "modint.cpp"
-using Mi = ModInt998244353;
-#include "matrix.cpp"
+#include "convexhull.cpp"
+using namespace geo2;
+using Nv = NearValue<double>;
+using Pt = Point<Nv>;
+using Ln = Line<Nv>;
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int N;
   in >> N;
-  Vec<i64> A(N);
-  in >> A;
-
-  var mock_once = [&]() {
-    Vec<i64> cnt(N);
-    int time = 0;
-    while(true) {
-      time++;
-      int pt = random_choice(0, N - 1);
-      bool ok = true;
-      for(int i = 0; i < N; i++) {
-        cnt[i] += 1;
-        if(i == pt) {
-          cnt[i] = 0;
-        }
-        if(cnt[i] < A[i]) {
-          ok = false;
-        }
-      }
-      if(ok) {
-        return time;
-      }
-    }
-  };
-  var mock = [&]() {
-    long sum = 0;
-    for(int i = 0; i < 10000; i++) {
-      sum += mock_once();
-    }
-    Debug(sum / double(10000));
-  };
-
-  DebugRun(
-    //mock();
-  );
-
-  Vec<i64> stage(N);
-  for(int i = 1; i < N; i++) {
-    stage[i] = A[i] - A[i - 1];
-    Assert(stage[i] >= 0);
+  Vec<Pt> pts(N);
+  for (int i = 0; i < N; i++) {
+    int a, b, c;
+    in >> a >> b >> c;
+    pts[i].x = double(a) / c;
+    pts[i].y = double(b) / c;
   }
-  Reverse(stage.begin() + 1, stage.end());
-  using Mat = math::Matrix<Mi>;
-  Mat last_ans(1, Vec<Mi> {0, 1, 1});
-  Mat pre_sum(1, Vec<Mi>(3));
-  for(int i = 1; i < N; i++) {
-    Debug(i);
-    pre_sum += last_ans;
-    Mat T(3, Vec<Mi> {
-      N, 0, -Mi(N) - pre_sum[0][0],
-      0, N, -pre_sum[1][0],
-      0, 0, 0,
-    });
-    T /= N - i;
-    Debug(T.to_vec());
-    T[2][2] = 1;
-    Mat compress_T = T.pow(stage[i]);
-    last_ans = compress_T * last_ans;
-    Debug(last_ans.to_vec());
+  Debug(pts);
+  ConvexHull<Nv> ch(pts);
+  var profit = [&](Pt &pt) { return Min(Nv(1) / pt.x, Nv(1) / pt.y); };
+  Debug(ch.to_vec());
+  Nv dist = 0;
+  for (int i = 0; i < Size(ch); i++) {
+    var pt = ch[i];
+    Chmax(dist, profit(pt));
   }
-  var a = last_ans[0][0];
-  var b = last_ans[1][0];
-  //a + xb = 0
-  //x = -a / b;
-  var x = -a / b;
-  out << x << '\n';
+  for (int i = 0; i < Size(ch); i++) {
+    var a = ch[i];
+    var b = ch[(i + 1) % Size(ch)];
+    if (Pt::in_angle(a, b, Pt(1, 1))) {
+      var pt =
+          Ln::intersect(Ln::from_ends(a, b), Ln::from_ends(Pt(0, 0), Pt(1, 1)));
+      Chmax(dist, profit(*pt));
+    }
+  }
+  out << dist;
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  //std::ifstream input("in");
+  // std::ifstream input("in");
   int num_of_input = 1;
-  //in >> num_of_input;
+  // in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    //SolveOne(i + 1, input, out);
-	SolveOne(i + 1, in, out);
+    // SolveOne(i + 1, input, out);
+    SolveOne(i + 1, in, out);
   }
 }

@@ -1,5 +1,5 @@
 external/*
 *.exe
 .vscode/*
-solver.cpp.bak
+*.bak
 in
