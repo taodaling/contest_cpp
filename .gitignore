@@ -1,3 +1,5 @@
 external/*
 *.exe
 .vscode/*
+*.bak
+in

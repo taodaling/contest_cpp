@@ -24,7 +24,7 @@ struct Affine {
     return Self(lhs.a / rhs, lhs.b / rhs);
   }
   T operator()(T x) const { return a * x + b; }
-  static Self mul_identity() { return Self(T(1), T(0)); }
+  static Self MulIdentity() { return Self(T(1), T(0)); }
   static Self add_identity() { return Self(T(0), T(0)); }
 };
 }  // namespace dalt

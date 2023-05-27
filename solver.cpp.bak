@@ -1,44 +1,72 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "math.cpp"
+#include "bipartite_match.cpp"
+#include "graph.cpp"
+
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N;
-  in >> N;
-  Vec<int> A(N);
-  in >> A;
-  A -= 1;
-  int M = *MaxElement(All(A));
-  Vec<Vec<int>> next(N + 1, Vec<int>(M + 1, N));
-  for (int i = N - 1; i >= 0; i--) {
-    next[i] = next[i + 1];
-    next[i][A[i]] = i;
+  int H, W;
+  in >> H >> W;
+  Trace(grid);
+  Vec<Vec<int>> grid(H, Vec<int>(W));
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      char c;
+      in >> c;
+      grid[i][j] = c == '#';
+    }
   }
-  MDVec<int, 4> dp_mem(
-      N, MDVec<int, 3>(N, MDVec<int, 2>(M + 1, Vec<int>(M + 1, -1))));
-  var dp = [&](var &dp, int l, int r, int h, int b) {
-    if (l > r || b > h) {
-      return 0;
-    }
-
-    var &ans = dp_mem[l][r][h][b];
-    if (ans == -1) {
-      ans = dp(dp, l, r, h - 1, b);
-
-      for (int i = l; i <= r; i++) {
-        if (A[i] == h) {
-          for (int k = b; k <= h; k++) {
-            Chmax(ans, dp(dp, l, i - 1, k, b) + dp(dp, i + 1, r, h, k) + 1);
-          }
-        }
+  Vec<Vec<int>> V_ids(H, Vec<int>(W, -1));
+  Vec<Vec<int>> H_ids(H, Vec<int>(W, -1));
+  int id = 0;
+  var next = [&]() { return id++; };
+  Trace(V_ids);
+  for (int i = 0; i < W; i++) {
+    for (int j = 0; j < H; j++) {
+      if (grid[j][i]) {
+        continue;
       }
-
-      // DebugFmtln("dp(%d, %d, %d, %d) = %d", l, r, h, b, ans);
+      if (j == 0 || V_ids[j - 1][i] == -1) {
+        V_ids[j][i] = next();
+      } else {
+        V_ids[j][i] = V_ids[j - 1][i];
+      }
     }
-    return ans;
-  };
-  var ans = dp(dp, 0, N - 1, M, 0);
-  out << ans << '\n';
+  }
+  Trace(H_ids);
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (grid[i][j]) {
+        continue;
+      }
+      if (j == 0 || H_ids[i][j - 1] == -1) {
+        H_ids[i][j] = next();
+      } else {
+        H_ids[i][j] = H_ids[i][j - 1];
+      }
+    }
+  }
+  Trace(make graph);
+  using namespace graph;
+  using E = BiBaseEdge;
+  Debug(id);
+  Graph<E> g(id);
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (V_ids[i][j] != -1) {
+        DebugFmtln("%d, %d", i, j);
+        AddBiEdge(g, V_ids[i][j], H_ids[i][j]);
+      }
+    }
+  }
+  Trace(match);
+  var match = BipartiteMatch(g);
+  int ans = 0;
+  for (int x : match) {
+    ans += x >= 0;
+  }
+  ans /= 2;
+  out << ans;
 }
 
 void SolveMulti(IStream &in, OStream &out) {

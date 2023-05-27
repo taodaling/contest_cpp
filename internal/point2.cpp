@@ -31,7 +31,7 @@ struct Point {
   bool operator==(const Self& rhs) const { return x == rhs.x && y == rhs.y; }
   bool operator!=(const Self& rhs) const { return !(*this == rhs); }
   T square() const { return Self::dot(*this, *this); }
-  FType abs() const{ return square().sqrt(); }
+  FType abs() const { return square().sqrt(); }
   static T dist2(const Self& lhs, const Self& rhs) {
     return (lhs - rhs).square();
   }
@@ -41,16 +41,14 @@ struct Point {
   Self operator-() const { return {-x, -y}; }
 
   //(-pi,pi]
-  FType atan2() const {
-    return T::atan2(y, x);
-  }
+  FType atan2() const { return T::atan2(y, x); }
   static int half(T x, T y) {
     return y > T(0) || y == T(0) && x < T(0) ? 1 : 0;
   }
   int half() const { return half(x, y); }
   Self norm(T d = T(1)) const { return *this * d / abs(); }
   Self conj() const { return {x, -y}; }
-  //count-clockwise rotate pi/2
+  // count-clockwise rotate pi/2
   Self perpendicular() const { return {-y, x}; }
   static Self rotate(const Self& pt, FType cos, FType sin,
                      const Self& center = Self()) {
@@ -82,14 +80,14 @@ struct Point {
   }
 
   static int orient(const Self& b, const Self& c) { return cross(b, c).sign(); }
-  //获取c处于ab的方向，-1表示順時針方向，1表示逆時針，0表示在綫上
+  // 获取c处于ab的方向，-1表示順時針方向，1表示逆時針，0表示在綫上
   static int orient(const Self& a, const Self& b, const Self& c) {
     return orient(b - a, c - a);
   }
   static bool in_angle(const Self& b, const Self& c, const Self& p,
                        const Self& center = Self()) {
     if (orient(b, c, center) < 0) {
-      Swap(b, c);
+      return in_angle(c, b, p, center);
     }
     return orient(b, p, center) >= 0 && orient(c, p, center) <= 0;
   }
@@ -106,15 +104,15 @@ struct Point {
                         const Self& fq) const {
     return fp + (*this - p) * ((fq - fp) / (q - p));
   }
-  //判断c是否落在以a与b为直径两端的圆中（包含边界）
+  // 判断c是否落在以a与b为直径两端的圆中（包含边界）
   static bool in_disk(const Self& a, const Self& b, const Self& c) {
     return dot(a - c, b - c).sign() <= 0;
   }
-  //判断c是否在a到b的线段上
+  // 判断c是否在a到b的线段上
   static bool on_segment(const Self& a, const Self& b, const Self& c) {
     return orient(a, b, c) == 0 && in_disk(a, b, c);
   }
-  //获取线段a->b与线段c->d的交点
+  // 获取线段a->b与线段c->d的交点
   static Optional<Self> proper_intersect(const Self& a, const Self& b,
                                          const Self& c, const Self& d) {
     T oa = cross(d - c, a - c);

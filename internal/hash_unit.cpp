@@ -7,7 +7,7 @@ struct HashUnit {
   using Self = HashUnit;
   Mi val;
   int size;
-
+  operator Mi() const { return val; }
   static Self nil() {
     return Self{
         .val = Mi(0),
