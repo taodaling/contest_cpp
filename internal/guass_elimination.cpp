@@ -61,4 +61,6 @@ struct GuassElimination {
   }
   Vec<Vec<T>> to_vec() const { return data; }
 };
+
+
 }  // namespace dalt
