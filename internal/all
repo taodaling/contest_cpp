@@ -151,6 +151,7 @@
 #include "polynomial.cpp"
 #include "poly_points.cpp"
 #include "pow_chain.cpp"
+#include "prefixsum.cpp"
 #include "prefixsum_of_lucas.cpp"
 #include "prefix_sum.cpp"
 #include "prefix_sum2.cpp"

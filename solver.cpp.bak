@@ -1,72 +1,59 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "bipartite_match.cpp"
-#include "graph.cpp"
+#include "topo_sort.cpp"
 
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int H, W;
   in >> H >> W;
-  Trace(grid);
-  Vec<Vec<int>> grid(H, Vec<int>(W));
+  Vec<Vec<int>> A(H, Vec<int>(W));
+  Vec<Vec<int>> B(W, Vec<int>(H));
+  in >> A;
   for (int i = 0; i < H; i++) {
     for (int j = 0; j < W; j++) {
-      char c;
-      in >> c;
-      grid[i][j] = c == '#';
+      B[j][i] = A[i][j];
     }
   }
-  Vec<Vec<int>> V_ids(H, Vec<int>(W, -1));
-  Vec<Vec<int>> H_ids(H, Vec<int>(W, -1));
-  int id = 0;
-  var next = [&]() { return id++; };
-  Trace(V_ids);
-  for (int i = 0; i < W; i++) {
-    for (int j = 0; j < H; j++) {
-      if (grid[j][i]) {
-        continue;
+  var check = [&](const Vec<Vec<int>> &A) {
+    int H = Size(A);
+    int W = Size(A[0]);
+    using namespace graph;
+    using E = DiBaseEdge;
+    Graph<E> g(H * W + W);
+    var id_of_col = [&](int c) { return c; };
+    var id_of_ps = [&](int r, int c) { return r * W + c + W; };
+
+    for (int r = 0; r < H; r++) {
+      Vec<int> idx;
+      for (int i = 0; i < W; i++) {
+        if (i > 0) {
+          AddDiEdge(g, id_of_ps(r, i), id_of_ps(r, i - 1));
+        }
+        if (A[r][i] != 0) {
+          idx.push_back(i);
+        }
       }
-      if (j == 0 || V_ids[j - 1][i] == -1) {
-        V_ids[j][i] = next();
-      } else {
-        V_ids[j][i] = V_ids[j - 1][i];
-      }
-    }
-  }
-  Trace(H_ids);
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      if (grid[i][j]) {
-        continue;
-      }
-      if (j == 0 || H_ids[i][j - 1] == -1) {
-        H_ids[i][j] = next();
-      } else {
-        H_ids[i][j] = H_ids[i][j - 1];
-      }
-    }
-  }
-  Trace(make graph);
-  using namespace graph;
-  using E = BiBaseEdge;
-  Debug(id);
-  Graph<E> g(id);
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      if (V_ids[i][j] != -1) {
-        DebugFmtln("%d, %d", i, j);
-        AddBiEdge(g, V_ids[i][j], H_ids[i][j]);
+      Sort(All(idx), [&](int i, int j) { return A[r][i] < A[r][j]; });
+      int last_offset = 0;
+      for (int c = 0; c < Size(idx); c++) {
+        while (last_offset < Size(idx) &&
+               A[r][idx[last_offset]] < A[r][idx[c]]) {
+          last_offset++;
+        }
+        AddDiEdge(g, id_of_ps(r, c), id_of_col(idx[c]));
+        if (last_offset > 0) {
+          AddDiEdge(g, id_of_col(idx[c]), id_of_ps(r, last_offset - 1));
+        }
       }
     }
+    var topo = TopoSort(g);
+    return topo.is_some();
+  };
+  if (check(B)) {
+    out << "Yes";
+  } else {
+    out << "No";
   }
-  Trace(match);
-  var match = BipartiteMatch(g);
-  int ans = 0;
-  for (int x : match) {
-    ans += x >= 0;
-  }
-  ans /= 2;
-  out << ans;
 }
 
 void SolveMulti(IStream &in, OStream &out) {
