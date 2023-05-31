@@ -6,7 +6,7 @@ struct MDVecDef {
 
   template <typename... Args>
   static Type Make(int n, Args... args) {
-    return Type(n, typename MDVecDef<T, S - 1>::Make(args));
+    return Type(n, MDVecDef<T, S - 1>::Make(args...));
   }
 };
 template <class T>
