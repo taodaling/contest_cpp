@@ -7,7 +7,25 @@ void SolveOne(int test_id, IStream &in, OStream &out) {
   in >> N >> M;
   using namespace graph;
   using E = BoundFlowEdge<i32>;
-  Graph
+  Graph<E> g(N + 1);
+  Vec<Pair<int, int>> ids;
+  for (int i = 0; i < M; i++) {
+    int s, t, l, u;
+    in >> s >> t >> l >> u;
+    AddFlowEdge(g, s, t, u);
+    g[s].back().bound = l;
+    ids.push_back({s, Size(g[s]) - 1});
+  }
+  bool ans = FeasibleFlow(g);
+  if (ans) {
+    out << "YES";
+  } else {
+    out << "NO";
+  }
+  out << '\n';
+  for (var id : ids) {
+    out << g[id.first][id.second].flow << '\n';
+  }
 }
 
 void SolveMulti(IStream &in, OStream &out) {

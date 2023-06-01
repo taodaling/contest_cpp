@@ -10,9 +10,10 @@ struct BoundFlowEdge : FlowBaseEdge<T> {
   enable_if_t<is_base_of_v<BoundFlowEdge<typename E::flow_type>, E>, ret>
 
 template <class E>
-IsBoundFlow(E, bool) FeasibleFlow(
-    Graph<E> &g,
-    E::flow_type inf = numeric_limits<typename E::flow_type>::max() / 2) {
+IsBoundFlow(E, bool)
+    FeasibleFlow(Graph<E> &g,
+                 typename E::flow_type inf =
+                     std::numeric_limits<typename E::flow_type>::max() / 2) {
   int n = Size(g);
   g.resize(n + 2);
   int src = n;
@@ -24,8 +25,8 @@ IsBoundFlow(E, bool) FeasibleFlow(
         continue;
       }
       if (fe.bound > 0) {
-        AddFlowEdge(g, src, e.to, e.bound);
-        AddFlowEdge(g, i, dst, e.bound);
+        AddFlowEdge(g, src, fe.to, fe.bound);
+        AddFlowEdge(g, i, dst, fe.bound);
       }
     }
   }
@@ -52,9 +53,10 @@ IsBoundFlow(E, bool) FeasibleFlow(
 }
 
 template <class E>
-IsBoundFlow(E, bool) FeasibleFlow(
-    Graph<E> &g, int s, int t,
-    E::flow_type inf = numeric_limits<typename E::flow_type>::max() / 2) {
+IsBoundFlow(E, bool)
+    FeasibleFlow(Graph<E> &g, int s, int t,
+                 typename E::flow_type inf =
+                     std::numeric_limits<typename E::flow_type>::max() / 2) {
   using T = typename E::flow_type;
   AddFlowEdge(g, t, s, inf, 0);
   bool ans = FeasibleFlow(g, inf);
