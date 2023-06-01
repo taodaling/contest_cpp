@@ -1,7 +1,7 @@
 #include "common.cpp"
 namespace dalt {
 // verified by:
-//  - https://www.luogu.com.cn/problem/P1177
+//  - https://www.luogu.com.cn/problem/P1923
 template <class F, class T, i32 BIT_8 = 1>
 enable_if_t<is_integral_v<T>, void> RadixSortMapper(
     F* begin, i32 n, const Mapper<F, T>& mapper) {
