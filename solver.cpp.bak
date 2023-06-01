@@ -1,59 +1,69 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "topo_sort.cpp"
-
+#include "bipartite_match.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
   int H, W;
   in >> H >> W;
-  Vec<Vec<int>> A(H, Vec<int>(W));
-  Vec<Vec<int>> B(W, Vec<int>(H));
-  in >> A;
+  Vec<String> mat(H);
+  in >> mat;
+  using namespace graph;
+  using E = BiBaseEdge;
+  Graph<E> g(H * W * 2);
+  var id_of = [&](int i, int j) { return i * W + j; };
+  int dirs[][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
   for (int i = 0; i < H; i++) {
     for (int j = 0; j < W; j++) {
-      B[j][i] = A[i][j];
-    }
-  }
-  var check = [&](const Vec<Vec<int>> &A) {
-    int H = Size(A);
-    int W = Size(A[0]);
-    using namespace graph;
-    using E = DiBaseEdge;
-    Graph<E> g(H * W + W);
-    var id_of_col = [&](int c) { return c; };
-    var id_of_ps = [&](int r, int c) { return r * W + c + W; };
-
-    for (int r = 0; r < H; r++) {
-      Vec<int> idx;
-      for (int i = 0; i < W; i++) {
-        if (i > 0) {
-          AddDiEdge(g, id_of_ps(r, i), id_of_ps(r, i - 1));
+      char c = mat[i][j];
+      if (c == '2') {
+        // add edge
+        for (var &d : dirs) {
+          int ni = i + d[0];
+          int nj = j + d[1];
+          if (ni < 0 || ni >= H || nj < 0 || nj >= W) continue;
+          if (mat[ni][nj] == '2') {
+            AddBiEdge(g, id_of(i, j), id_of(ni, nj));
+          }
         }
-        if (A[r][i] != 0) {
-          idx.push_back(i);
-        }
-      }
-      Sort(All(idx), [&](int i, int j) { return A[r][i] < A[r][j]; });
-      int last_offset = 0;
-      for (int c = 0; c < Size(idx); c++) {
-        while (last_offset < Size(idx) &&
-               A[r][idx[last_offset]] < A[r][idx[c]]) {
-          last_offset++;
-        }
-        AddDiEdge(g, id_of_ps(r, c), id_of_col(idx[c]));
-        if (last_offset > 0) {
-          AddDiEdge(g, id_of_col(idx[c]), id_of_ps(r, last_offset - 1));
-        }
+      } else if (c == '?') {
+        // AddBiEdge(g, id_of_left(i, j), id_of_left(i, j));
       }
     }
-    var topo = TopoSort(g);
-    return topo.is_some();
-  };
-  if (check(B)) {
-    out << "Yes";
-  } else {
-    out << "No";
   }
+  var mate = BipartiteMatch(g, false, Vec<int>(), H * W);
+  Debug(mate);
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      char c = mat[i][j];
+      if (c == '2') {
+        // add edge
+        for (var &d : dirs) {
+          int ni = i + d[0];
+          int nj = j + d[1];
+          if (ni < 0 || ni >= H || nj < 0 || nj >= W) continue;
+          if (mat[ni][nj] == '?') {
+            AddBiEdge(g, id_of(i, j), id_of(ni, nj) + H * W);
+          }
+        }
+      } else if (c == '?') {
+        // AddBiEdge(g, id_of_left(i, j), id_of_left(i, j));
+      }
+    }
+  }
+  mate = BipartiteMatch(g, false, Move(mate), H * W);
+  Debug(mate);
+  for (int i = 0; i < H; i++) {
+    for (int j = 0; j < W; j++) {
+      if (mat[i][j] == '2') {
+        int id = id_of(i, j);
+        if (mate[id] == -1) {
+          out << "No";
+          return;
+        }
+      }
+    }
+  }
+  out << "Yes";
 }
 
 void SolveMulti(IStream &in, OStream &out) {
