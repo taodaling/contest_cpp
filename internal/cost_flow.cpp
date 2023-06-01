@@ -18,6 +18,14 @@ IsCostFlow(E, void)
   g[s].back().cost = cost;
   g[t].back().cost = -cost;
 }
-
+template <class E>
+IsFlow(E, String) CostFlowToString(const Graph<E> &g) {
+  Func<String(const E &e)> tostring = [&](const E &e) -> String {
+    return "->" + ToString(e.to) + ", flow = " + ToString(e.flow) + "/" +
+           ToString(e.flow + g[e.to][e.rev].flow) +
+           ", cost = " + ToString(e.cost);
+  };
+  return FlowToStringTemplate(g, tostring);
+}
 } // namespace graph
 } // namespace dalt

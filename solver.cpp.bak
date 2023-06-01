@@ -1,69 +1,34 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "bipartite_match.cpp"
+#include "bound_flow.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int H, W;
-  in >> H >> W;
-  Vec<String> mat(H);
-  in >> mat;
+  int N, M;
+  in >> N >> M;
   using namespace graph;
-  using E = BiBaseEdge;
-  Graph<E> g(H * W * 2);
-  var id_of = [&](int i, int j) { return i * W + j; };
-  int dirs[][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      char c = mat[i][j];
-      if (c == '2') {
-        // add edge
-        for (var &d : dirs) {
-          int ni = i + d[0];
-          int nj = j + d[1];
-          if (ni < 0 || ni >= H || nj < 0 || nj >= W) continue;
-          if (mat[ni][nj] == '2') {
-            AddBiEdge(g, id_of(i, j), id_of(ni, nj));
-          }
-        }
-      } else if (c == '?') {
-        // AddBiEdge(g, id_of_left(i, j), id_of_left(i, j));
-      }
-    }
+  using E = BoundFlowEdge<i32>;
+  Graph<E> g(N + 1);
+  Vec<Pair<int, int>> ids;
+  for (int i = 0; i < M; i++) {
+    int s, t, l, u;
+    in >> s >> t >> l >> u;
+    AddBoundFlowEdge(g, s, t, u, l);
+    ids.push_back({s, Size(g[s]) - 1});
   }
-  var mate = BipartiteMatch(g, false, Vec<int>(), H * W);
-  Debug(mate);
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      char c = mat[i][j];
-      if (c == '2') {
-        // add edge
-        for (var &d : dirs) {
-          int ni = i + d[0];
-          int nj = j + d[1];
-          if (ni < 0 || ni >= H || nj < 0 || nj >= W) continue;
-          if (mat[ni][nj] == '?') {
-            AddBiEdge(g, id_of(i, j), id_of(ni, nj) + H * W);
-          }
-        }
-      } else if (c == '?') {
-        // AddBiEdge(g, id_of_left(i, j), id_of_left(i, j));
-      }
-    }
+  Debug(FlowToString(g));
+  bool ans = FeasibleFlow(g);
+
+  Debug(FlowToString(g));
+  if (ans) {
+    out << "YES";
+  } else {
+    out << "NO";
+    return;
   }
-  mate = BipartiteMatch(g, false, Move(mate), H * W);
-  Debug(mate);
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      if (mat[i][j] == '2') {
-        int id = id_of(i, j);
-        if (mate[id] == -1) {
-          out << "No";
-          return;
-        }
-      }
-    }
+  out << '\n';
+  for (var id : ids) {
+    out << g[id.first][id.second].flow + g[id.first][id.second].bound << '\n';
   }
-  out << "Yes";
 }
 
 void SolveMulti(IStream &in, OStream &out) {
