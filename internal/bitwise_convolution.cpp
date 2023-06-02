@@ -1,48 +1,59 @@
 #pragma once
-#include "common.cpp"
 #include "binary.cpp"
+#include "common.cpp"
 #include "poly.cpp"
 namespace dalt {
 namespace fwt {
 // res[i] is how many superset of i occur in p
-template <class T> struct And {
+template <class T>
+struct And {
   using Type = T;
   static Array<T, 2> conv(const T &a, const T &b) { return {a + b, b}; }
 };
 // p[i] is the number of superset of i, ret[i] is the occurrence number of
 // number i
-template <class T> struct IAnd {
+template <class T>
+struct IAnd {
   using Type = T;
   static Array<T, 2> conv(const T &a, const T &b) { return {a - b, b}; }
 };
 // res[i] is how many subsets of i occur in p
-template <class T> struct Or {
+template <class T>
+struct Or {
   using Type = T;
   static Array<T, 2> conv(const T &a, const T &b) { return {a, b + a}; }
 };
 // p[i] is the number of subset of i, ret[i] is the occurrence number of number
 // i
-template <class T> struct IOr {
+template <class T>
+struct IOr {
   using Type = T;
   static Array<T, 2> conv(const T &a, const T &b) { return {a, b - a}; }
 };
-template <class T> struct Xor {
+template <class T>
+struct Xor {
   using Type = T;
   static Array<T, 2> conv(const T &a, const T &b) { return {a + b, a - b}; }
 };
-template <class T> struct IXor {
+template <class T>
+struct IXor {
   using Type = T;
   static Array<T, 2> conv(const T &a, const T &b) {
     return {(a + b) / T(2), (a - b) / T(2)};
   }
 };
-template <class T> struct IXorFast {
+template <class T>
+struct IXorFast {
   using Type = T;
+  static T half;
+  static void Register(T _half) { half = _half; }
   static Array<T, 2> conv(const T &a, const T &b) {
-    static const T div = T(1) / T(2);
-    return {(a + b) * div, (a - b) * div};
+    return {(a + b) * half, (a - b) * half};
   }
 };
+template <class T>
+T IXorFast<T>::half;
+
 template <class Conv, class T = typename Conv::Type>
 void BitwiseTransform(Vec<T> &data, int l, int r) {
   static_assert(is_same_v<typename Conv::Type, T>);
@@ -79,7 +90,8 @@ void BitwiseInverse(Vec<T> &data, int l, int r) {
 
 // ret[i] = \sum_{j \in i} a[j] * b[i ^ j]
 // O(n(\log n)^2)
-template <class T> Vec<T> SubsetConvolution(Vec<T> a, Vec<T> b) {
+template <class T>
+Vec<T> SubsetConvolution(Vec<T> a, Vec<T> b) {
   Assert(Size(a) == Size(b));
   Assert(Size(a) == LowestOneBit(Size(a)));
   i32 n = Size(a);
@@ -115,5 +127,5 @@ template <class T> Vec<T> SubsetConvolution(Vec<T> a, Vec<T> b) {
   }
   return c;
 }
-} // namespace fwt
-} // namespace dalt
+}  // namespace fwt
+}  // namespace dalt
