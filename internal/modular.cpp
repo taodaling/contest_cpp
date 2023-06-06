@@ -16,12 +16,18 @@ inline T MulMod(T a, T b, T modulus) {
 }
 template<>
 inline i64 MulMod<i64>(i64 a, i64 b, i64 modulus) {
+#ifdef __SIZEOF_INT128__
+  // do some fancy stuff here
+  return __int128_t(a) * __int128_t(b) % modulus;
+#else
+  // do some fallback stuff here
   i64 k = roundl((f80)a / modulus * b);
   i64 res = (a * b - k * modulus) % modulus;
   if (res < 0) {
     res += modulus;
   }
   return res;
+#endif
 }
 template <class T>
 inline enable_if_t<is_integral_v<T>, T> AddMod(T a, T b, T modulus) {

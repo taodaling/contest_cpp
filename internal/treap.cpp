@@ -24,7 +24,7 @@ struct Treap: public SbtReverse<SBT, DIR> {
       res = left->split_by_weight_first_true(checker, find);
       if (!find) {
         res[1] = right;
-        right = NULL;
+        right = NIL;
         res->left = res[0];
         res[0] = this;
         find = true;
@@ -221,17 +221,18 @@ struct Treap: public SbtReverse<SBT, DIR> {
     }
     push_down();
     AT2 res;
-    S s_1 = s_s(s, left->sum);
+    S s_1 = SBT::s_s(s, left->sum);
     if (checker(s_1)) {
-      res = left->split_by_weight_first_true(checker, s);
+      res = left->split_by_sum_first_true(checker, s);
       left = res[1];
       res[1] = this;
     } else {
       s = s_1;
-      S s_2 = s_s(s, weight);
+      S s_2 = SBT::s_s(s, weight);
       if (checker(s_2)) {
+        res[0] = this;
         res[1] = right;
-        right = NULL;
+        right = NIL;
       } else {
         s = s_2;
         res = right->split_by_sum_first_true(checker, s);
@@ -248,7 +249,7 @@ struct Treap: public SbtReverse<SBT, DIR> {
     }
     push_down();
     AT2 res;
-    S s_1 = s_s(s_s(s, left->sum), weight);
+    S s_1 = SBT::s_s(SBT::s_s(s, left->sum), weight);
     if (checker(s_1)) {
       s = s_1;
       res = right->split_by_sum_last_true(checker, s);
@@ -262,14 +263,13 @@ struct Treap: public SbtReverse<SBT, DIR> {
     push_up();
     return res;
   }
-  static Self *MakeTree(int n, const_ref(Indexer<S>) indexer) {
+  static Self *MakeTree(int n, const_ref(Indexer<Self*>) indexer) {
     var dfs = [&](var &dfs, int l, int r) {
       if (l > r) {
         return NIL;
       }
       int mid = (l + r) / 2;
-      var node = new Self();
-      node->weight = indexer(mid);
+      var node = indexer(mid);
       node->left = dfs(dfs, l, mid - 1);
       node->right = dfs(dfs, mid + 1, r);
       node->push_up();

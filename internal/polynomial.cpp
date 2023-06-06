@@ -209,6 +209,7 @@ struct Polynomial {
   static Self mulmod(const Self &a, const Self &b, int mod) {
     return (a * b).modular(mod);
   }
+  //O(n ln n ln n)
   Self powmod_binary_lift(i64 n, i32 mod) const {
     if (n == 0) {
       return Self::of(T(1)).modular(mod);
@@ -221,6 +222,7 @@ struct Polynomial {
     return res;
   }
 
+  //O(n ln n)
   enable_if_t<is_modint_v<T> && is_same_v<i32, typename T::Type>, Self>
   powmod_fast(i32 n_mod_modulus, i32 n_mod_phi, i64 estimate, i32 mod) const {
     if (estimate == 0) {

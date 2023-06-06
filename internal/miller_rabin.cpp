@@ -4,11 +4,12 @@
 #include "modint.cpp"
 namespace dalt {
 // Check whether n is a prime s times, O(slog n)
-template <class T> enable_if_t<is_integral_v<T>, bool> MillerRabin(T n, int s = 10) {
+template <class T>
+enable_if_t<is_integral_v<T>, bool> MillerRabin(T n, int s = 10) {
   using Modular = DynamicModular<T, -2>;
   using mi = ModInt<Modular>;
   Modular::Register(n);
-  auto test = [&](auto &test, mi y, T exp, T n) -> bool {
+  auto test = [&](auto& test, mi y, T exp, T n) -> bool {
     auto y2 = y * y;
     if (!(exp == n - 1 || test(test, y2, exp * 2, n))) {
       return false;
@@ -21,7 +22,6 @@ template <class T> enable_if_t<is_integral_v<T>, bool> MillerRabin(T n, int s = 
     }
     return true;
   };
-
   if (n <= 1) {
     return false;
   }
