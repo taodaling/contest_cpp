@@ -1,47 +1,58 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "bound_flow.cpp"
+
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int H, W;
-  in >> H >> W;
-  Vec<String> mat(H);
-  in >> mat;
-  var id_of = [&](int i, int j) { return i * W + j; };
-  var src = H * W;
-  var dst = src + 1;
-  using namespace graph;
-  using E = BoundFlowEdge<int>;
-  int dirs[][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+  using Pt = Array<int, 2>;
+  Pt s, t;
+  in >> s[0] >> s[1] >> t[0] >> t[1];
+  int a, b, c, d;
+  in >> a >> b >> c >> d;
 
-  Graph<E> g(H * W + 2);
-  for (int i = 0; i < H; i++) {
-    for (int j = 0; j < W; j++) {
-      if (mat[i][j] == '1') {
-        continue;
-      }
-      if ((i + j) % 2 == 0) {
-        AddBoundFlowEdge(g, src, id_of(i, j), 1, mat[i][j] == '2');
-      } else {
-        AddBoundFlowEdge(g, id_of(i, j), dst, 1, mat[i][j] == '2');
-      }
-      if ((i + j) % 2 == 0) {
-        for (var &d : dirs) {
-          int ni = i + d[0];
-          int nj = j + d[1];
-          if(ni < 0 || ni >= H || nj < 0 || nj >= W || mat[ni][nj] == '1') {
-            continue;
-          }
+  Vec<Pt> seq;
+  Pt cur = s;
+  var update = [&](int x, int y) {
+    Assert(Size(seq) < 1e6);
+    Assert(x >= a && x <= b);
+    Assert(y >= c && y <= d);
+    seq.push_back(Pt{x, y});
+    // x1 + x0 = 2 * x
+    cur[0] = 2 * x - cur[0];
+    cur[1] = 2 * y - cur[1];
+    DebugFmtln(" -> (%d, %d) = (%d, %d)", x, y, cur[0], cur[1]);
+  };
 
-          AddBoundFlowEdge(g, id_of(i, j), id_of(ni, nj), 1, 0);
-        }
-      }
+  if (a == b && cur[0] != t[0]) {
+    update(a, c);
+  }
+  if (c == d && cur[1] != t[1]) {
+    update(a, c);
+  }
+  if (a == b && cur[0] != t[0] || c == d && cur[1] != t[1] ||
+      (t[0] - cur[0]) & 1 || (t[1] - cur[1]) & 1) {
+    out << "No";
+    return;
+  }
+  while (cur != t) {
+    if (cur[0] < t[0]) {
+      // add 2
+      update(a, c);
+      update(a + 1, c);
+    } else if (cur[0] > t[0]) {
+      update(a + 1, c);
+      update(a, c);
+    } else if (cur[1] < t[1]) {
+      update(a, c);
+      update(a, c + 1);
+    } else {
+      update(a, c + 1);
+      update(a, c);
     }
   }
-  if (FeasibleFlow(g, src, dst)) {
-    out << "Yes";
-  } else {
-    out << "No";
+
+  out << "Yes\n";
+  for (var op : seq) {
+    out << op[0] << " " << op[1] << "\n";
   }
 }
 

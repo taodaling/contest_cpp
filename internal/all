@@ -52,6 +52,7 @@
 #include "eratosthenes_sieve.cpp"
 #include "euclid_like_function.cpp"
 #include "euler_sieve.cpp"
+#include "euler_trail.cpp"
 #include "factorize.cpp"
 #include "factory.cpp"
 #include "farthest_point_pair2.cpp"

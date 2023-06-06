@@ -1,18 +1,20 @@
 #pragma once
-#include "common.cpp"
 #include "binary.cpp"
+#include "common.cpp"
 namespace dalt {
-template <class T> struct SparseTable {
-private:
+template <class T>
+struct SparseTable {
+ private:
   Vec<Vec<T>> table;
   Reducer<T> reducer;
 
-public:
+ public:
   using Self = SparseTable<T>;
+  SparseTable() {}
   SparseTable(int n, const Indexer<T> &data, Reducer<T> f) : reducer(f) {
     i32 m = Log2Floor(u32(n));
     table = Vec<Vec<T>>(m + 1, Vec<T>(n));
-    for(int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++) {
       table[0][i] = data(i);
     }
     for (i32 i = 0; i < m; i++) {
@@ -26,7 +28,7 @@ public:
       }
     }
   }
-
+  int size() const { return table[0].size(); }
   T query(i32 l, i32 r) const {
     int len = r - l + 1;
     int log_floor = Log2Floor(u32(len));
@@ -34,4 +36,4 @@ public:
                    table[log_floor][r + 1 - (1 << log_floor)]);
   }
 };
-} // namespace dalt
+}  // namespace dalt
