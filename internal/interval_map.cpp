@@ -14,7 +14,7 @@ struct IntervalMap {
 
  private:
   void add0(T l, T r) {
-    if(l >= r) {
+    if (l >= r) {
       return;
     }
     add_callback(l, r);
@@ -25,7 +25,7 @@ struct IntervalMap {
     return map.erase(iter);
   }
 
-public:
+ public:
   IntervalMap(
       const Function<void(T, T)>& _add_callback = [](T a, T b) {},
       const Function<void(T, T)>& _del_callback = [](T a, T b) {})
@@ -33,13 +33,13 @@ public:
   //[begin, end)
   void add(T begin, T end) {
     auto iter = map.upper_bound(begin);
-    if(iter != map.begin()) {
+    if (iter != map.begin()) {
       --iter;
-      if(iter->second < begin) {
+      if (iter->second < begin) {
         ++iter;
       }
     }
-    while(iter != map.end() && !(iter->second < begin || iter->first > end)) {
+    while (iter != map.end() && !(iter->second < begin || iter->first > end)) {
       begin = Min(begin, iter->first);
       end = Max(end, iter->second);
       iter = del0(iter);
@@ -64,14 +64,29 @@ public:
   }
   Optional<Pair<T, T>> cover_line(T pt) {
     auto iter = map.upper_bound(pt);
-    if(iter == map.begin()) {
+    if (iter == map.begin()) {
       return {};
     }
     --iter;
-    if(iter->second <= pt) {
+    if (iter->second <= pt) {
       return {};
     }
     return MakePair(iter->first, iter->second);
+  }
+  T query(T begin, T end) const {
+    auto iter = map.upper_bound(begin);
+    if (iter != map.begin()) {
+      --iter;
+      if (iter->second <= begin) {
+        ++iter;
+      }
+    }
+    T res = 0;
+    while (iter != map.end() && iter->first < end) {
+      res += Min(iter->second, end) - Max(iter->first, begin);
+      ++iter;
+    }
+    return res;
   }
   Vec<Pair<T, T>> to_vec() const {
     Vec<Pair<T, T>> res;
