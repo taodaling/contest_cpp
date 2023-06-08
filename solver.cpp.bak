@@ -1,73 +1,17 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "fenwick_tree2.cpp"
-#include "math.cpp"
-#include "operand.cpp"
-#include "prefixsum.cpp"
-#include "static_rmq.cpp"
+
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  // using MaxOp = Operand<i64, 1>;
-  using MinOp = Operand<i64, 2>;
-  i64 inf = 1e18;
-  MinOp::add_op = [](i64 a, i64 b) { return std::min(a, b); };
-  MinOp::default_val = inf;
 
-  int N;
-  i64 A, B, C, D;
-  in >> N >> A >> B >> C >> D;
-  Vec<i64> X(N);
-  in >> X;
-  Debug(X);
-  Vec<Pair<int, i64>> actions{{0, 1}, {A, B}, {C, D}};
-  Vec<Vec<i64>> dp(N, Vec<i64>(N, -inf));
-  PrefixSum<i64, 1> ps(X);
-  Trace(rmqs);
-  Vec<StaticRMQ> rmqs(2 * N);
-  Vec<Vec<i64>> rmq_rows(2 * N, Vec<i64>(N, inf));
-  Trace(solve);
-  for (int i = -N; i < N; i++) {
-    Debug(i);
-    for (int r = 0; r < N; r++) {
-      // r - l = i;
-      // r - i = l
-      int l = r - i;
-      if (r < l || l < 0) {
-        continue;
-      }
-
-      var range_sum = ps.query(l, r);
-      Assert(range_sum >= 0);
-      for (var[cost, dist] : actions) {
-        Chmin(dist, r - l + 1);
-        if (r - l + 1 == dist) {
-          Chmax(dp[l][r], range_sum - cost);
-        } else if (i - dist >= -N + 1) {
-          // r - dist, r
-
-          var min_choice =
-              rmq_rows[i - dist + N]
-                      [rmqs[i - dist + N].query_with_check(r - dist, r)];
-          Chmax(dp[l][r], range_sum - cost - min_choice);
-        }
-      }
-      // DebugFmtln("dp[%d][%d] = %lld", l, r, dp[l][r]);
-      rmq_rows[i + N][r] = dp[l][r] + range_sum;
-    }
-    Debug(i);
-    var &line = rmq_rows[i + N];
-    rmqs[i + N] = StaticRMQ(N, [&](int a, int b) { return line[a] < line[b]; });
-  }
-  var ans = dp[0][N - 1];
-  out << ans;
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  std::ifstream input("in");
+  //std::ifstream input("in");
   int num_of_input = 1;
-  // in >> num_of_input;
+  //in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    SolveOne(i + 1, input, out);
-    // SolveOne(i + 1, in, out);
+    //SolveOne(i + 1, input, out);
+	SolveOne(i + 1, in, out);
   }
 }
