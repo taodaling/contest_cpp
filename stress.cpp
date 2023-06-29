@@ -22,7 +22,7 @@ void Stress() {
     StringStream stress_out;
     StringStream solver_in = StringStream(in);
     StringStream stress_in = StringStream(in);
-    StressSolve(stress_in, stress_out);
+    StressSolve(i, stress_in, stress_out);
     SolveMulti(solver_in, solver_out);
     StringStream checker_input = StringStream(in);
     StringStream check_stress_out = StringStream(stress_out.str());

@@ -2,10 +2,11 @@
 namespace dalt {
 namespace seq {
 template <class T>
-// ret[0][i] * 2     = the longest palindrom centered at i - 1 and i with even length
-// ret[1][i] * 2 - 1 = the longest palindrom centered at i with odd length
+// ret[0][i] * 2 = the longest palindrom centered at i - 1 and i with even
+// length ret[1][i] * 2 - 1 = the longest palindrom centered at i with odd
+// length
 //- time: O(n)
-Array<Vec<i32>, 2> Manacher(const Indexer<T> &s, int n) {
+Array<Vec<i32>, 2> Manacher(int n, const Indexer<T> &s) {
   Array<Vec<i32>, 2> res;
   {
     Vec<i32> ans(n);

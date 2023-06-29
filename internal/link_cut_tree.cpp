@@ -104,7 +104,7 @@ struct LCTNode: public SbtReverse<SBT, DIR> {
     x->upd = SBT::u_u(x->upd, upd);
     this->apply_sum_rev(upd);
   }
-  static void access(Self *x) {
+  static Self* access(Self *x) {
     Self *last = NIL;
     while (x != NIL) {
       splay(x);
@@ -118,6 +118,7 @@ struct LCTNode: public SbtReverse<SBT, DIR> {
       last = x;
       x = x->tree_father;
     }
+    return last;
   }
 
   static void make_root(Self *x) {
@@ -276,25 +277,13 @@ struct LCTNode: public SbtReverse<SBT, DIR> {
       return a;
     }
     access(a);
-    splay(a);
-    access(b);
-    splay(b);
-    if (a->tree_father != NIL) {
-      return a->tree_father;
-    }
-    if (a->father != NIL) {
-      // in same splay
-      return a;
-    }
-    return NIL;
+    return access(b);
   }
 
   static bool connected(Self *a, Self *b) {
-    return lca(a, b) != NIL;
-    //        makeRoot(a);
-    //        access(b);
-    //        splay(b);
-    //        return findRoot(b) == a;
+    make_root(a);
+    access(b);
+    return find_root(b) == a;
   }
 };
 template <class SBT, bool DIR, i64 ID>
