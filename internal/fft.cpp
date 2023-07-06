@@ -1,11 +1,11 @@
 #pragma once
 #include "binary.cpp"
 #include "bit_reverse.cpp"
+#include "brute_force_conv.cpp"
 #include "convolution.cpp"
 #include "math.cpp"
 #include "modint.cpp"
 #include "poly.cpp"
-#include "brute_force_conv.cpp"
 namespace dalt {
 namespace poly {
 template <class F>
@@ -32,8 +32,7 @@ enable_if_t<is_floating_point_v<F>> fft(Vec<Complex<F>> &p, bool inv) {
       // init
       level.resize(1 << d);
       for (int j = 0, s = 1 << d; j < s; j++) {
-        level[j] =
-            cpx(Cos(F(PI) / s * j), Sin(F(PI) / s * j));
+        level[j] = cpx(Cos(F(PI) / s * j), Sin(F(PI) / s * j));
       }
     }
     for (int i = 0; i < n; i += s2) {
@@ -71,7 +70,7 @@ struct FFTConv {
   static_assert(is_same_v<i32, typename M::Type>);
 
   static Vec<mi> conv(const Vec<mi> &a, const Vec<mi> &b) {
-    if(Size(a) <= 20 || Size(b) <= 20) {
+    if (Size(a) <= 20 || Size(b) <= 20) {
       return BruteForceConv<M>::conv(a, b);
     }
     if (&a == &b) {
@@ -80,75 +79,74 @@ struct FFTConv {
     return conv(a, Size(a), b, Size(b));
   }
   static Vec<mi> conv(const Vec<mi> &a, int na, const Vec<mi> &b, int nb) {
-      let rank_a = na - 1;
-      let rank_b = nb - 1;
-      i32 step = 15;
-      i32 mask = (1 << step) - 1;
-      let n = 1 << Log2Ceil(rank_a + rank_b + 1);
-      Vec<cpx> a_cpx(n);
-      Vec<cpx> b_cpx(n);
-      for (int i = 0; i < Size(a); i++) {
-        let x = a[i].value;
-        a_cpx[i] = cpx(x & mask, x >> step);
-      }
-      for (int i = 0; i < Size(b); i++) {
-        let x = b[i].value;
-        b_cpx[i] = cpx(x & mask, x >> step);
-      }
-      fft(a_cpx, false);
-      fft(b_cpx, false);
-      i32 i = 0;
-      i32 j = 0;
-      while (i <= j) {
-        let ari = a_cpx[i].real();
-        let aii = a_cpx[i].imag();
-        let bri = b_cpx[i].real();
-        let bii = b_cpx[i].imag();
-        let arj = a_cpx[j].real();
-        let aij = a_cpx[j].imag();
-        let brj = b_cpx[j].real();
-        let bij = b_cpx[j].imag();
-        let a1r = (ari + arj) / 2;
-        let a1i = (aii - aij) / 2;
-        let a2r = (aii + aij) / 2;
-        let a2i = (arj - ari) / 2;
-        let b1r = (bri + brj) / 2;
-        let b1i = (bii - bij) / 2;
-        let b2r = (bii + bij) / 2;
-        let b2i = (brj - bri) / 2;
-        a_cpx[i] = cpx(a1r * b1r - a1i * b1i - a2r * b2i - a2i * b2r,
+    let rank_a = na - 1;
+    let rank_b = nb - 1;
+    i32 step = 15;
+    i32 mask = (1 << step) - 1;
+    let n = 1 << Log2Ceil(rank_a + rank_b + 1);
+    Vec<cpx> a_cpx(n);
+    Vec<cpx> b_cpx(n);
+    for (int i = 0; i < na; i++) {
+      let x = a[i].value;
+      a_cpx[i] = cpx(x & mask, x >> step);
+    }
+    for (int i = 0; i < nb; i++) {
+      let x = b[i].value;
+      b_cpx[i] = cpx(x & mask, x >> step);
+    }
+    fft(a_cpx, false);
+    fft(b_cpx, false);
+    i32 i = 0;
+    i32 j = 0;
+    while (i <= j) {
+      let ari = a_cpx[i].real();
+      let aii = a_cpx[i].imag();
+      let bri = b_cpx[i].real();
+      let bii = b_cpx[i].imag();
+      let arj = a_cpx[j].real();
+      let aij = a_cpx[j].imag();
+      let brj = b_cpx[j].real();
+      let bij = b_cpx[j].imag();
+      let a1r = (ari + arj) / 2;
+      let a1i = (aii - aij) / 2;
+      let a2r = (aii + aij) / 2;
+      let a2i = (arj - ari) / 2;
+      let b1r = (bri + brj) / 2;
+      let b1i = (bii - bij) / 2;
+      let b2r = (bii + bij) / 2;
+      let b2i = (brj - bri) / 2;
+      a_cpx[i] = cpx(a1r * b1r - a1i * b1i - a2r * b2i - a2i * b2r,
+                     a1r * b1i + a1i * b1r + a2r * b2r - a2i * b2i);
+      b_cpx[i] = cpx(a1r * b2r - a1i * b2i + a2r * b1r - a2i * b1i,
+                     a1r * b2i + a1i * b2r + a2r * b1i + a2i * b1r);
+      if (i != j) {
+        let a1r = (arj + ari) / 2;
+        let a1i = (aij - aii) / 2;
+        let a2r = (aij + aii) / 2;
+        let a2i = (ari - arj) / 2;
+        let b1r = (brj + bri) / 2;
+        let b1i = (bij - bii) / 2;
+        let b2r = (bij + bii) / 2;
+        let b2i = (bri - brj) / 2;
+        a_cpx[j] = cpx(a1r * b1r - a1i * b1i - a2r * b2i - a2i * b2r,
                        a1r * b1i + a1i * b1r + a2r * b2r - a2i * b2i);
-        b_cpx[i] = cpx(a1r * b2r - a1i * b2i + a2r * b1r - a2i * b1i,
+        b_cpx[j] = cpx(a1r * b2r - a1i * b2i + a2r * b1r - a2i * b1i,
                        a1r * b2i + a1i * b2r + a2r * b1i + a2i * b1r);
-        if (i != j) {
-          let a1r = (arj + ari) / 2;
-          let a1i = (aij - aii) / 2;
-          let a2r = (aij + aii) / 2;
-          let a2i = (ari - arj) / 2;
-          let b1r = (brj + bri) / 2;
-          let b1i = (bij - bii) / 2;
-          let b2r = (bij + bii) / 2;
-          let b2i = (bri - brj) / 2;
-          a_cpx[j] = cpx(a1r * b1r - a1i * b1i - a2r * b2i - a2i * b2r,
-                         a1r * b1i + a1i * b1r + a2r * b2r - a2i * b2i);
-          b_cpx[j] = cpx(a1r * b2r - a1i * b2i + a2r * b1r - a2i * b1i,
-                         a1r * b2i + a1i * b2r + a2r * b1i + a2i * b1r);
-        }
-        i += 1;
-        j = n - i;
       }
-      fft(a_cpx, true);
-      fft(b_cpx, true);
-      i64 modulus = M::modulus();
-      Vec<mi> ans(n);
-      for (int i = 0; i < n; i++) {
-        i64 aa = Round(a_cpx[i].real());
-        i64 bb = Round(b_cpx[i].real());
-        i64 cc = Round(a_cpx[i].imag());
-        ans[i] = (aa + (bb % modulus << 15) + (cc % modulus << 30)) % modulus;
-      }
-      return ans;
-    
+      i += 1;
+      j = n - i;
+    }
+    fft(a_cpx, true);
+    fft(b_cpx, true);
+    i64 modulus = M::modulus();
+    Vec<mi> ans(n);
+    for (int i = 0; i < n; i++) {
+      i64 aa = Round(a_cpx[i].real());
+      i64 bb = Round(b_cpx[i].real());
+      i64 cc = Round(a_cpx[i].imag());
+      ans[i] = (aa + (bb % modulus << 15) + (cc % modulus << 30)) % modulus;
+    }
+    return ans;
   }
   static Vec<mi> conv2(const Vec<mi> &p) {
     int na, nb;

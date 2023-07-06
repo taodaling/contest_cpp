@@ -4,6 +4,7 @@
 #include "polynomial.cpp"
 namespace dalt {
 namespace math {
+
 template <class T>
 struct FirstKindStirlingNumberResult {
   Vec<T> data;
@@ -17,7 +18,33 @@ struct FirstKindStirlingNumberResult {
     return data[i];
   }
 };
-//O(n\log n)
+// according to - https://codeforces.com/blog/entry/117906
+// O(nln n)
+template <class C>
+FirstKindStirlingNumberResult<typename C::Type> FirstKindStirlingNumberFixedK(
+    int N, int K) {
+  static_assert(poly::is_convolution_v<C>);
+  Assert(K <= N);
+  using Mi = typename C::Type;
+  using Poly = poly::Polynomial<C>;
+  Poly poly = Vec<Mi>{1, 1};
+  var log = poly.ln(N + 1).powmod_fast(K, K, K, N + 1);
+  // var log = poly.ln(N + 1).powmod_binary_lift(K, N + 1);
+  Combination<Mi> comb(N + 1);
+  Vec<Mi> S(N + 1);
+  for (int i = 0; i <= N; i++) {
+    S[i] = log[i] * comb.inv_fact[K] * comb.fact[i];
+    if ((i - K) & 1) {
+      S[i] = -S[i];
+    }
+  }
+  return FirstKindStirlingNumberResult<Mi>{
+      .data = Move(S),
+      .n = K,
+  };
+}
+
+// O(n\log n)
 template <class C>
 enable_if_t<poly::is_convolution_v<C>,
             FirstKindStirlingNumberResult<typename C::Type>>
@@ -66,8 +93,8 @@ FirstKindStirlingNumber(int n) {
       .n = n,
   };
 }
-//ret[i] = ways to split n number into i subset
-//time complexity: O(n\log n)
+// ret[i] = ways to split n number into i non-empty subset
+// time complexity: O(n\log n)
 template <class C>
 enable_if_t<poly::is_convolution_v<C>, Vec<typename C::Type>>
 SecondKindStirlingNumber(int n) {
@@ -87,6 +114,23 @@ SecondKindStirlingNumber(int n) {
   auto c = (Poly(Move(a)) * Poly(Move(b))).data;
   c.resize(n + 1);
   return c;
+}
+
+// ret[i] = ways to split i number into K non-empty subset
+// time complexity: O(n\log n)
+template <class C>
+enable_if_t<poly::is_convolution_v<C>, Vec<typename C::Type>>
+SecondKindStirlingNumberFixedK(int N, int K) {
+  using T = typename C::Type;
+  using Poly = poly::Polynomial<C>;
+  Combination<T> comb(N + 1);
+  Poly p = Vec<T>{0, 1};
+  var exp = (p.exp(N + 1) - Poly(Vec<T>{1})).powmod_fast(K, K, K, N + 1);
+  Vec<T> ans(N + 1);
+  for (int i = 0; i <= N; i++) {
+    ans[i] = exp[i] * comb.inv_fact[K] * comb.fact[i];
+  }
+  return ans;
 }
 }  // namespace math
 }  // namespace dalt
