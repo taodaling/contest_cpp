@@ -6,6 +6,7 @@
 #include "mod_inverse.cpp"
 #include "modint.cpp"
 #include "poly.cpp"
+#include "combination.cpp"
 namespace dalt {
 namespace poly {
 const static int POLY_FAST_MAGIC_THRESHOLD = 64;
@@ -166,6 +167,23 @@ struct Polynomial {
     }
     return *this - (*this / rhs) * rhs;
   }
+  //return this(x + s)
+  Self shift(T s) const {
+    int r = rank();
+    var comb = math::Combination<T>(r + 1);
+    Vec<T> A(r + 1), B(r + 1);
+    T s_pow = 1;
+    for(int i = 0; i <= r; i++, s_pow *= s) {
+      A[i] = data[i] * comb.fact[i];
+      B[i] = s_pow * comb.inv_fact[i];
+    }
+    var C = Self(Move(A)).delta_convolution(Self(Move(B)));
+    for(int i = 0; i <= C.rank(); i++) {
+      C.data[i] *= comb.inv_fact[i];
+    }
+    Normalize(C.data); 
+    return C;
+  }
   Self operator+(const Self &rhs) const {
     const Self &lhs = *this;
     int n = Size(lhs.data);
@@ -223,8 +241,10 @@ struct Polynomial {
   }
 
   //O(n ln n)
-  enable_if_t<is_modint_v<T> && is_same_v<i32, typename T::Type>, Self>
-  powmod_fast(i32 n_mod_modulus, i32 n_mod_phi, i64 estimate, i32 mod) const {
+  Self powmod_fast(i32 n_mod_modulus, i32 n_mod_phi, i64 estimate,
+                   i32 mod) const {
+    static_assert(is_modint_v<T>);
+    static_assert(is_same_v<i32, typename T::Type>);
     if (estimate == 0) {
       return Self::of(T(1)).modular(mod);
     }

@@ -9,12 +9,10 @@
 #include "brute_force_conv.cpp"
 namespace dalt {
 namespace poly {
-template <class M>
-enable_if_t<is_modular_v<M>> NumberTheoryTransform(Vec<ModInt<M>> &p,
-                                                   bool inv) {
-  using mi = ModInt<M>;
-  auto modulus = mi::modulus();
-  mi g = mi(mi::primitive_root());
+template <class Mi>
+enable_if_t<is_modint_v<Mi>> NumberTheoryTransform(Vec<Mi> &p, bool inv) {
+  auto modulus = Mi::modulus();
+  Mi g = Mi(Mi::primitive_root());
   i32 m = Log2Ceil(Size(p));
   i32 n = 1 << m;
   Assert(n == Size(p));
@@ -25,7 +23,7 @@ enable_if_t<is_modular_v<M>> NumberTheoryTransform(Vec<ModInt<M>> &p,
       Swap(p[i], p[j]);
     }
   }
-  Vec<mi> ws(n / 2);
+  Vec<Mi> ws(n / 2);
   Assert((modulus - 1) % n == 0);
   auto unit = PowBinaryLift(g, (modulus - 1) / n);
   if (Size(ws) >= 1) {
@@ -51,7 +49,7 @@ enable_if_t<is_modular_v<M>> NumberTheoryTransform(Vec<ModInt<M>> &p,
   }
 
   if (inv) {
-    auto inv_n = mi(1) / mi(n);
+    auto inv_n = Mi(1) / Mi(n);
     auto i = 0;
     auto j = 0;
     while (i <= j) {

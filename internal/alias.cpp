@@ -40,6 +40,11 @@ FunctionAlias(std::clamp, Clamp);
 FunctionAlias(std::shuffle, Shuffle);
 FunctionAlias(std::to_string, ToString);
 FunctionAlias(std::tie, Tie);
+FunctionAlias(std::get<0>, Get0);
+FunctionAlias(std::get<1>, Get1);
+FunctionAlias(std::get<2>, Get2);
+FunctionAlias(std::get<3>, Get3);
+FunctionAlias(std::get<4>, Get4);
 template <typename _Signature>
 using Function = std::function<_Signature>;
 template <typename _Signature>
