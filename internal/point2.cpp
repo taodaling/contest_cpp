@@ -80,7 +80,7 @@ struct Point {
   }
 
   static int orient(const Self& b, const Self& c) { return cross(b, c).sign(); }
-  // 获取c处于ab的方向，-1表示順時針方向，1表示逆時針，0表示在綫上
+  // 获取ac处于ab的方向，-1表示順時針方向，1表示逆時針，0表示在綫上
   static int orient(const Self& a, const Self& b, const Self& c) {
     return orient(b - a, c - a);
   }
