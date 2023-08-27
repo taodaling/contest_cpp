@@ -29,6 +29,10 @@ public:
      return Pt(T(0), c / b);
    }
   }
+  Pair<Pt, Pt> get_ends() const {
+    var pt = any();
+    return MakePair(pt, pt + vec);
+  }
   //ax + by = c
   static Self from_formula(T a, T b, T c) {
     return Self(Pt(b, -a), c);
