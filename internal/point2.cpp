@@ -50,7 +50,7 @@ struct Point {
   Self conj() const { return {x, -y}; }
   // count-clockwise rotate pi/2
   Self perpendicular() const { return {-y, x}; }
-  static Self rotate(const Self& pt, FType cos, FType sin,
+  static Self rotate(const Self& pt, T cos, T sin,
                      const Self& center = Self()) {
     auto a = pt - center;
     return {a.x * cos - a.y * sin, a.x * sin + a.y * cos};

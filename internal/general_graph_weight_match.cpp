@@ -3,6 +3,7 @@ namespace dalt {
 namespace graph {
 // credited to: https://judge.yosupo.jp/submission/54445
 // maximize weight, not necessary maximize cardinality
+// O(V^3)
 template <class T> struct GeneralWeightedMaxMatch {
 private:
   struct Edge {
@@ -238,6 +239,13 @@ public:
         S(V * 2 + 1, 0), stamp(V * 2 + 1, 0), lab(V * 2 + 1, T()),
         flo(V * 2 + 1), floFrom(V * 2 + 1, Vec<int>(V + 1, 0)),
         G(V * 2 + 1, Vec<Edge>(V * 2 + 1)) {
+    //assert symmetric
+    for(int i = 0; i < Size(matrix); i++) {
+      Assert(Size(matrix[i]) == Size(matrix));
+      for(int j = 0; j < i; j++) {
+        Assert(matrix[i][j] == matrix[j][i]);
+      }
+    }
     std::iota(st.begin(), st.begin() + V + 1, 0);
     T mx = T();
     for (int v = 1; v <= V; v++)

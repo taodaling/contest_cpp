@@ -1,54 +1,29 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "ntt.cpp"
-#include "polynomial.cpp"
-#include "binary.cpp"
-#include "math.cpp"
-using namespace poly;
-using Mi = ModInt998244353;
-using Conv = NTTConv<Mi>;
-using Poly = Polynomial<Conv>;
+Vec<Str> words{"out", "output", "puton", "in", "input", "one"};
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N;
-  in >> N;
-  Vec<int> A(N), B(N);
-  in >> A >> B;
-  Vec<Vec<int>> bits(5);
-  Vec<Poly> deltas(5);
-  for(int i = 0; i < 5; i++) {
-    Vec<Mi> a(N * 2);
-    Vec<Mi> b(N);
-    for(int j = 0; j < N; j++) {
-      a[j] = a[j + N] = KthBit(A[j], i);
-      b[j] = KthBit(B[j], i);
+  Str s;
+  in >> s;
+  Vec<bool> ok(Size(s) + 1);
+  ok[0] = true;
+  for(int i = 0; i < Size(s); i++) {
+    if(!ok[i]) {
+      continue;
     }
-    deltas[i] = Poly(Move(a)).delta_convolution(Poly(Move(b)));
-  }
-
-  int minand = (int)1e9;
-  for(int i = 0; i < N; i++) {
-    int andsum = 0;
-    for(int j = 0; j < 5; j++) {
-      andsum += deltas[j][i].value << j;
+    for(var &word : words) {
+      if(s.substr(i, Size(word)) == word) {
+        ok[i + Size(word)] = true;
+      }
     }
-    Chmin(minand, andsum);
   }
-  int total = 0;
-  for(int x : A) {
-    total += x;
-  }
-  for(int x : B) {
-    total += x;
-  }
-  total -= minand;
-  out << total;
+  out << (ok[Size(s)] ? "YES" : "NO") << '\n';
 }
 
 void SolveMulti(IStream &in, OStream &out) {
   //std::ifstream input("in");
   int num_of_input = 1;
-  //in >> num_of_input;
+  in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
     //SolveOne(i + 1, input, out);
 	SolveOne(i + 1, in, out);

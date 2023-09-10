@@ -52,6 +52,20 @@ struct Polygon {
     return sum.abs();
   }
   T area() const { return area_2() / T(2); }
+  Pt centroid() const {
+    T sum = 0;
+    T x_sum = 0;
+    T y_sum = 0;
+    for (int i = 0, n = Size(data); i < n; i++) {
+      var &cur = data[i];
+      var &next = data[(i + 1) % n];
+      var a = Pt::cross(cur, next);
+      sum = sum + a;
+      x_sum += (cur.x + next.x) / T(3) * a;
+      y_sum += (cur.y + next.y) / T(3) * a;
+    }
+    return Pt(x_sum / sum, y_sum / sum);
+  }
   template <class X = T>
   enable_if_t<is_same_v<X, T> && is_integral_v<typename T::Type>, T>
   lattice_point_number_on_boundary() const {

@@ -1,7 +1,6 @@
 #pragma once
 #include "collection.cpp"
 #include "polygon2.cpp"
-#include "sort.cpp"
 namespace dalt {
 namespace geo2 {
 // O(n\log_2n)

@@ -28,7 +28,7 @@ struct Line3 {
   bool cmpProj(const_ref(p3) p, const_ref(p3) q) const { return (d | p) < (d | q); }
   // - these require T = double
   IsBool(is_floating_point_v<TType>, p3)
-  proj(const_ref(p3) p) const { return o + d * (d | (p - o)) / sq(d); }
+  proj(const_ref(p3) p) const { return o + d * (d | (p - o)) / d.sq(); }
   p3 refl(const_ref(p3) p) const { return proj(p) * 2 - p; }
   //intersection with plane
   IsBool(is_floating_point_v<TType>, p3)
