@@ -135,7 +135,7 @@ TEMPLATE_ARGS struct ModInt {
   friend inline IStream &operator>>(IStream &is, Self &x) {
     Type val;
     is >> val;
-    x = Self(val);
+    x = Self::of(val);
     return is;
   }
   friend inline OStream &operator<<(OStream &os, const Self &x) {

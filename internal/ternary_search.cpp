@@ -25,7 +25,7 @@ namespace dalt {
   template <class T, class E, class C = Less<E>>
   enable_if_t<is_floating_point_v<T>, T> TernarySearchArgMax(T l, T r,
                                                        const Function<E(T)> &f,
-                                                       int round = 64,
+                                                       int round = 100,
                                                        const C &c = C()) {
     while(round-- > 0) {
       T dist = (r - l) / 3;

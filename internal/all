@@ -166,6 +166,7 @@
 #include "radix.cpp"
 #include "radix_sort.cpp"
 #include "random.cpp"
+#include "random_ext.cpp"
 #include "range_affine_range_sum.cpp"
 #include "range_tree.cpp"
 #include "root_tree.cpp"

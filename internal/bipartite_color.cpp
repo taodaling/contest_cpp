@@ -17,6 +17,7 @@ IsBiGraph(E, Optional<Vec<bool>>) BipartiteColor(const Graph<E> &g) {
       return;
     }
     visited[root] = true;
+    color[root] = c;
     for (auto &e : g[root]) {
       dfs(dfs, e.to, !c);
     }

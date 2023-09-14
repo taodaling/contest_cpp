@@ -11,20 +11,15 @@ namespace poly {
 // - constraint: s[i] > 0
 // - time: O(|s| + n\log n)
 template <class Conv, class T = typename Conv::Type>
-Vec<T> CountSetsetSum(const Vec<i32> &s, i32 n) {
+Vec<T> CountSubsetSum(const Vec<T> &cnt, i32 n) {
   static_assert(is_same_v<typename Conv::Type, T>);
-  Vec<T> cnt(n);
-  for (auto x : s) {
-    if (x < n) {
-      cnt[x] = cnt[x] + T(1);
-    }
-  }
+
   Vec<T> log(n);
   Vec<T> inv_buf(n);
   auto inv = math::InverseBatch(
       Range<i32>(0, n - 1).iter().map(ConstructorMapper<i32, T>()).to_vec());
   for (i32 i = 1; i < n; i++) {
-    for (i32 j = 1, ij; (ij = i * j) <= n; j++) {
+    for (i32 j = 1, ij; (ij = i * j) < n; j++) {
       T inv_j = inv[j];
       T contrib = inv_j * cnt[i];
       if ((j & 1) == 0) {

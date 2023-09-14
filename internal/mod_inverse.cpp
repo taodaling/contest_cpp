@@ -1,6 +1,5 @@
 #pragma once
 #include "common.cpp"
-#include "factory.cpp"
 namespace dalt {
 namespace math {
 template <class T>
