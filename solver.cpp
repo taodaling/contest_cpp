@@ -1,26 +1,46 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "math.cpp"
-#include "xor_subset_convolution.cpp"
-using Mi = ModInt1000000007;
+#include "binary_search.cpp"
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int K, N, M;
-  in >> K >> N >> M;
-  Vec<Mi> cnts(1 << M);
+  int MAX = 600;
+  int N;
+  in >> N;
+  Vec<Tuple<int, int, int>> stus;
   for(int i = 0; i < N; i++) {
-    int x;
-    in >> x;
-    cnts[x] += 1;
+    int a, b, c;
+    in >> a >> b >> c;
+    stus.emplace_back(a, b, c);
   }
-  var ans = XorSubsetConvolutionLastTier(Move(cnts), K);
-  // for(int i = 0; i <= K; i++) {
-  //   Debug(i);
-  //   Debug(ans[i]);
-  // }
-  for(int i = 0; i < 1 << M; i++) {
-    out << ans[i] << ' ';
-  }
+  Sort(All(stus), [&](var &a, var &b) {
+    return Get0(a) < Get0(b);
+  });
+  var checker = [&](int start) {
+    int cur = start;
+    Deque<Tuple<int, int>> heap;
+    var iter = stus.begin();
+    while(Size(heap) > 0 || iter != stus.end()) {
+      while(iter != stus.end() && Get0(*iter) + start <= cur) {
+        heap.emplace_back(Get2(*iter), Get1(*iter));
+        ++iter;
+      }
+      if(heap.empty()) {
+        Debug(*iter);
+        cur = Get0(*iter) + start;
+      } else {
+        var top = heap.front();
+        heap.pop_front();
+        if(Get1(top) + cur > Get0(top)) {
+          return false;
+        }
+        cur += Get1(top);
+      }
+    }
+    return true; 
+  };
+  var last_true = LastTrue<int>(-1e9, 0, checker);
+  Debug(last_true);
+  out << -(*last_true);
 }
 
 void SolveMulti(IStream &in, OStream &out) {
