@@ -1,7 +1,6 @@
 #pragma once
 #include "collection.cpp"
 #include "polygon2.cpp"
-#include "sort.cpp"
 namespace dalt {
 namespace geo2 {
 // O(n\log_2n)
@@ -22,8 +21,8 @@ struct ConvexHull : public Polygon<T> {
     var first = *MinElement(All(data));
     int start_pos = 0;
     {
-      for(int i = 0; i < n; i++) {
-        if(data[i] == first) {
+      for (int i = 0; i < n; i++) {
+        if (data[i] == first) {
           Swap(data[start_pos++], data[i]);
         }
       }
