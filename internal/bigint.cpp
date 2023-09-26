@@ -488,8 +488,8 @@ struct BigInt {
   void operator*=(const BigInt &v) { *this = *this * v; }
   BigInt operator*(const BigInt &v) const {
     if (a.size() * v.a.size() <= 1000111) return mul_simple(v);
-    /*if (a.size() > 500111 || v.a.size() > 500111) */ return mul_fft(v);
-    // return mul_karatsuba(v);
+    if (a.size() > 10000 || v.a.size() > 10000) return mul_fft(v);
+    return mul_karatsuba(v);
   }
 
   BigInt mul_fft(const BigInt &v) const {
