@@ -81,7 +81,7 @@ IsDiGraph(E, Optional<Pair<Vec<int> COMMA Vec<int>>>) EulerTraceDi(Graph<E> g) {
     return {};
   }
   if (Size(begin) > 0) {
-    root = begin;
+    root = begin.front();
   }
   Vec<int> nodes;
   Vec<int> edges;
@@ -89,11 +89,7 @@ IsDiGraph(E, Optional<Pair<Vec<int> COMMA Vec<int>>>) EulerTraceDi(Graph<E> g) {
     while (!g[v].empty()) {
       var next = g[v].back();
       g[v].pop_back();
-      if (next.to == -1) {
-        continue;
-      }
-      g[next.to][next.rev].to = -1;
-      dfs(dfs, next.to, next.rev);
+      dfs(dfs, next.to, Size(g[v]));
     }
     nodes.push_back(v);
     edges.push_back(e);
