@@ -3,9 +3,9 @@
 namespace dalt {
 namespace graph {
 template <class E>
-enable_if_t<is_base_of_v<BiBaseEdge, E>, Tuple<i32, i32, i32>>
-TreeDiameter(const Graph<E> &g) {
-  auto depth0 = DepthOnTree(g, [&](i32 i) { return i == 0; });
+enable_if_t<is_base_of_v<BiBaseEdge, E>, Tuple<i32, i32, i32>> TreeDiameter(
+    const Graph<E> &g, int root = 0) {
+  auto depth0 = DepthOnTree(g, [&](i32 i) { return i == root; });
   int a = std::max_element(All(depth0)) - depth0.begin();
   auto depth1 = DepthOnTree(g, [&](i32 i) { return i == a; });
   int b = std::max_element(All(depth1)) - depth1.begin();
@@ -22,8 +22,8 @@ TreeDiameterWeight(const Graph<E> &g) {
   return Tuple<T, i32, i32>(depth1[b], a, b);
 }
 template <class E>
-enable_if_t<is_base_of_v<BiBaseEdge, E>, Tuple<i32, i32, i32>>
-ForestDiameter(const Graph<E> &g) {
+enable_if_t<is_base_of_v<BiBaseEdge, E>, Tuple<i32, i32, i32>> ForestDiameter(
+    const Graph<E> &g) {
   int n = Size(g);
   DSU dsu(n);
   for (int i = 0; i < n; i++) {
@@ -66,5 +66,5 @@ ForestDiameter(const Graph<E> &g) {
   int b = *std::max_element(All(depth1));
   return Tuple<T, i32, i32>(depth1[b], roots[dsu.find(b)], b);
 }
-} // namespace graph
-} // namespace dalt
+}  // namespace graph
+}  // namespace dalt

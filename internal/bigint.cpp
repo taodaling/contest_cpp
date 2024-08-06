@@ -361,6 +361,7 @@ struct BigInt {
   }
 
   void fft(vector<complex<double> > &x, bool invert) const {
+    static const double PI = std::asin((double)1) * 2;
     int n = (int)x.size();
 
     for (int i = 1, j = 0; i < n; ++i) {
@@ -371,7 +372,7 @@ struct BigInt {
     }
 
     for (int len = 2; len <= n; len <<= 1) {
-      double ang = 2 * 3.14159265358979323846 / len * (invert ? -1 : 1);
+      double ang = 2 * PI / len * (invert ? -1 : 1);
       complex<double> wlen(cos(ang), sin(ang));
       for (int i = 0; i < n; i += len) {
         complex<double> w(1);
@@ -487,7 +488,7 @@ struct BigInt {
   void operator*=(const BigInt &v) { *this = *this * v; }
   BigInt operator*(const BigInt &v) const {
     if (a.size() * v.a.size() <= 1000111) return mul_simple(v);
-    if (a.size() > 500111 || v.a.size() > 500111) return mul_fft(v);
+    if (a.size() > 10000 || v.a.size() > 10000) return mul_fft(v);
     return mul_karatsuba(v);
   }
 

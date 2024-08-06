@@ -1,54 +1,40 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "binary_search.cpp"
+#include "cost_flow.cpp"
+#include "min_cost_flow.cpp"
+using namespace graph;
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int MAX = 600;
-  int N;
-  in >> N;
-  Vec<Tuple<int, int, int>> stus;
-  for(int i = 0; i < N; i++) {
-    int a, b, c;
-    in >> a >> b >> c;
-    stus.emplace_back(a, b, c);
+  using E = CostFlowBaseEdge<i64>;
+  int N, M, K;
+  in >> N >> M >> K;
+  Graph<E> g(N);
+  for (int i = 0; i < M; i++) {
+    int a, b, r, c;
+    in >> a >> b >> r >> c;
+    a--;
+    b--;
+    AddCostFlowEdge(g, a, b, r, c);
+    // AddCostFlowEdge(g, b, a, r, c);
   }
-  Sort(All(stus), [&](var &a, var &b) {
-    return Get0(a) < Get0(b);
-  });
-  var checker = [&](int start) {
-    int cur = start;
-    Deque<Tuple<int, int>> heap;
-    var iter = stus.begin();
-    while(Size(heap) > 0 || iter != stus.end()) {
-      while(iter != stus.end() && Get0(*iter) + start <= cur) {
-        heap.emplace_back(Get2(*iter), Get1(*iter));
-        ++iter;
-      }
-      if(heap.empty()) {
-        Debug(*iter);
-        cur = Get0(*iter) + start;
-      } else {
-        var top = heap.front();
-        heap.pop_front();
-        if(Get1(top) + cur > Get0(top)) {
-          return false;
-        }
-        cur += Get1(top);
-      }
-    }
-    return true; 
-  };
-  var last_true = LastTrue<int>(-1e9, 0, checker);
-  Debug(last_true);
-  out << -(*last_true);
+  if (N == 1) {
+    out << 0;
+    return;
+  }
+  var ans = MinCostFlowDijkstra<E>(g, 0, N - 1, K);
+  if (ans[0] < K) {
+    out << -1;
+  } else {
+    out << ans[1];
+  }
 }
 
 void SolveMulti(IStream &in, OStream &out) {
-  //std::ifstream input("in");
+  // std::ifstream input("in");
   int num_of_input = 1;
-  //in >> num_of_input;
+  // in >> num_of_input;
   for (int i = 0; i < num_of_input; i++) {
-    //SolveOne(i + 1, input, out);
-	SolveOne(i + 1, in, out);
+    // SolveOne(i + 1, input, out);
+    SolveOne(i + 1, in, out);
   }
 }
