@@ -6,7 +6,7 @@ struct Affine {
   using Self = Affine;
   T a, b;
   Affine(T _a, T _b) : a(_a), b(_b) {}
-  Affine(T _b = T(0)) : b(_b) {}
+  Affine(T _b = T(0)) : Affine(0, _b) {}
   friend Self operator+(const Self& lhs, const Self& rhs) {
     return Self(lhs.a + rhs.a, lhs.b + rhs.b);
   }
@@ -27,4 +27,9 @@ struct Affine {
   static Self MulIdentity() { return Self(T(1), T(0)); }
   static Self add_identity() { return Self(T(0), T(0)); }
 };
+template<class T>
+OStream& operator<<(OStream& os, const_ref(Affine<T>) a){
+  os << a.a << "x + "<< a.b;
+  return os;
+}
 }  // namespace dalt

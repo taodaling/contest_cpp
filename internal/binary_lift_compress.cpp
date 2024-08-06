@@ -54,7 +54,7 @@ public:
     }
   }
 
-  Tuple<int, T> first_true(int node, const BiChecker<int, T> &pred) {
+  Tuple<int, T> first_true(int node, const BiChecker<int, T> &pred) const {
     auto s = s_nil;
     while (!pred(node, s)) {
       auto cand = adder(s, sum[node]);
@@ -73,7 +73,7 @@ public:
     return {node, adder(s, weight[node])};
   }
 
-  Tuple<int, T> last_true(int node, const BiChecker<i32, T> &pred) {
+  Tuple<int, T> last_true(int node, const BiChecker<i32, T> &pred) const {
     auto s = s_nil;
     if (!pred(node, s)) {
       return Tuple<int, T>(-1, s);
@@ -99,7 +99,7 @@ public:
       }
     }
   }
-  int first_true_raw(int node, const Checker<int> &pred) {
+  int first_true_raw(int node, const Checker<int> &pred) const {
     while (!pred(node)) {
       auto fa = jump[node];
       if (pred(fa)) {
@@ -113,7 +113,7 @@ public:
     }
     return node;
   }
-  int last_true_raw(int node, const Checker<int> &pred) {
+  int last_true_raw(int node, const Checker<int> &pred) const {
     if (!pred(node)) {
       return -1;
     }
@@ -135,13 +135,13 @@ public:
     }
   }
 
-  int kth_ancestor(i32 node, i32 k) {
+  int kth_ancestor(i32 node, i32 k) const {
     int target = depth[node] - k;
     return first_true_raw(node, [&](auto i) { return depth[i] <= target; });
   }
 
   // lowest common ancestor in O(log_2 n)
-  i32 lca(int a, int b) {
+  i32 lca(int a, int b) const {
     if (depth[a] > depth[b]) {
       a = kth_ancestor(a, depth[a] - depth[b]);
     } else {
@@ -157,6 +157,25 @@ public:
       }
     }
     return a;
+  }
+
+  // the kth node on path a->b
+  // O(log n)
+  i32 walk(int a, int b, int k) const {
+    int c = lca(a, b);
+    if(depth[a] - depth[c] >= k) {
+      //a's ancestor
+      return kth_ancestor(a, k);
+    }
+    //step + k = depth[a] + depth[b] - depth[c] * 2
+    return kth_ancestor(b, depth[a] + depth[b] - depth[c] * 2 - k);
+  }
+
+  // the edge number on path a->b
+  // O(log n)
+  i32 distance(int a, int b) {
+    int c = lca(a, b);
+    return depth[a] + depth[b] - depth[c] * 2;
   }
 };
 } // namespace graph

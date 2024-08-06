@@ -4,6 +4,7 @@ template <class T, int N>
 struct PrefixSum {
   using Self = PrefixSum<T, N>;
   Vec<PrefixSum<T, N - 1>> ps;
+  PrefixSum(){}
   PrefixSum(const MDVec<T, N>& data) {
     ps.reserve(Size(data));
     int k = Size(data);

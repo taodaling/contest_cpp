@@ -88,44 +88,6 @@ void BitwiseInverse(Vec<T> &data, int l, int r) {
   BitwiseInverse<Conv>(data, m + 1, r);
 }
 
-// ret[i] = \sum_{j \in i} a[j] * b[i ^ j]
-// O(n(\log n)^2)
-template <class T>
-Vec<T> SubsetConvolution(Vec<T> a, Vec<T> b) {
-  Assert(Size(a) == Size(b));
-  Assert(Size(a) == LowestOneBit(Size(a)));
-  i32 n = Size(a);
-  if (n == 0) {
-    return Vec<T>();
-  }
-  i32 log = Log2Floor(n);
-  Vec<Vec<T>> fwta = Vec<Vec<T>>(log + 1, Vec<T>(n));
-  Vec<Vec<T>> fwtb = fwta;
-  Vec<T> c(n);
-  Vec<T> t(n);
-  for (i32 i = 0; i < n; i++) {
-    let bitcount = CountBit(i);
-    fwta[bitcount][i] = a[i];
-    fwtb[bitcount][i] = b[i];
-  }
-  for (i32 i = 0; i <= log; i++) {
-    BitwiseTransform<Or<T>>(fwta[i], 0, Size(fwta[i]) - 1);
-    BitwiseTransform<Or<T>>(fwtb[i], 0, Size(fwtb[i]) - 1);
-  }
-  for (i32 i = 0; i <= log; i++) {
-    Fill(All(t), T(0));
-    for (i32 j = 0; j <= i; j++) {
-      let k = i - j;
-      poly::DotMulPlus(fwta[j], fwtb[k], t);
-    }
-    BitwiseInverse<IOr<T>>(t, 0, Size(t) - 1);
-    for (i32 j = 0; j < n; j++) {
-      if (CountBit(j) == i) {
-        c[j] = t[j];
-      }
-    }
-  }
-  return c;
-}
+
 }  // namespace fwt
 }  // namespace dalt

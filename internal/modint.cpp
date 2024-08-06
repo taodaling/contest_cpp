@@ -23,8 +23,8 @@ template <class T, i64 M, i64 PR, i64 PHI>
 struct is_modular<StaticModular<T, M, PR, PHI>> {
   static const bool value = true;
 };
-using MOD998244353 =
-    StaticModular<i32, 998244353, 3>;
+using MOD998244353 = StaticModular<i32, 998244353, 3>;
+using MOD1004535809 = StaticModular<i32, 1004535809, 3>;
 using MOD1000000007 = StaticModular<i32, 1000000007, 5>;
 using MOD1000000009 = StaticModular<i32, 1000000009, 13>;
 using MOD_BIG = StaticModular<i64, 2305843009213693951, -1>;
@@ -177,4 +177,5 @@ TEMPLATE_ARGS struct is_modint_32<ModInt<MODULAR>> {
 using ModInt998244353 = ModInt<MOD998244353>;
 using ModInt1000000007 = ModInt<MOD1000000007>;
 using ModInt1000000009 = ModInt<MOD1000000009>;
+using ModInt1004535809 = ModInt<MOD1004535809>;
 }  // namespace dalt

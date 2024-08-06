@@ -14,7 +14,7 @@ struct EulerSieve {
     is_comp.resize(2);
     smallest_prime_factor.resize(2);
     exp_of_smallest_prime_factor.resize(2);
-    ensure(1e6 + 10);
+    ensure(100);
   }
   //trigger recompute if necessary
   static void ensure(int n) {

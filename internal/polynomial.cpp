@@ -212,7 +212,7 @@ struct Polynomial {
   }
 
   T operator[](int index) const {
-    return index < Size(data) ? data[index] : T(0);
+    return get(index);
   }
   T get(int index) const {
     if (index < Size(data)) {
