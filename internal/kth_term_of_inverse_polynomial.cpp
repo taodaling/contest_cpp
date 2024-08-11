@@ -3,9 +3,10 @@
 #include "function.cpp"
 namespace dalt {
 namespace poly {
+// Bostan-Mori Algorithm
 // [x^k] P/Q 
 // time complexity: O(M(Poly) n) where M(Poly) is the time taken to perform polynomial mutiplication
-// consider from last bit to first bit
+// consider from last bit to first bit (lower bit to higher bit), n - 1 means the lowest bit
 template <class Poly>
 typename Poly::Type KthTermOfInversePolynomial(int n,
                                                const Indexer<int> &bit_indexer,

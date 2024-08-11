@@ -92,9 +92,8 @@ struct EulerSieve {
     }
     return ans;
   }
-  template <class T>
-  static enable_if_t<is_modint_v<T>, Vec<T>> powmod(int n, int k) {
-    static const i64 ID = -1;
+  template <class T, class E>
+  static Vec<T> powmod(int n, E k) {
     return calc_totally_multiplicative_function<T>(n, [&](auto x) -> T {
       return PowBinaryLift(T(x), k);
     });

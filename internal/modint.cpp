@@ -107,17 +107,17 @@ TEMPLATE_ARGS struct ModInt {
   }
   Self operator+(const Self &rhs) const {
     auto res = value + rhs.value;
-    if (res >= MOD) {
+    if (res >= MOD || res < 0) {
       res -= MOD;
     }
     return res;
   }
   Self operator-(const Self &rhs) const {
-    auto res = value - rhs.value;
-    if (res < Type(0)) {
-      res += MOD;
+    if(value >= rhs.value) {
+      return value - rhs.value;
+    } else {
+      return value + MOD - rhs.value;
     }
-    return res;
   }
   Self operator/(const SELF &rhs) const {
     auto inv = Self(rhs.possible_inv().value());

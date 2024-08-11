@@ -159,6 +159,7 @@ struct Matrix {
     }
     return ans;
   }
+  //O(N^3)
   Optional<Self> possible_inv() const {
     if (row_num() != col_num()) {
       return {};
@@ -196,6 +197,7 @@ struct Matrix {
     }
     return {r};
   }
+  //O(N^3 log exp)
   template <class E>
   enable_if_t<is_integral_v<E>, Self> pow(E exp) {
     if (exp == 0) {

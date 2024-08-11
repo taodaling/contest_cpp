@@ -7,6 +7,7 @@ namespace dalt {
 namespace poly {
 // lr = {1, -c1, -c2, ...}
 // consider from last bit to first bit
+// O(M(Poly) n)
 template <class Poly, class T>
 T KthTermOfLinearRecurrence(int n, const Indexer<int>& indexer, Vec<T> lr,
                             Vec<T> prefix) {

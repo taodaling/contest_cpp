@@ -18,6 +18,7 @@ struct GuassElimination {
  public:
   GuassElimination(int _n) : data(_n + 1), inv(_n + 1), n(_n + 1), rank(0) {}
 
+  //e[0] * x[0] + e[1] * x[1] + ... + e[n - 2] * x[n - 2] = e[n - 1]
   int add(Vec<T> e) {
     Assert(Size(e) == n);
     for (int i = 0; i < n; i++) {
@@ -36,7 +37,7 @@ struct GuassElimination {
     if (index != -1) {
       data[index] = e;
       inv[index] = T(1) / e[index];
-      rank++;
+      rank++; 
     }
     return index;
   }
