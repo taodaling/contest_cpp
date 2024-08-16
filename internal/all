@@ -185,6 +185,7 @@
 #include "std_include.cpp"
 #include "stirling_number.cpp"
 #include "strongly_connected_component.cpp"
+#include "subset_sum.cpp"
 #include "suffix_array.cpp"
 #include "suffix_automaton.cpp"
 #include "sum_of_float.cpp"

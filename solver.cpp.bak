@@ -1,100 +1,31 @@
 #pragma once
 #include "common.cpp"
 using namespace dalt;
-#include "bipartite_color.cpp"
-#include "dsu.cpp"
+#include "cost_flow.cpp"
+#include "min_cost_flow.cpp"
+using namespace graph;
 void SolveOne(int test_id, IStream &in, OStream &out) {
-  int N, M;
-  in >> N >> M;
-  Trace(input);
-  using namespace graph;
-  using E = BiBaseEdge;
-  Graph<E> g(N * 2);
-  DSU<> dsu(N * 2);
+  using E = CostFlowBaseEdge<i64>;
+  int N, M, K;
+  in >> N >> M >> K;
+  Graph<E> g(N);
   for (int i = 0; i < M; i++) {
-    int a, b;
-    in >> a >> b;
-    AddBiEdge(g, a - 1, b - 1);
-    dsu.merge(a - 1, b - 1);
+    int a, b, r, c;
+    in >> a >> b >> r >> c;
+    a--;
+    b--;
+    AddCostFlowEdge(g, a, b, r, c);
+    // AddCostFlowEdge(g, b, a, r, c);
   }
-  Debug(dsu.to_vec());
-  Trace(bipartite color);
-  var color = BipartiteColor(g);
-  if (color.is_none()) {
-    out << "IMPOSSIBLE";
+  if (N == 1) {
+    out << 0;
     return;
   }
-  var &raw_color = *color;
-  Vec<int> delta(2 * N);
-  Vec<int> roots;
-  for (int i = 0; i < 2 * N; i++) {
-    int root = dsu.find(i);
-    delta[root] += raw_color[i] ? 1 : -1;
-    if (root == i) {
-      roots.push_back(i);
-    }
-  }
-  Debug(raw_color);
-  Debug(delta);
-  Trace(dp);
-  Vec<Vec<bool>> dp;
-  dp.push_back(Vec<bool>(2 * N + 1));
-  dp[0][N] = true;
-  for (int i = 0; i < Size(roots); i++) {
-    int root = roots[i];
-    Vec<bool> next(2 * N + 1);
-    for (int j = 0; j <= 2 * N; j++) {
-      if (!dp[i][j]) continue;
-      for (int sign = -1; sign <= 1; sign += 2) {
-        int nj = j + sign * delta[root];
-        if (nj < 0 || nj > 2 * N) continue;
-        next[nj] = true;
-      }
-    }
-    dp.push_back(Move(next));
-  }
-
-  if (!dp.back()[N]) {
-    out << "IMPOSSIBLE";
-    return;
-  }
-  Trace(reverse trace);
-  Vec<bool> rev(2 * N);
-  int cur = N;
-  for (int i = Size(roots); i >= 1; i--) {
-    Debug(i);
-    Debug(cur);
-    for (int sign = -1; sign <= 1; sign += 2) {
-      int ncur = cur + sign * delta[roots[i - 1]];
-      if (ncur < 0 || ncur > 2 * N || !dp[i - 1][ncur]) continue;
-      if (sign == 1) {
-        rev[roots[i - 1]] = true;
-      }
-      cur = ncur;
-      break;
-    }
-    Assert(dp[i - 1][cur]);
-  }
-  Debug(0);
-  Debug(cur);
-  Trace(calc two seq);
-  Vec<Vec<int>> seq(2);
-  for (int i = 0; i < 2 * N; i++) {
-    int c = raw_color[i];
-    if (rev[dsu.find(i)]) {
-      c ^= 1;
-    }
-    seq[c].push_back(i);
-  }
-  Debug(roots);
-  Debug(rev);
-  Debug(seq);
-  Assert(seq[0].size() == seq[1].size());
-  for (var &s : seq) {
-    for (var x : s) {
-      out << x + 1 << ' ';
-    }
-    out << '\n';
+  var ans = MinCostFlowDijkstra<E>(g, 0, N - 1, K);
+  if (ans[0] < K) {
+    out << -1;
+  } else {
+    out << ans[1];
   }
 }
 
