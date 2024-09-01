@@ -22,7 +22,9 @@ struct Point3 {
   }  // only for floating-point
      // Some comparators
   bool operator==(p3 p) const { return tie(x, y, z) == tie(p.x, p.y, p.z); }
+  bool operator<(p3 p) const {return tie(x, y, z) < tie(p.x, p.y, p.z); }
   bool operator!=(p3 p) const { return !operator==(p); }
+  ImplDefaultComparision(Self);
   T operator|(p3 w) const {
     var &v = *this;
     return v.x * w.x + v.y * w.y + v.z * w.z;

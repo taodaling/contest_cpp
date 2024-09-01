@@ -19,32 +19,32 @@ namespace dalt
         }
         Operand(T _v) : value(_v) {}
         Operand() : value(default_val) {}
-        Self operator+(const_ref(Self) x)
+        Self operator+(const_ref(Self) x) const
         {
             return Self(add_op(value, x.value));
         }
-        Self operator-(const_ref(Self) x)
+        Self operator-(const_ref(Self) x) const
         {
             return Self(sub_op(value, x.value));
         }
-        Self operator*(const_ref(Self) x)
+        Self operator*(const_ref(Self) x) const
         {
             return Self(mul_op(value, x.value));
         }
-        Self operator/(const_ref(Self) x)
+        Self operator/(const_ref(Self) x) const
         {
             return Self(div_op(value, x.value));
         }
-        bool operator==(const_ref(Self) x)
+        bool operator==(const_ref(Self) x) const
         {
             return value == x.value;
         }
-        bool operator!=(const_ref(Self) x)
+        bool operator!=(const_ref(Self) x) const
         {
             return !(*this == x);
         }
         ImplArithmeticAssignOperation(Self);
-        bool operator<(const_ref(Self) x)
+        bool operator<(const_ref(Self) x) const
         {
             return comp_op(value, x.value);
         }
@@ -68,4 +68,6 @@ namespace dalt
     Adder<T> Operand<T, ID>::mul_op;
     template <class T, i64 ID>
     Adder<T> Operand<T, ID>::div_op;
+    template <class T, i64 ID>
+    Comparator<T> Operand<T, ID>::comp_op;
 }

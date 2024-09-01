@@ -3,6 +3,7 @@
 #define mut_ref(T) T &
 #define let auto
 #define var auto
+#define varr var&
 #define MEMSET0(X) std::memset(&X, 0, sizeof(X)) 
 #define Size(T) int((T).size())
 #define All(data) data.begin(), data.end()

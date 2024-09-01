@@ -103,6 +103,7 @@ template <class A, class B>
 using BiChecker = Func<bool(const A &, const B &)>;
 template <class T>
 using Consumer = Func<void(const T &)>;
+using Action = Func<void()>;
 template<class T>
 using Supplier = Func<T()>;
 template <class FIRST, class SECOND>

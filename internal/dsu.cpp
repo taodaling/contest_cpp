@@ -2,9 +2,9 @@
 #include "common.cpp"
 #include "nil.cpp"
 namespace dalt {
-template <bool COMPRESS = true, class C = Nil, class P = Nil>
+template <bool COMPRESS = true, bool ROLLBACK = false, class C = Nil, class P = Nil>
 struct DSU {
-  using Self = DSU<COMPRESS, C, P>;
+  using Self = DSU<COMPRESS, ROLLBACK, C, P>;
 
   Vec<int> fa;
   Vec<int> size;
@@ -56,6 +56,39 @@ struct DSU {
       i = fa[i];
     }
     return MakePair(sum, i);
+  }
+
+
+  IsBool(!COMPRESS && ROLLBACK, Pair<Consumer<Tuple<int COMMA int>&> COMMA Consumer<Tuple<int COMMA int>&>>) wrap_as_function(int a, int b, P delta = P()) {
+    return MakePair(
+      [&, a, b, delta](Tuple<int COMMA int>& context) {
+       // Trace(do);
+      //  Debug(to_vec());
+
+        Get0(context) = find(a);
+        Get1(context) = find(b);
+        merge(a, b, delta);
+      },
+      [&](Tuple<int COMMA int>& context) {
+        int a = Get0(context);
+        int b = Get1(context);
+        if(a == b) {
+          return;
+        }
+        if(fa[b] != a) {
+          Swap(a, b);
+        }
+        assert(fa[b] == a);
+        sum_of_path_to_root[b] = P();
+        fa[b] = b;
+        size[a] = size[a] - size[b];
+        sum_of_connected_commponent[a] =
+          sum_of_connected_commponent[a] - sum_of_connected_commponent[b];
+
+      //  Trace(undo);
+       // Debug(to_vec());
+      }
+    );
   }
 
   // a - b = delta
