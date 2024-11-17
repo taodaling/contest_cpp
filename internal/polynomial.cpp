@@ -50,6 +50,15 @@ struct Polynomial {
     }
   }
   Self modular(i32 n) const { return Self(CopyAndExtend(data, n)); }
+  //x^n = 1
+  Self circular_modular(i32 n) const {
+    //equivalent to mod x^n - 1
+    Vec<T> ans(Min(Size(data), n));
+    for(int i = 0; i < Size(data); i++) {
+      ans[i % n] += data[i];
+    }
+    return Self(ans);
+  }
   static Self of(T val) { return Self(Vec<T>{val}); }
   Self ln(i32 n) const {
     Assert(data[0] == T(1));
